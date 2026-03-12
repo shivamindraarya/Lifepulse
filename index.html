@@ -329,7 +329,7 @@ NOTES: ${d.notes||'none'}
 DIET - Breakfast:${d.breakfast.join(',')||'skipped'} | Lunch:${d.lunch.join(',')||'skipped'} | Dinner:${d.dinner.join(',')||'skipped'} | Snacks:${d.snacks.join(',')||'none'}
 Return exactly: {"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"]}`;
   try {
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{ "Content-Type": "application/json", "x-api-key": "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", "anthropic-version": "2023-06-01" },body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
     const raw=await res.json();
     const txt=raw.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
     render(JSON.parse(txt));
