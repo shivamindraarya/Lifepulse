@@ -263,7 +263,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
     </div>
     <div class="card">
       <div class="card-lbl">Hydration</div>
-      <div class="sl-top"><span class="sl-name">Liters of water</span><span class="sl-num" id="wv" style="color:var(--blue);">2L</span></div>
+      <div class="sl-top"><span class="sl-name">Water Intake</span><span class="sl-num" id="wv" style="color:var(--blue);">2L</span></div>
       <input type="range" min="1" max="10" step="0.5" value="2" oninput="document.getElementById('wv').textContent=this.value+'L'">
     </div>
     <div class="card">
@@ -364,9 +364,9 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 </nav>
 
 <div class="cta-wrap">
-  <button class="cta" id="cta" onclick="analyse()">
+  <button class="cta" id="cta" onclick="ctaClick()">
     <div class="spin"></div>
-    <span class="btxt">Analyse My Day</span>
+    <span class="btxt" id="cta-txt">Next &rarr;</span>
   </button>
 </div>
 
@@ -386,7 +386,7 @@ window.onload = () => {
     updateUserUI();
   }
   updateUsesUI();
-  document.getElementById('meal-list').appendChild(createMealRow());
+  const _ml = document.getElementById('meal-list'); _ml.appendChild(createMealRow('Breakfast')); _ml.appendChild(createMealRow('Lunch'));
 };
 
 // ── AUTH ──
@@ -488,6 +488,24 @@ function go(t) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (t === 'history') loadHistory();
   if (t === 'progress') loadProgress();
+  // Update CTA button label
+  const ctaTxt = document.getElementById('cta-txt');
+  if (t === 'routine') {
+    ctaTxt.textContent = 'Next →';
+  } else if (t === 'meals') {
+    ctaTxt.textContent = 'Analyse My Day';
+  } else {
+    ctaTxt.textContent = 'Analyse My Day';
+  }
+}
+
+function ctaClick() {
+  const activeTab = document.querySelector('.nb.on')?.dataset.t;
+  if (activeTab === 'routine') {
+    go('meals');
+  } else {
+    analyse();
+  }
 }
 
 // ── FORM HELPERS ──
@@ -509,9 +527,16 @@ function removeMealRow(btn) { btn.closest('.erow').remove(); ensureEmptyRow(); }
 function ensureEmptyRow() {
   const list = document.getElementById('meal-list');
   const rows = list.querySelectorAll('.erow');
-  if (rows.length === 0) { list.appendChild(createMealRow()); return; }
-  const lastFood = rows[rows.length - 1].querySelector('.meal-food').value.trim();
-  if (lastFood !== '') list.appendChild(createMealRow());
+  if (rows.length === 0) { list.appendChild(createMealRow('Breakfast')); return; }
+  const lastRow = rows[rows.length - 1];
+  const lastFood = lastRow.querySelector('.meal-food').value.trim();
+  if (lastFood !== '') {
+    // Pick next meal type smartly based on last selected
+    const lastType = lastRow.querySelector('.meal-type').value;
+    const seq = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+    const nextType = seq[(seq.indexOf(lastType) + 1) % seq.length];
+    list.appendChild(createMealRow(nextType));
+  }
 }
 
 function getData() {
