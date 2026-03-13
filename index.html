@@ -3,166 +3,263 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Vela – Life & Diet Analyzer</title>
+<title>Daily Wellness – Life & Diet Analyzer</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-:root {
-  --bg: #F7F5F2;
-  --white: #FFFFFF;
-  --ink: #1A1814;
-  --ink2: #3D3A35;
-  --muted: #9B9690;
-  --line: #E8E4DF;
-  --gold: #C4A882;
-  --gold-light: #EDE4D8;
-  --green: #4A7C59;
-  --green-light: #EAF2EC;
-  --red: #C4614A;
-  --red-light: #F5EBE8;
-  --blue: #4A6B8A;
-  --blue-light: #E8EFF5;
-  --radius: 16px;
-  --shadow: 0 2px 24px rgba(26,24,20,0.06);
-  --shadow-lg: 0 8px 40px rgba(26,24,20,0.10);
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#F7F5F2;--white:#FFFFFF;--ink:#1A1814;--ink2:#3D3A35;
+  --muted:#9B9690;--line:#E8E4DF;--gold:#C4A882;--gold-light:#EDE4D8;
+  --green:#4A7C59;--green-light:#EAF2EC;--red:#C4614A;--red-light:#F5EBE8;
+  --blue:#4A6B8A;--blue-light:#E8EFF5;--radius:16px;
+  --shadow:0 2px 24px rgba(26,24,20,0.06);--shadow-lg:0 8px 40px rgba(26,24,20,0.10);
 }
-body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; overflow-x:hidden; }
-.app { max-width:420px; margin:0 auto; min-height:100vh; padding-bottom:140px; }
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+.app{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:140px;}
 
-/* Header */
-.header { padding:52px 28px 28px; background:var(--white); border-bottom:1px solid var(--line); position:relative; }
-.header::after { content:''; position:absolute; bottom:0; left:28px; right:28px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
-.eyebrow { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); font-weight:500; margin-bottom:8px; }
-.header h1 { font-family:'Cormorant Garamond',serif; font-size:38px; font-weight:300; line-height:1.1; letter-spacing:-0.5px; }
-.header h1 em { font-style:italic; color:var(--gold); }
-.header-sub { font-size:13px; color:var(--muted); font-weight:300; margin-top:8px; line-height:1.5; }
+/* ── AUTH MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,24,20,0.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--white);border-radius:24px 24px 0 0;padding:32px 24px 40px;width:100%;max-width:420px;animation:slideUp 0.3s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;margin-bottom:6px;}
+.modal-title em{font-style:italic;color:var(--gold);}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:24px;font-weight:300;}
+.modal-tabs{display:flex;background:var(--bg);border-radius:12px;padding:3px;margin-bottom:20px;}
+.modal-tab{flex:1;padding:9px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--muted);border-radius:10px;cursor:pointer;transition:all 0.2s;}
+.modal-tab.on{background:var(--white);color:var(--ink);box-shadow:var(--shadow);}
+.m-field{margin-bottom:14px;}
+.m-lbl{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;}
+.m-input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:all 0.2s;}
+.m-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,168,130,0.12);}
+.m-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:all 0.2s;}
+.m-btn:hover{background:var(--ink2);}
+.m-skip{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;margin-top:8px;}
+.m-err{font-size:12px;color:var(--red);margin-top:8px;text-align:center;}
+.free-badge{background:var(--green-light);color:var(--green);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:16px;}
 
-/* Sections */
-.section { display:none; animation:up 0.35s ease; }
-.section.active { display:block; }
-@keyframes up { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+/* ── HEADER ── */
+.header{padding:52px 28px 28px;background:var(--white);border-bottom:1px solid var(--line);position:relative;}
+.header::after{content:'';position:absolute;bottom:0;left:28px;right:28px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:8px;}
+.header h1{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;line-height:1.1;letter-spacing:-0.5px;}
+.header h1 em{font-style:italic;color:var(--gold);}
+.header-sub{font-size:13px;color:var(--muted);font-weight:300;margin-top:8px;line-height:1.5;}
+.user-bar{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
+.user-info{font-size:12px;color:var(--muted);}
+.user-info span{color:var(--gold);font-weight:600;}
+.signout-btn{font-size:11px;color:var(--red);background:var(--red-light);border:none;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;}
+.uses-left{font-size:11px;color:var(--muted);background:var(--gold-light);padding:4px 10px;border-radius:20px;}
 
-/* Section head */
-.sec-head { padding:24px 28px 0; }
-.sec-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:400; letter-spacing:-0.3px; }
-.sec-desc { font-size:13px; color:var(--muted); font-weight:300; margin-top:4px; }
+/* ── SECTIONS ── */
+.section{display:none;animation:up 0.35s ease;}
+.section.active{display:block;}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sec-head{padding:24px 28px 0;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;letter-spacing:-0.3px;}
+.sec-desc{font-size:13px;color:var(--muted);font-weight:300;margin-top:4px;}
 
-/* Cards */
-.card { background:var(--white); border-radius:var(--radius); padding:22px; margin:16px 16px 0; box-shadow:var(--shadow); border:1px solid var(--line); }
-.card-lbl { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-.card-lbl::after { content:''; flex:1; height:1px; background:var(--line); }
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:var(--radius);padding:22px;margin:16px 16px 0;box-shadow:var(--shadow);border:1px solid var(--line);}
+.card-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-lbl::after{content:'';flex:1;height:1px;background:var(--line);}
 
-/* Inputs */
-.field { margin-bottom:14px; }
-.field:last-child { margin-bottom:0; }
-.f-lbl { font-size:11px; color:var(--muted); font-weight:500; margin-bottom:6px; }
-input[type="text"],input[type="number"],input[type="time"],textarea,select {
-  width:100%; background:var(--bg); border:1px solid var(--line); border-radius:10px;
-  padding:12px 14px; color:var(--ink); font-family:'Outfit',sans-serif; font-size:14px;
-  font-weight:400; outline:none; transition:border-color 0.2s,box-shadow 0.2s; -webkit-appearance:none;
+/* ── INPUTS ── */
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.f-lbl{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;}
+input[type="text"],input[type="number"],input[type="time"],input[type="email"],input[type="tel"],textarea,select{
+  width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+  padding:12px 14px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:14px;
+  font-weight:400;outline:none;transition:border-color 0.2s,box-shadow 0.2s;-webkit-appearance:none;
 }
-input:focus,textarea:focus,select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(196,168,130,0.12); background:var(--white); }
-textarea { min-height:90px; resize:none; line-height:1.6; }
-select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239B9690' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; cursor:pointer; }
+input:focus,textarea:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,168,130,0.12);background:var(--white);}
+textarea{min-height:90px;resize:none;line-height:1.6;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239B9690' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
+.sl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.sl-name{font-size:13px;color:var(--ink2);}
+.sl-num{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);font-weight:600;}
+input[type="range"]{width:100%;-webkit-appearance:none;height:3px;border-radius:3px;background:var(--line);outline:none;padding:0;border:none;box-shadow:none;}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--white);border:2px solid var(--gold);cursor:pointer;box-shadow:0 2px 8px rgba(196,168,130,0.3);}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{padding:8px 16px;border-radius:30px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'Outfit',sans-serif;}
+.chip.on{background:var(--gold-light);border-color:var(--gold);color:var(--ink2);font-weight:600;}
+.erow{display:grid;gap:8px;align-items:center;margin-bottom:8px;}
+.erow.act{grid-template-columns:88px 1fr 32px;}
+.erow.meal{grid-template-columns:110px 1fr 32px;}
+.erow input{margin:0;}
+.del{width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--line);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;}
+.del:hover{border-color:var(--red);color:var(--red);background:var(--red-light);}
+.add-r{width:100%;padding:10px;background:transparent;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.add-r:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-light);}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 
-/* Slider */
-.sl-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
-.sl-name { font-size:13px; color:var(--ink2); }
-.sl-num { font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--gold); font-weight:600; }
-input[type="range"] { width:100%; -webkit-appearance:none; height:3px; border-radius:3px; background:var(--line); outline:none; padding:0; border:none; box-shadow:none; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--white); border:2px solid var(--gold); cursor:pointer; box-shadow:0 2px 8px rgba(196,168,130,0.3); }
+/* ── CTA ── */
+.cta-wrap{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;padding:12px 16px 28px;background:linear-gradient(transparent,var(--bg) 30%);z-index:100;}
+.cta{width:100%;padding:17px;border-radius:var(--radius);border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--shadow-lg);}
+.cta:hover{background:var(--ink2);transform:translateY(-1px);}
+.cta:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:rot 0.7s linear infinite;display:none;}
+.cta.loading .spin{display:block;}
+.cta.loading .btxt{display:none;}
+@keyframes rot{to{transform:rotate(360deg)}}
 
-/* Chips */
-.chips { display:flex; flex-wrap:wrap; gap:8px; }
-.chip { padding:8px 16px; border-radius:30px; border:1px solid var(--line); background:var(--bg); color:var(--muted); font-size:12px; font-weight:500; cursor:pointer; transition:all 0.2s; font-family:'Outfit',sans-serif; }
-.chip.on { background:var(--gold-light); border-color:var(--gold); color:var(--ink2); font-weight:600; }
+/* ── NAV ── */
+.nav{display:flex;position:fixed;bottom:74px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:388px;background:var(--white);border-radius:20px;padding:6px;box-shadow:var(--shadow-lg);border:1px solid var(--line);z-index:99;}
+.nb{flex:1;padding:8px 4px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:9px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;border-radius:14px;transition:all 0.25s;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.nb span{font-size:16px;}
+.nb.on{background:var(--gold-light);color:var(--gold);}
+.nb.on[data-t="meals"]{background:var(--green-light);color:var(--green);}
+.nb.on[data-t="analysis"]{background:var(--blue-light);color:var(--blue);}
+.nb.on[data-t="history"]{background:var(--red-light);color:var(--red);}
+.nb.on[data-t="progress"]{background:#EDE4D8;color:#8B6914;}
 
-/* Rows */
-.erow { display:grid; gap:8px; align-items:center; margin-bottom:8px; }
-.erow.act { grid-template-columns:88px 1fr 32px; }
-.erow.meal { grid-template-columns:110px 1fr 32px; }
-.erow input { margin:0; }
-.del { width:32px; height:32px; border-radius:8px; background:transparent; border:1px solid var(--line); color:var(--muted); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; }
-.del:hover { border-color:var(--red); color:var(--red); background:var(--red-light); }
-.add-r { width:100%; padding:10px; background:transparent; border:1px dashed var(--line); border-radius:10px; color:var(--muted); font-family:'Outfit',sans-serif; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.2s; margin-top:4px; }
-.add-r:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-light); }
-.two { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+/* ── RESULTS ── */
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 16px 0;}
+.stile{background:var(--white);border-radius:var(--radius);padding:20px 16px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--line);}
+.snum{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:600;line-height:1;}
+.slbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.tip{margin:12px 16px 0;padding:16px 18px;background:var(--ink);border-radius:var(--radius);color:rgba(255,255,255,0.9);font-size:13px;line-height:1.6;font-weight:300;}
+.tip strong{color:var(--gold);font-weight:600;font-size:10px;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:6px;}
+.rgroup{margin:0 16px;}
+.rhead{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:600;padding:20px 0 10px;display:flex;align-items:center;gap:8px;}
+.rhead.pos{color:var(--green);}
+.rhead.neg{color:var(--red);}
+.rhead.sug{color:var(--blue);}
+.rhead.meal-sug{color:#8B6914;}
+.rhead::after{content:'';flex:1;height:1px;background:var(--line);}
+.ri{background:var(--white);border-radius:12px;padding:13px 16px;margin-bottom:8px;font-size:13px;line-height:1.55;color:var(--ink2);font-weight:300;border:1px solid var(--line);border-left-width:3px;}
+.ri.pos{border-left-color:var(--green);}
+.ri.neg{border-left-color:var(--red);}
+.ri.sug{border-left-color:var(--blue);}
+.ri.meal{border-left-color:#C4A882;}
+.mrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 16px;}
+.mbox{background:var(--white);border-radius:12px;padding:14px 8px;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow);}
+.mv{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--gold);line-height:1;}
+.mn{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.bsec{margin:0 16px;}
+.brow{margin-bottom:14px;}
+.btop{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.bname{color:var(--ink2);font-weight:400;}
+.bpct{color:var(--muted);font-size:11px;}
+.bbg{height:4px;background:var(--line);border-radius:4px;overflow:hidden;}
+.bfill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(0.16,1,0.3,1);}
+.empty{text-align:center;padding:60px 32px;color:var(--muted);}
+.empty .ei{font-size:40px;margin-bottom:12px;opacity:0.4;}
+.empty p{font-size:14px;line-height:1.7;font-weight:300;}
 
-/* CTA */
-.cta-wrap { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:420px; padding:12px 16px 28px; background:linear-gradient(transparent,var(--bg) 30%); z-index:100; }
-.cta { width:100%; padding:17px; border-radius:var(--radius); border:none; background:var(--ink); color:var(--white); font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:var(--shadow-lg); }
-.cta:hover { background:var(--ink2); transform:translateY(-1px); }
-.cta:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
-.spin { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:rot 0.7s linear infinite; display:none; }
-.cta.loading .spin { display:block; }
-.cta.loading .btxt { display:none; }
-@keyframes rot { to{transform:rotate(360deg)} }
+/* ── PDF BUTTON ── */
+.pdf-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 32px);margin:12px 16px 0;padding:13px;border-radius:12px;border:1px solid var(--gold);background:var(--gold-light);color:var(--ink2);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.pdf-btn:hover{background:var(--gold);color:var(--white);}
 
-/* Nav */
-.nav { display:flex; position:fixed; bottom:74px; left:50%; transform:translateX(-50%); width:calc(100% - 32px); max-width:388px; background:var(--white); border-radius:20px; padding:6px; box-shadow:var(--shadow-lg); border:1px solid var(--line); z-index:99; }
-.nb { flex:1; padding:10px 6px; border:none; background:transparent; color:var(--muted); font-family:'Outfit',sans-serif; font-size:10px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; cursor:pointer; border-radius:14px; transition:all 0.25s; display:flex; flex-direction:column; align-items:center; gap:4px; }
-.nb span { font-size:18px; }
-.nb.on { background:var(--gold-light); color:var(--gold); }
-.nb.on[data-t="meals"] { background:var(--green-light); color:var(--green); }
-.nb.on[data-t="analysis"] { background:var(--blue-light); color:var(--blue); }
+/* ── HISTORY ── */
+.hist-card{background:var(--white);border-radius:14px;padding:16px;margin:10px 16px 0;border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;}
+.hist-card:hover{box-shadow:var(--shadow-lg);}
+.hist-date{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.hist-scores{display:flex;gap:12px;align-items:center;}
+.hist-score{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;}
+.hist-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.hist-tip{font-size:12px;color:var(--ink2);font-weight:300;margin-top:8px;line-height:1.4;}
 
-/* Results */
-.scores { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:20px 16px 0; }
-.stile { background:var(--white); border-radius:var(--radius); padding:20px 16px; text-align:center; box-shadow:var(--shadow); border:1px solid var(--line); }
-.snum { font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:600; line-height:1; }
-.slbl { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
-.tip { margin:12px 16px 0; padding:16px 18px; background:var(--ink); border-radius:var(--radius); color:rgba(255,255,255,0.9); font-size:13px; line-height:1.6; font-weight:300; }
-.tip strong { color:var(--gold); font-weight:600; font-size:10px; letter-spacing:2px; text-transform:uppercase; display:block; margin-bottom:6px; }
-.rgroup { margin:0 16px; }
-.rhead { font-size:10px; letter-spacing:2px; text-transform:uppercase; font-weight:600; padding:20px 0 10px; display:flex; align-items:center; gap:8px; }
-.rhead.pos { color:var(--green); }
-.rhead.neg { color:var(--red); }
-.rhead.sug { color:var(--blue); }
-.rhead::after { content:''; flex:1; height:1px; background:var(--line); }
-.ri { background:var(--white); border-radius:12px; padding:13px 16px; margin-bottom:8px; font-size:13px; line-height:1.55; color:var(--ink2); font-weight:300; border:1px solid var(--line); border-left-width:3px; }
-.ri.pos { border-left-color:var(--green); }
-.ri.neg { border-left-color:var(--red); }
-.ri.sug { border-left-color:var(--blue); }
-.mrow { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:0 16px; }
-.mbox { background:var(--white); border-radius:12px; padding:14px 8px; text-align:center; border:1px solid var(--line); box-shadow:var(--shadow); }
-.mv { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:600; color:var(--gold); line-height:1; }
-.mn { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-top:3px; }
-.bsec { margin:0 16px; }
-.brow { margin-bottom:14px; }
-.btop { display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; }
-.bname { color:var(--ink2); font-weight:400; }
-.bpct { color:var(--muted); font-size:11px; }
-.bbg { height:4px; background:var(--line); border-radius:4px; overflow:hidden; }
-.bfill { height:100%; border-radius:4px; transition:width 1.2s cubic-bezier(0.16,1,0.3,1); }
-.empty { text-align:center; padding:60px 32px; color:var(--muted); }
-.empty .ei { font-size:40px; margin-bottom:12px; opacity:0.4; }
-.empty p { font-size:14px; line-height:1.7; font-weight:300; }
-::-webkit-scrollbar { width:0; }
+/* ── PROGRESS ── */
+.prog-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 16px;}
+.prog-day{text-align:center;}
+.prog-day-lbl{font-size:9px;color:var(--muted);margin-bottom:4px;}
+.prog-bar-wrap{height:60px;background:var(--line);border-radius:6px;display:flex;align-items:flex-end;overflow:hidden;}
+.prog-bar{width:100%;border-radius:6px;transition:height 1s ease;}
+.prog-val{font-size:9px;color:var(--muted);margin-top:4px;}
+
+/* ── SCROLL POPUP ── */
+.scroll-popup{
+  position:fixed;bottom:160px;left:50%;transform:translateX(-50%) translateY(20px);
+  width:calc(100% - 40px);max-width:380px;
+  background:var(--white);border-radius:20px;
+  padding:18px 20px;box-shadow:0 12px 48px rgba(26,24,20,0.18);
+  border:1px solid var(--line);z-index:150;
+  display:flex;align-items:center;gap:14px;
+  opacity:0;pointer-events:none;
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.scroll-popup.show{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);}
+.scroll-popup-icon{width:44px;height:44px;border-radius:12px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.scroll-popup-body{flex:1;}
+.scroll-popup-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.scroll-popup-sub{font-size:11px;color:var(--muted);font-weight:300;line-height:1.4;}
+.scroll-popup-actions{display:flex;gap:8px;margin-top:10px;}
+.sp-btn-primary{flex:1;padding:9px;border-radius:10px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.sp-btn-secondary{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;}
+.scroll-popup-close{position:absolute;top:12px;right:14px;border:none;background:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;}
+::-webkit-scrollbar{width:0;}
 </style>
 </head>
 <body>
-<div class="app">
 
+<!-- AUTH MODAL -->
+<div class="modal-overlay hidden" id="auth-modal">
+  <div class="modal">
+    <div class="free-badge" id="free-badge">✦ 5 free uses remaining</div>
+    <div class="modal-title">Welcome to <em>Daily Wellness</em></div>
+    <div class="modal-sub" id="modal-sub">Sign in to save your analysis & track weekly progress</div>
+    <div class="modal-tabs">
+      <button class="modal-tab on" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="modal-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <div id="auth-form">
+      <div class="m-field">
+        <div class="m-lbl">Email or Phone</div>
+        <input class="m-input" type="text" id="auth-id" placeholder="you@email.com or +91 9999999999">
+      </div>
+      <div class="m-field" id="name-field" style="display:none;">
+        <div class="m-lbl">Full Name</div>
+        <input class="m-input" type="text" id="auth-name" placeholder="Your name">
+      </div>
+      <div class="m-field">
+        <div class="m-lbl">Password</div>
+        <input class="m-input" type="password" id="auth-pass" placeholder="••••••••">
+      </div>
+      <div class="m-err" id="auth-err"></div>
+      <button class="m-btn" onclick="handleAuth()">Continue</button>
+      <button class="m-skip" id="skip-btn" onclick="skipAuth()">Skip for now — uses left: <span id="uses-remaining">5</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- SCROLL SAVE POPUP -->
+<div class="scroll-popup" id="scroll-popup">
+  <button class="scroll-popup-close" onclick="dismissScrollPopup()">×</button>
+  <div class="scroll-popup-icon">💾</div>
+  <div class="scroll-popup-body">
+    <div class="scroll-popup-title">Save this analysis?</div>
+    <div class="scroll-popup-sub">Sign in free to save your report & track weekly progress.</div>
+    <div class="scroll-popup-actions">
+      <button class="sp-btn-primary" onclick="scrollPopupSignIn()">Sign In / Sign Up</button>
+      <button class="sp-btn-secondary" onclick="dismissScrollPopup()">Not now</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app">
   <div class="header">
     <div class="eyebrow">Daily Wellness</div>
     <h1>Know your<br><em>day better</em></h1>
     <p class="header-sub">Track routine & diet · Get personalized insights</p>
+    <div class="user-bar">
+      <div class="user-info" id="user-info-bar" style="display:none;">Hello, <span id="user-name-display"></span></div>
+      <div class="uses-left" id="uses-left-bar">5 free uses left</div>
+      <button class="signout-btn" id="signout-btn" style="display:none;" onclick="signOut()">Sign Out</button>
+    </div>
   </div>
 
   <!-- ROUTINE -->
   <div class="section active" id="sec-routine">
-    <div class="sec-head">
-      <div class="sec-title">Your Routine</div>
-      <div class="sec-desc">Sleep, hydration, activities & mood</div>
-    </div>
+    <div class="sec-head"><div class="sec-title">Your Routine</div><div class="sec-desc">Sleep, hydration, activities & mood</div></div>
     <div class="card">
       <div class="card-lbl">Sleep</div>
       <div class="sl-top"><span class="sl-name">Hours of sleep</span><span class="sl-num" id="sv">7h</span></div>
       <input type="range" min="3" max="12" step="0.5" value="7" oninput="document.getElementById('sv').textContent=this.value+'h'">
-      <div class="field" style="margin-top:16px;">
-        <div class="f-lbl">Wake-up time</div>
-        <input type="time" id="wake" value="07:00">
-      </div>
+      <div class="field" style="margin-top:16px;"><div class="f-lbl">Wake-up time</div><input type="time" id="wake" value="07:00"></div>
     </div>
     <div class="card">
       <div class="card-lbl">Hydration</div>
@@ -196,10 +293,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:20px;
 
   <!-- MEALS -->
   <div class="section" id="sec-meals">
-    <div class="sec-head">
-      <div class="sec-title">Today's Meals</div>
-      <div class="sec-desc">Log everything you've eaten</div>
-    </div>
+    <div class="sec-head"><div class="sec-title">Today's Meals</div><div class="sec-desc">Log everything you've eaten</div></div>
     <div class="card">
       <div class="card-lbl">About You</div>
       <div class="two">
@@ -213,16 +307,51 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:20px;
       <div class="card-lbl">Food Log</div>
       <div id="meal-list"></div>
     </div>
-
   </div>
 
   <!-- ANALYSIS -->
   <div class="section" id="sec-analysis">
     <div id="empty" class="empty">
       <div class="ei">◎</div>
-      <p>Fill in your routine &amp; meals,<br>then tap <strong>Analyse</strong> below<br>for your daily wellness report.</p>
+      <p>Fill in your routine & meals,<br>then tap <strong>Analyse</strong> below<br>for your daily wellness report.</p>
     </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" style="display:none; padding:48px 28px; text-align:center;">
+      <div style="font-size:40px; margin-bottom:20px; animation: pulse-icon 1.5s ease-in-out infinite;">🔬</div>
+      <div style="font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; color:var(--ink); margin-bottom:6px;">Analysing your day…</div>
+      <div style="font-size:13px; color:var(--muted); font-weight:300; margin-bottom:32px; line-height:1.6;" id="loading-msg">Reading your routine & diet data</div>
+      <div style="background:var(--line); border-radius:99px; height:6px; overflow:hidden; margin-bottom:12px;">
+        <div id="progress-bar" style="height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg, var(--gold), var(--green)); transition:width 0.6s ease;"></div>
+      </div>
+      <div style="font-size:11px; color:var(--muted);" id="progress-pct">0%</div>
+      <div style="margin-top:32px; display:flex; flex-direction:column; gap:10px;" id="loading-steps">
+        <div class="loading-step" id="step-1">🌅 Checking your daily routine</div>
+        <div class="loading-step" id="step-2">🥗 Analysing your meals & nutrition</div>
+        <div class="loading-step" id="step-3">🧮 Calculating macro & micro nutrients</div>
+        <div class="loading-step" id="step-4">🍛 Preparing Indian meal suggestions</div>
+        <div class="loading-step" id="step-5">✨ Generating your wellness report</div>
+      </div>
+    </div>
+    <style>
+      .loading-step{font-size:12px;color:var(--muted);padding:10px 14px;border-radius:10px;background:var(--white);border:1px solid var(--line);text-align:left;transition:all 0.4s ease;font-weight:300;}
+      .loading-step.active{color:var(--ink2);border-color:var(--gold);background:var(--gold-light);font-weight:500;}
+      .loading-step.done{color:var(--green);border-color:var(--green);background:var(--green-light);}
+      @keyframes pulse-icon{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+    </style>
     <div id="results" style="display:none;padding-bottom:16px;"></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="section" id="sec-history">
+    <div class="sec-head"><div class="sec-title">Past Analyses</div><div class="sec-desc">Your saved health reports</div></div>
+    <div id="history-list" style="padding-bottom:16px;"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="section" id="sec-progress">
+    <div class="sec-head"><div class="sec-title">Weekly Progress</div><div class="sec-desc">Your wellness trend this week</div></div>
+    <div id="progress-content" style="padding-bottom:16px;"></div>
   </div>
 </div>
 
@@ -230,6 +359,8 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:20px;
   <button class="nb on" data-t="routine" onclick="go('routine')"><span>🌅</span>Routine</button>
   <button class="nb" data-t="meals" onclick="go('meals')"><span>🥗</span>Meals</button>
   <button class="nb" data-t="analysis" onclick="go('analysis')"><span>✦</span>Analysis</button>
+  <button class="nb" data-t="history" onclick="go('history')"><span>📋</span>History</button>
+  <button class="nb" data-t="progress" onclick="go('progress')"><span>📈</span>Progress</button>
 </nav>
 
 <div class="cta-wrap">
@@ -240,122 +371,316 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:20px;
 </div>
 
 <script>
-function go(t){
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  document.querySelector(`[data-t="${t}"]`).classList.add('on');
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(`sec-${t}`).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+// ── STATE ──
+let currentUser = null;
+let authMode = 'signin';
+let freeUses = parseInt(localStorage.getItem('vela_free_uses') || '0');
+const MAX_FREE = 5;
+let lastAnalysis = null;
+
+// ── INIT ──
+window.onload = () => {
+  const saved = localStorage.getItem('vela_user');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    updateUserUI();
+  }
+  updateUsesUI();
+  document.getElementById('meal-list').appendChild(createMealRow());
+};
+
+// ── AUTH ──
+function showAuthModal(mandatory = false) {
+  const modal = document.getElementById('auth-modal');
+  modal.classList.remove('hidden');
+  const skipBtn = document.getElementById('skip-btn');
+  const modalSub = document.getElementById('modal-sub');
+  if (mandatory) {
+    skipBtn.style.display = 'none';
+    modalSub.textContent = 'You\'ve used your 5 free analyses. Sign in to continue for free!';
+  } else {
+    skipBtn.style.display = 'block';
+    modalSub.textContent = 'Sign in to save your analysis & track weekly progress';
+  }
 }
-function removeRow(b){b.closest('.erow').remove();}
-function pickMood(c){document.querySelectorAll('#mood .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');}
-function addAct(){
-  const d=document.createElement('div');d.className='erow act';
-  d.innerHTML=`<input type="time" style="padding:10px;font-size:13px;"><input type="text" placeholder="Activity"><button class="del" onclick="removeRow(this)">×</button>`;
+
+function hideAuthModal() {
+  document.getElementById('auth-modal').classList.add('hidden');
+}
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.querySelectorAll('.modal-tab').forEach((t, i) => {
+    t.classList.toggle('on', (i === 0 && mode === 'signin') || (i === 1 && mode === 'signup'));
+  });
+  document.getElementById('name-field').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('auth-err').textContent = '';
+}
+
+function handleAuth() {
+  const id = document.getElementById('auth-id').value.trim();
+  const pass = document.getElementById('auth-pass').value.trim();
+  const name = document.getElementById('auth-name').value.trim();
+  const err = document.getElementById('auth-err');
+
+  if (!id || !pass) { err.textContent = 'Please fill in all fields.'; return; }
+  if (pass.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+
+  const users = JSON.parse(localStorage.getItem('vela_users') || '{}');
+
+  if (authMode === 'signup') {
+    if (!name) { err.textContent = 'Please enter your name.'; return; }
+    if (users[id]) { err.textContent = 'Account already exists. Please sign in.'; return; }
+    users[id] = { id, name, pass, analyses: [] };
+    localStorage.setItem('vela_users', JSON.stringify(users));
+    currentUser = users[id];
+  } else {
+    if (!users[id]) { err.textContent = 'Account not found. Please sign up.'; return; }
+    if (users[id].pass !== pass) { err.textContent = 'Incorrect password.'; return; }
+    currentUser = users[id];
+  }
+
+  localStorage.setItem('vela_user', JSON.stringify(currentUser));
+  hideAuthModal();
+  updateUserUI();
+}
+
+function skipAuth() {
+  hideAuthModal();
+}
+
+function signOut() {
+  currentUser = null;
+  localStorage.removeItem('vela_user');
+  updateUserUI();
+}
+
+function updateUserUI() {
+  const userBar = document.getElementById('user-info-bar');
+  const signoutBtn = document.getElementById('signout-btn');
+  const usesBar = document.getElementById('uses-left-bar');
+  if (currentUser) {
+    userBar.style.display = 'block';
+    document.getElementById('user-name-display').textContent = currentUser.name || currentUser.id;
+    signoutBtn.style.display = 'block';
+    usesBar.style.display = 'none';
+  } else {
+    userBar.style.display = 'none';
+    signoutBtn.style.display = 'none';
+    usesBar.style.display = 'block';
+    updateUsesUI();
+  }
+}
+
+function updateUsesUI() {
+  const left = MAX_FREE - freeUses;
+  document.getElementById('uses-left-bar').textContent = `${left} free use${left !== 1 ? 's' : ''} left`;
+  document.getElementById('uses-remaining').textContent = left;
+  document.getElementById('free-badge').textContent = `✦ ${left} free use${left !== 1 ? 's' : ''} remaining`;
+}
+
+// ── NAV ──
+function go(t) {
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.querySelector(`[data-t="${t}"]`).classList.add('on');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${t}`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (t === 'history') loadHistory();
+  if (t === 'progress') loadProgress();
+}
+
+// ── FORM HELPERS ──
+function removeRow(b) { b.closest('.erow').remove(); }
+function pickMood(c) { document.querySelectorAll('#mood .chip').forEach(x => x.classList.remove('on')); c.classList.add('on'); }
+function addAct() {
+  const d = document.createElement('div'); d.className = 'erow act';
+  d.innerHTML = `<input type="time" style="padding:10px;font-size:13px;"><input type="text" placeholder="Activity"><button class="del" onclick="removeRow(this)">×</button>`;
   document.getElementById('act-list').appendChild(d);
 }
-function addMeal(p){
-  const d=document.createElement('div');d.className='erow meal';
-  d.innerHTML=`<input type="text" placeholder="e.g. 1 cup oats with milk"><button class="del" onclick="removeRow(this)">×</button>`;
-  document.getElementById(p).appendChild(d);
-}
-// ── Dynamic meal list ──
-const MEAL_OPTS = ['Breakfast','Lunch','Dinner','Snacks'];
-function mealSelectHTML(val=''){
-  return `<select class="meal-type" onchange="onMealChange()">${MEAL_OPTS.map(o=>`<option value="${o}"${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
-}
-function createMealRow(typeVal='Breakfast', foodVal=''){
-  const row = document.createElement('div');
-  row.className = 'erow meal';
-  row.innerHTML = `${mealSelectHTML(typeVal)}<input type="text" class="meal-food" placeholder="e.g. 2 eggs with toast" value="${foodVal}" oninput="onMealChange()"><button class="del" onclick="removeMealRow(this)">×</button>`;
+const MEAL_OPTS = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+function createMealRow(typeVal = 'Breakfast', foodVal = '') {
+  const row = document.createElement('div'); row.className = 'erow meal';
+  const sel = MEAL_OPTS.map(o => `<option value="${o}"${o === typeVal ? ' selected' : ''}>${o}</option>`).join('');
+  row.innerHTML = `<select class="meal-type">${sel}</select><input type="text" class="meal-food" placeholder="e.g. 2 roti with dal" value="${foodVal}" oninput="ensureEmptyRow()"><button class="del" onclick="removeMealRow(this)">×</button>`;
   return row;
 }
-function removeMealRow(btn){
-  btn.closest('.erow').remove();
-  ensureEmptyRow();
-}
-function ensureEmptyRow(){
+function removeMealRow(btn) { btn.closest('.erow').remove(); ensureEmptyRow(); }
+function ensureEmptyRow() {
   const list = document.getElementById('meal-list');
   const rows = list.querySelectorAll('.erow');
-  // Check if last row is already empty
-  if(rows.length === 0){
-    list.appendChild(createMealRow());
-    return;
-  }
-  const lastRow = rows[rows.length - 1];
-  const lastFood = lastRow.querySelector('.meal-food').value.trim();
-  if(lastFood !== ''){
-    list.appendChild(createMealRow());
-  }
+  if (rows.length === 0) { list.appendChild(createMealRow()); return; }
+  const lastFood = rows[rows.length - 1].querySelector('.meal-food').value.trim();
+  if (lastFood !== '') list.appendChild(createMealRow());
 }
-function onMealChange(){ ensureEmptyRow(); }
-// Init first row
-document.getElementById('meal-list').appendChild(createMealRow());
 
-function getData(){
-  const acts=[];
-  document.querySelectorAll('#act-list .erow').forEach(r=>{const i=r.querySelectorAll('input');if(i[1].value.trim())acts.push(`${i[0].value||'?'}: ${i[1].value}`);});
-  // Collect meals grouped by type
-  const mealMap={Breakfast:[],Lunch:[],Dinner:[],Snacks:[]};
-  document.querySelectorAll('#meal-list .erow').forEach(r=>{
-    const type=r.querySelector('.meal-type')?.value;
-    const food=r.querySelector('.meal-food')?.value.trim();
-    if(type && food) mealMap[type].push(food);
+function getData() {
+  const acts = [];
+  document.querySelectorAll('#act-list .erow').forEach(r => { const i = r.querySelectorAll('input'); if (i[1].value.trim()) acts.push(`${i[0].value || '?'}: ${i[1].value}`); });
+  const mealMap = { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] };
+  document.querySelectorAll('#meal-list .erow').forEach(r => {
+    const type = r.querySelector('.meal-type')?.value;
+    const food = r.querySelector('.meal-food')?.value.trim();
+    if (type && food) mealMap[type].push(food);
   });
   return {
-    sleep:document.querySelector('[oninput*="sv"]').value,
-    wake:document.getElementById('wake').value,
-    water:document.querySelector('[oninput*="wv"]').value,
-    mood:document.querySelector('#mood .chip.on')?.textContent||'Not set',
-    notes:document.getElementById('notes').value,
-    activities:acts,
-    age:document.getElementById('age').value,
-    weight:document.getElementById('weight').value,
-    height:document.getElementById('height').value,
-    gender:document.getElementById('gender').value,
-    breakfast:mealMap['Breakfast'],lunch:mealMap['Lunch'],dinner:mealMap['Dinner'],snacks:mealMap['Snacks']
+    sleep: document.querySelector('[oninput*="sv"]').value,
+    wake: document.getElementById('wake').value,
+    water: document.querySelector('[oninput*="wv"]').value,
+    mood: document.querySelector('#mood .chip.on')?.textContent || 'Not set',
+    notes: document.getElementById('notes').value,
+    activities: acts,
+    age: document.getElementById('age').value,
+    weight: document.getElementById('weight').value,
+    height: document.getElementById('height').value,
+    gender: document.getElementById('gender').value,
+    breakfast: mealMap['Breakfast'], lunch: mealMap['Lunch'], dinner: mealMap['Dinner'], snacks: mealMap['Snacks']
   };
 }
-async function analyse(){
-  const d=getData();
-  const btn=document.getElementById('cta');
-  btn.disabled=true;btn.classList.add('loading');
-  go('analysis');
-  const prompt=`You are a health and nutrition expert. Analyse this data and return ONLY valid JSON (no markdown fences).
-PERSON: age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}
-ROUTINE: sleep=${d.sleep}h, wake=${d.wake}, water=${d.water} liters, mood=${d.mood}
-ACTIVITIES: ${d.activities.join('; ')||'none'}
-NOTES: ${d.notes||'none'}
-DIET - Breakfast:${d.breakfast.join(',')||'skipped'} | Lunch:${d.lunch.join(',')||'skipped'} | Dinner:${d.dinner.join(',')||'skipped'} | Snacks:${d.snacks.join(',')||'none'}
-Return exactly: {"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"]}`;
-  try {
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{ "Content-Type": "application/json", "x-api-key": "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", "anthropic-version": "2023-06-01" },body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
-    const raw=await res.json();
-    const txt=raw.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
-    render(JSON.parse(txt));
-  } catch(e){
-    document.getElementById('empty').style.display='block';
-    document.getElementById('empty').innerHTML=`<div class="ei">⚠</div><p>Something went wrong.<br>Please try again.</p>`;
-    document.getElementById('results').style.display='none';
+
+// ── ANALYSE ──
+async function analyse() {
+  // Check auth/free uses
+  if (!currentUser) {
+    if (freeUses >= MAX_FREE) {
+      showAuthModal(true);
+      return;
+    }
+    freeUses++;
+    localStorage.setItem('vela_free_uses', freeUses.toString());
+    updateUsesUI();
+    // Show modal after 3rd use to nudge signup
+    if (freeUses === 3) showAuthModal(false);
   }
-  btn.disabled=false;btn.classList.remove('loading');
+
+  const d = getData();
+  const btn = document.getElementById('cta');
+  btn.disabled = true; btn.classList.add('loading');
+  go('analysis');
+
+  // Show loading state
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('loading-state').style.display = 'block';
+
+  // Animate progress
+  const steps = ['step-1','step-2','step-3','step-4','step-5'];
+  const msgs = [
+    'Reading your daily routine & activities…',
+    'Analysing your meals & food intake…',
+    'Calculating macro & micro nutrients…',
+    'Preparing Indian meal suggestions…',
+    'Generating your wellness report…'
+  ];
+  const pcts = [10, 30, 55, 75, 90];
+  let stepIndex = 0;
+  const progressBar = document.getElementById('progress-bar');
+  const progressPct = document.getElementById('progress-pct');
+  const loadingMsg = document.getElementById('loading-msg');
+
+  function advanceStep() {
+    if (stepIndex > 0) {
+      document.getElementById(steps[stepIndex-1]).classList.remove('active');
+      document.getElementById(steps[stepIndex-1]).classList.add('done');
+      document.getElementById(steps[stepIndex-1]).textContent = '✓ ' + document.getElementById(steps[stepIndex-1]).textContent.replace('✓ ','');
+    }
+    if (stepIndex < steps.length) {
+      document.getElementById(steps[stepIndex]).classList.add('active');
+      progressBar.style.width = pcts[stepIndex] + '%';
+      progressPct.textContent = pcts[stepIndex] + '%';
+      loadingMsg.textContent = msgs[stepIndex];
+      stepIndex++;
+    }
+  }
+
+  advanceStep();
+  const stepTimer = setInterval(() => {
+    if (stepIndex < steps.length) advanceStep();
+    else clearInterval(stepTimer);
+  }, 900);
+
+  const prompt = `You are a health and nutrition expert specializing in Indian diet and lifestyle. Analyse this data and return ONLY valid JSON (no markdown fences).
+PERSON: age=${d.age || '?'}, weight=${d.weight || '?'}kg, height=${d.height || '?'}cm, gender=${d.gender}
+ROUTINE: sleep=${d.sleep}h, wake=${d.wake}, water=${d.water} liters, mood=${d.mood}
+ACTIVITIES: ${d.activities.join('; ') || 'none'}
+NOTES: ${d.notes || 'none'}
+DIET - Breakfast:${d.breakfast.join(',') || 'skipped'} | Lunch:${d.lunch.join(',') || 'skipped'} | Dinner:${d.dinner.join(',') || 'skipped'} | Snacks:${d.snacks.join(',') || 'none'}
+Return exactly this JSON with Indian diet meal suggestions:
+{"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"indian_meal_suggestions":{"breakfast":["suggestion1","suggestion2"],"lunch":["suggestion1","suggestion2"],"dinner":["suggestion1","suggestion2"],"snacks":["suggestion1","suggestion2"]}}
+For indian_meal_suggestions provide specific Indian foods like dal, sabzi, roti, rice, khichdi, idli, dosa, poha, upma, paneer, curd, lassi, fruits etc. based on their nutritional needs.`;
+
+  try {
+    const res = await fetch("https://lifepulse.dynamicwebstudio-india.workers.dev", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages: [{ role: "user", content: prompt }] })
+    });
+    const raw = await res.json();
+    const txt = raw.content.map(i => i.text || '').join('').replace(/```json|```/g, '').trim();
+    lastAnalysis = { ...JSON.parse(txt), date: new Date().toISOString(), data: d };
+    // Complete progress bar
+    clearInterval(stepTimer);
+    steps.forEach(s => { document.getElementById(s).classList.remove('active'); document.getElementById(s).classList.add('done'); });
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
+    loadingMsg.textContent = 'Analysis complete!';
+    setTimeout(() => {
+      document.getElementById('loading-state').style.display = 'none';
+      render(lastAnalysis);
+      if (currentUser) saveAnalysis(lastAnalysis);
+    }, 600);
+  } catch (e) {
+    clearInterval(stepTimer);
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('empty').style.display = 'block';
+    document.getElementById('empty').innerHTML = `<div class="ei">⚠</div><p>Something went wrong.<br>Please check your API connection<br>and try again.</p>`;
+    document.getElementById('results').style.display = 'none';
+  }
+  btn.disabled = false; btn.classList.remove('loading');
 }
-function bc(v){return v>=70?'var(--green)':v>=40?'var(--gold)':'var(--red)';}
-function render(a){
-  document.getElementById('empty').style.display='none';
-  const el=document.getElementById('results');el.style.display='block';
-  const items=(arr,cls)=>arr.map(x=>`<div class="ri ${cls}">${x}</div>`).join('');
-  const vbars=Object.entries(a.vitamins).map(([k,v])=>`<div class="brow"><div class="btop"><span class="bname">${k}</span><span class="bpct">${v}%</span></div><div class="bbg"><div class="bfill" style="width:${v}%;background:${bc(v)};"></div></div></div>`).join('');
-  el.innerHTML=`
+
+// ── SAVE ANALYSIS ──
+function saveAnalysis(analysis) {
+  const users = JSON.parse(localStorage.getItem('vela_users') || '{}');
+  if (!users[currentUser.id]) return;
+  if (!users[currentUser.id].analyses) users[currentUser.id].analyses = [];
+  users[currentUser.id].analyses.unshift(analysis);
+  // Keep last 30
+  users[currentUser.id].analyses = users[currentUser.id].analyses.slice(0, 30);
+  localStorage.setItem('vela_users', JSON.stringify(users));
+  currentUser = users[currentUser.id];
+  localStorage.setItem('vela_user', JSON.stringify(currentUser));
+}
+
+// ── RENDER ANALYSIS ──
+function bc(v) { return v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--gold)' : 'var(--red)'; }
+function render(a) {
+  document.getElementById('empty').style.display = 'none';
+  const el = document.getElementById('results'); el.style.display = 'block';
+  const items = (arr, cls) => arr.map(x => `<div class="ri ${cls}">${x}</div>`).join('');
+  const vbars = Object.entries(a.vitamins).map(([k, v]) => `<div class="brow"><div class="btop"><span class="bname">${k}</span><span class="bpct">${v}%</span></div><div class="bbg"><div class="bfill" style="width:${v}%;background:${bc(v)};"></div></div></div>`).join('');
+
+  // Indian meal suggestions
+  let mealSugs = '';
+  if (a.indian_meal_suggestions) {
+    const ms = a.indian_meal_suggestions;
+    const mealTypes = [['🌅 Breakfast', ms.breakfast], ['☀️ Lunch', ms.lunch], ['🌙 Dinner', ms.dinner], ['🍎 Snacks', ms.snacks]];
+    mealSugs = mealTypes.map(([label, items]) => items && items.length ? `<div class="ri meal"><strong style="font-size:11px;color:var(--gold);font-weight:600;">${label}</strong><br>${items.join(' · ')}</div>` : '').join('');
+  }
+
+  const dateStr = a.date ? new Date(a.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
+
+  el.innerHTML = `
+    ${dateStr ? `<div style="text-align:center;padding:16px 0 0;font-size:11px;color:var(--muted);">${dateStr}</div>` : ''}
     <div class="scores">
       <div class="stile"><div class="snum" style="color:var(--gold)">${a.lifestyle_score}</div><div class="slbl">Lifestyle</div></div>
       <div class="stile"><div class="snum" style="color:var(--green)">${a.diet_score}</div><div class="slbl">Diet</div></div>
     </div>
     <div class="tip"><strong>Today's Insight</strong>${a.overall_tip}</div>
     <div class="rgroup">
-      <div class="rhead pos">✓ Routine Wins</div>${items(a.routine_positives,'pos')}
-      <div class="rhead neg">→ Watch Out</div>${items(a.routine_negatives,'neg')}
-      <div class="rhead sug">◎ Suggestions</div>${items(a.routine_suggestions,'sug')}
+      <div class="rhead pos">✓ Routine Wins</div>${items(a.routine_positives, 'pos')}
+      <div class="rhead neg">→ Watch Out</div>${items(a.routine_negatives, 'neg')}
+      <div class="rhead sug">◎ Suggestions</div>${items(a.routine_suggestions, 'sug')}
     </div>
     <div class="sec-head" style="padding:24px 0 12px;margin:0 16px;">
       <div class="sec-title" style="font-size:22px;">Nutrition</div>
@@ -370,16 +695,314 @@ function render(a){
     <div class="bsec" style="margin-top:16px;">
       <div class="card-lbl" style="margin-bottom:14px;padding:0 16px;">Micronutrients</div>
       <div style="padding:0 16px;">
-        <div class="brow"><div class="btop"><span class="bname">Fiber</span><span class="bpct">${a.fiber}g / 30g</span></div><div class="bbg"><div class="bfill" style="width:${Math.min(100,(a.fiber/30)*100)}%;background:var(--gold);"></div></div></div>
+        <div class="brow"><div class="btop"><span class="bname">Fiber</span><span class="bpct">${a.fiber}g / 30g</span></div><div class="bbg"><div class="bfill" style="width:${Math.min(100, (a.fiber / 30) * 100)}%;background:var(--gold);"></div></div></div>
         ${vbars}
       </div>
     </div>
-    <div class="rgroup" style="padding-bottom:8px;">
-      <div class="rhead pos">✓ Diet Wins</div>${items(a.diet_positives,'pos')}
-      <div class="rhead neg">→ Diet Gaps</div>${items(a.diet_negatives,'neg')}
-      <div class="rhead sug">◎ Improve With</div>${items(a.diet_suggestions,'sug')}
-    </div>`;
+    <div class="rgroup">
+      <div class="rhead pos">✓ Diet Wins</div>${items(a.diet_positives, 'pos')}
+      <div class="rhead neg">→ Diet Gaps</div>${items(a.diet_negatives, 'neg')}
+      <div class="rhead sug">◎ Diet Improve</div>${items(a.diet_suggestions, 'sug')}
+      <div class="rhead meal-sug">🍛 Indian Meal Suggestions</div>${mealSugs}
+    </div>
+    <button class="pdf-btn" onclick="exportPDF()">📄 Export Health Report as PDF</button>
+    ${!currentUser ? `<div style="text-align:center;padding:12px 16px;font-size:12px;color:var(--muted);">Sign in to save this analysis →  <button onclick="showAuthModal(false)" style="border:none;background:none;color:var(--gold);font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;">Sign In</button></div>` : ''}
+  `;
 }
+
+// ── HISTORY ──
+function loadHistory() {
+  const el = document.getElementById('history-list');
+  if (!currentUser) {
+    el.innerHTML = `<div class="empty"><div class="ei">🔒</div><p>Sign in to view your<br>saved analyses.</p><button onclick="showAuthModal(false)" style="margin-top:16px;padding:10px 24px;border-radius:10px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sign In</button></div>`;
+    return;
+  }
+  const analyses = currentUser.analyses || [];
+  if (analyses.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="ei">📋</div><p>No saved analyses yet.<br>Analyse your day to get started!</p></div>`;
+    return;
+  }
+  el.innerHTML = analyses.map((a, i) => {
+    const date = new Date(a.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    return `<div class="hist-card" onclick="viewHistoryItem(${i})">
+      <div class="hist-date">${date}</div>
+      <div class="hist-scores">
+        <div><div class="hist-score" style="color:var(--gold)">${a.lifestyle_score}</div><div class="hist-lbl">Lifestyle</div></div>
+        <div style="margin-left:4px;"><div class="hist-score" style="color:var(--green)">${a.diet_score}</div><div class="hist-lbl">Diet</div></div>
+      </div>
+      <div class="hist-tip">${a.overall_tip?.substring(0, 80)}...</div>
+    </div>`;
+  }).join('');
+}
+
+function viewHistoryItem(index) {
+  const a = currentUser.analyses[index];
+  lastAnalysis = a;
+  go('analysis');
+  render(a);
+}
+
+// ── PROGRESS ──
+function loadProgress() {
+  const el = document.getElementById('progress-content');
+  if (!currentUser) {
+    el.innerHTML = `<div class="empty"><div class="ei">🔒</div><p>Sign in to track your<br>weekly progress.</p><button onclick="showAuthModal(false)" style="margin-top:16px;padding:10px 24px;border-radius:10px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sign In</button></div>`;
+    return;
+  }
+  const analyses = currentUser.analyses || [];
+  if (analyses.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="ei">📈</div><p>No data yet.<br>Analyse a few days to see<br>your weekly progress!</p></div>`;
+    return;
+  }
+
+  // Get last 7 days
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const today = new Date();
+  const weekData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const dateStr = d.toDateString();
+    const match = analyses.find(a => new Date(a.date).toDateString() === dateStr);
+    weekData.push({ day: days[d.getDay()], lifestyle: match?.lifestyle_score || 0, diet: match?.diet_score || 0, hasData: !!match });
+  }
+
+  const avg_lifestyle = Math.round(weekData.filter(d => d.hasData).reduce((s, d) => s + d.lifestyle, 0) / (weekData.filter(d => d.hasData).length || 1));
+  const avg_diet = Math.round(weekData.filter(d => d.hasData).reduce((s, d) => s + d.diet, 0) / (weekData.filter(d => d.hasData).length || 1));
+
+  el.innerHTML = `
+    <div class="scores" style="margin-bottom:4px;">
+      <div class="stile"><div class="snum" style="color:var(--gold);font-size:36px;">${avg_lifestyle}</div><div class="slbl">Avg Lifestyle</div></div>
+      <div class="stile"><div class="snum" style="color:var(--green);font-size:36px;">${avg_diet}</div><div class="slbl">Avg Diet</div></div>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div class="card-lbl">Lifestyle Score — This Week</div>
+      <div class="prog-week">
+        ${weekData.map(d => `<div class="prog-day">
+          <div class="prog-day-lbl">${d.day}</div>
+          <div class="prog-bar-wrap">
+            <div class="prog-bar" style="height:${d.hasData ? d.lifestyle : 0}%;background:${d.hasData ? 'var(--gold)' : 'var(--line)'};"></div>
+          </div>
+          <div class="prog-val">${d.hasData ? d.lifestyle : '–'}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Diet Score — This Week</div>
+      <div class="prog-week">
+        ${weekData.map(d => `<div class="prog-day">
+          <div class="prog-day-lbl">${d.day}</div>
+          <div class="prog-bar-wrap">
+            <div class="prog-bar" style="height:${d.hasData ? d.diet : 0}%;background:${d.hasData ? 'var(--green)' : 'var(--line)'};"></div>
+          </div>
+          <div class="prog-val">${d.hasData ? d.diet : '–'}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">All Time Records</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--gold)">${analyses.length}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Analyses</div></div>
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--green)">${Math.max(...analyses.map(a => a.lifestyle_score))}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Best Life</div></div>
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--blue)">${Math.max(...analyses.map(a => a.diet_score))}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Best Diet</div></div>
+      </div>
+    </div>
+  `;
+}
+
+// ── PDF EXPORT ──
+function exportPDF() {
+  if (!lastAnalysis) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const a = lastAnalysis;
+  const date = a.date ? new Date(a.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString();
+  const userName = currentUser?.name || currentUser?.id || 'User';
+
+  let y = 20;
+  const lm = 20; const pw = 170;
+
+  // Header
+  doc.setFillColor(26, 24, 20);
+  doc.rect(0, 0, 210, 45, 'F');
+  doc.setTextColor(196, 168, 130);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text('DAILY WELLNESS', lm, 18);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(24); doc.setFont('helvetica', 'bold');
+  doc.text('Daily Wellness Health Report', lm, 30);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text(`${userName}  ·  ${date}`, lm, 40);
+  y = 55;
+
+  // Scores
+  doc.setFillColor(237, 228, 216);
+  doc.roundedRect(lm, y, 80, 30, 4, 4, 'F');
+  doc.setFillColor(234, 242, 236);
+  doc.roundedRect(lm + 90, y, 80, 30, 4, 4, 'F');
+  doc.setTextColor(196, 168, 130);
+  doc.setFontSize(28); doc.setFont('helvetica', 'bold');
+  doc.text(`${a.lifestyle_score}`, lm + 16, y + 20);
+  doc.setTextColor(74, 124, 89);
+  doc.text(`${a.diet_score}`, lm + 106, y + 20);
+  doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+  doc.setTextColor(155, 150, 144);
+  doc.text('LIFESTYLE SCORE', lm + 8, y + 27);
+  doc.text('DIET SCORE', lm + 100, y + 27);
+  y += 38;
+
+  // Tip
+  doc.setFillColor(26, 24, 20);
+  doc.roundedRect(lm, y, pw, 20, 4, 4, 'F');
+  doc.setTextColor(196, 168, 130);
+  doc.setFontSize(7); doc.setFont('helvetica', 'bold');
+  doc.text("TODAY'S INSIGHT", lm + 5, y + 7);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+  const tipLines = doc.splitTextToSize(a.overall_tip || '', pw - 10);
+  doc.text(tipLines[0], lm + 5, y + 14);
+  y += 28;
+
+  // Section helper
+  const section = (title, items, color) => {
+    if (!items || items.length === 0) return;
+    if (y > 260) { doc.addPage(); y = 20; }
+    doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...color);
+    doc.text(title, lm, y); y += 6;
+    doc.setTextColor(61, 58, 53);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+    items.forEach(item => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      const lines = doc.splitTextToSize(`• ${item}`, pw - 4);
+      doc.text(lines, lm + 2, y);
+      y += lines.length * 5 + 2;
+    });
+    y += 4;
+  };
+
+  section('ROUTINE POSITIVES', a.routine_positives, [74, 124, 89]);
+  section('AREAS TO WATCH', a.routine_negatives, [196, 97, 74]);
+  section('SUGGESTIONS', a.routine_suggestions, [74, 107, 138]);
+
+  // Macros
+  if (y > 230) { doc.addPage(); y = 20; }
+  doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+  doc.setTextColor(155, 150, 144);
+  doc.text('NUTRITION', lm, y); y += 6;
+  const macros = [['Calories', `${a.calories} kcal`], ['Protein', `${a.protein}g`], ['Carbs', `${a.carbs}g`], ['Fat', `${a.fat}g`], ['Fiber', `${a.fiber}g`]];
+  macros.forEach(([k, v], i) => {
+    const x = lm + (i % 3) * 58;
+    if (i % 3 === 0 && i > 0) y += 16;
+    doc.setFillColor(247, 245, 242);
+    doc.roundedRect(x, y, 52, 14, 2, 2, 'F');
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(196, 168, 130);
+    doc.text(v, x + 4, y + 9);
+    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(155, 150, 144);
+    doc.text(k.toUpperCase(), x + 4, y + 13);
+  });
+  y += 28;
+
+  section('DIET POSITIVES', a.diet_positives, [74, 124, 89]);
+  section('DIET GAPS', a.diet_negatives, [196, 97, 74]);
+  section('DIET SUGGESTIONS', a.diet_suggestions, [74, 107, 138]);
+
+  // Indian meal suggestions
+  if (a.indian_meal_suggestions) {
+    if (y > 240) { doc.addPage(); y = 20; }
+    doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(196, 168, 130);
+    doc.text('INDIAN MEAL SUGGESTIONS', lm, y); y += 6;
+    const ms = a.indian_meal_suggestions;
+    [['Breakfast', ms.breakfast], ['Lunch', ms.lunch], ['Dinner', ms.dinner], ['Snacks', ms.snacks]].forEach(([label, items]) => {
+      if (!items || items.length === 0) return;
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(61, 58, 53);
+      doc.text(label + ':', lm + 2, y); y += 5;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(100, 100, 100);
+      items.forEach(item => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.text(`• ${item}`, lm + 4, y); y += 5;
+      });
+      y += 2;
+    });
+  }
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8); doc.setTextColor(155, 150, 144);
+    doc.text(`Daily Wellness Health Report  ·  Page ${i} of ${pageCount}  ·  Generated on ${new Date().toLocaleDateString()}`, lm, 290);
+  }
+
+  doc.save(`Daily-Wellness-Report-${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+// ── SCROLL POPUP ──
+let scrollPopupDismissed = false;
+let scrollPopupShown = false;
+let scrollPopupTimeout = null;
+
+function setupScrollPopup() {
+  window.addEventListener('scroll', handleScrollPopup, { passive: true });
+}
+
+function handleScrollPopup() {
+  // Only show on analysis tab, only if user is not signed in, and results are visible
+  if (currentUser) return;
+  if (document.getElementById('results').style.display === 'none') return;
+  if (scrollPopupDismissed) return;
+  if (scrollPopupShown) return;
+
+  const scrollY = window.scrollY || window.pageYOffset;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrollPct = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+
+  // Show popup when user scrolls past 30%
+  if (scrollPct > 30) {
+    showScrollPopup();
+  }
+}
+
+function showScrollPopup() {
+  if (scrollPopupShown || scrollPopupDismissed || currentUser) return;
+  scrollPopupShown = true;
+  const popup = document.getElementById('scroll-popup');
+  popup.classList.add('show');
+  // Auto hide after 8 seconds
+  scrollPopupTimeout = setTimeout(() => {
+    hideScrollPopup();
+  }, 8000);
+}
+
+function hideScrollPopup() {
+  const popup = document.getElementById('scroll-popup');
+  popup.classList.remove('show');
+  clearTimeout(scrollPopupTimeout);
+}
+
+function dismissScrollPopup() {
+  hideScrollPopup();
+  scrollPopupDismissed = true;
+  // Do not show again for this analysis session
+}
+
+function scrollPopupSignIn() {
+  hideScrollPopup();
+  scrollPopupDismissed = true;
+  showAuthModal(false);
+}
+
+// Reset popup state on each new analysis
+const _origRender = render;
+render = function(a) {
+  scrollPopupShown = false;
+  scrollPopupDismissed = false;
+  _origRender(a);
+};
+
+// Init scroll listener
+setupScrollPopup();
 </script>
 </body>
 </html>
