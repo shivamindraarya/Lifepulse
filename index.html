@@ -544,7 +544,7 @@ Return exactly this JSON:
 {"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"]}}`;
 
   try {
-    const res = await fetch("https://lifepulse.dynamicwebstudio-india.workers.dev", {
+    const res = await fetch("https://lifepulse2.dynamicwebstudio-india.workers.dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages: [{ role: "user", content: prompt }] })
