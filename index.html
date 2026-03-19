@@ -513,7 +513,7 @@ function getData() {
       acts.push(entry);
     }
   });
-  const mm = { Breakfast:[], Lunch:[], Dinner:[], Snacks:[] };
+  const mm = { Breakfast:[], Lunch:[], Dinner:[], Snacks:[], 'Pre-Workout':[], 'Post-Workout':[] };
   document.querySelectorAll('#meal-list .erow').forEach(r => { const t = r.querySelector('.meal-type')?.value; const f = r.querySelector('.meal-food')?.value.trim(); if (t && f) mm[t].push(f); });
   return {
     name: document.getElementById('user-name-input')?.value.trim() || '',
@@ -525,7 +525,7 @@ function getData() {
     activities: acts, age: document.getElementById('age').value,
     weight: document.getElementById('weight').value, height: document.getElementById('height').value,
     gender: document.getElementById('gender').value,
-    breakfast: mm['Breakfast'], lunch: mm['Lunch'], dinner: mm['Dinner'], snacks: mm['Snacks']
+    breakfast: mm['Breakfast'], lunch: mm['Lunch'], dinner: mm['Dinner'], snacks: mm['Snacks'], preworkout: mm['Pre-Workout'], postworkout: mm['Post-Workout']
   };
 }
 
@@ -559,9 +559,9 @@ PERSON: name=${d.name||'User'}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, he
 ROUTINE: sleep=${d.sleep}h, wake=${d.wake}, water=${d.water} liters, mood=${d.mood}
 ACTIVITIES: ${d.activities.join('; ')||'none'}
 NOTES: ${d.notes||'none'}
-DIET - Breakfast:${d.breakfast.join(',')||'skipped'} | Lunch:${d.lunch.join(',')||'skipped'} | Dinner:${d.dinner.join(',')||'skipped'} | Snacks:${d.snacks.join(',')||'none'}
+DIET - Breakfast:${d.breakfast.join(',')||'skipped'} | Lunch:${d.lunch.join(',')||'skipped'} | Dinner:${d.dinner.join(',')||'skipped'} | Snacks:${d.snacks.join(',')||'none'} | Pre-Workout:${d.preworkout.join(',')||'none'} | Post-Workout:${d.postworkout.join(',')||'none'}
 Return exactly this JSON:
-{"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"]}}`;
+{"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"],"pre_workout":["item1"],"post_workout":["item1"]}}`;
 
   try {
     const res = await fetch("https://lifepulse2.dynamicwebstudio-india.workers.dev", {
@@ -596,7 +596,7 @@ function render(a) {
   let msugs = '';
   if (a.indian_meal_suggestions) {
     const ms = a.indian_meal_suggestions;
-    [['🌅 Breakfast',ms.breakfast],['☀️ Lunch',ms.lunch],['🌙 Dinner',ms.dinner],['🍎 Snacks',ms.snacks]].forEach(([l,it]) => {
+    [['🌅 Breakfast',ms.breakfast],['☀️ Lunch',ms.lunch],['🌙 Dinner',ms.dinner],['🍎 Snacks',ms.snacks],['💪 Pre-Workout',ms.pre_workout],['🥤 Post-Workout',ms.post_workout]].forEach(([l,it]) => {
       if (it && it.length) msugs += `<div class="ri meal"><strong style="font-size:10px;color:var(--gold);font-weight:600;">${l}</strong><br>${it.join(' · ')}</div>`;
     });
   }
