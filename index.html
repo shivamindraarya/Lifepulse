@@ -3,504 +3,472 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Daily Wellness – Life & Diet Analyzer</title>
+<title>Daily Wellness – Gym Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where, orderBy, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDPZIE2z2iSlnlHwfBla9DJf-jhqVGH8ug",
+  authDomain: "daily-wellness-7d62c.firebaseapp.com",
+  projectId: "daily-wellness-7d62c",
+  storageBucket: "daily-wellness-7d62c.firebasestorage.app",
+  messagingSenderId: "967762169248",
+  appId: "1:967762169248:web:c9fdf7955655e6698668c5"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+
+window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, fbSignOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where, orderBy, updateDoc, serverTimestamp };
+window.dispatchEvent(new Event('firebase-ready'));
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
   --bg:#F7F5F2;--white:#FFFFFF;--ink:#1A1814;--ink2:#3D3A35;
-  --muted:#9B9690;--line:#E8E4DF;--gold:#C4A882;--gold-light:#EDE4D8;
-  --green:#4A7C59;--green-light:#EAF2EC;--red:#C4614A;--red-light:#F5EBE8;
-  --blue:#4A6B8A;--blue-light:#E8EFF5;--radius:16px;
-  --shadow:0 2px 24px rgba(26,24,20,0.06);--shadow-lg:0 8px 40px rgba(26,24,20,0.10);
+  --muted:#9B9690;--line:#E8E4DF;--gold:#C4A882;--gold-l:#EDE4D8;
+  --green:#4A7C59;--green-l:#EAF2EC;--red:#C4614A;--red-l:#F5EBE8;
+  --blue:#4A6B8A;--blue-l:#E8EFF5;--radius:16px;
+  --sh:0 2px 24px rgba(26,24,20,.06);--shl:0 8px 40px rgba(26,24,20,.10);
 }
 body.dark{
   --bg:#0F0F0F;--white:#1C1C1E;--ink:#F0EDE8;--ink2:#D4D0CA;
-  --muted:#7A7570;--line:#2E2E2E;--gold:#C4A882;--gold-light:#2A2218;
-  --green:#5A9E6F;--green-light:#0F2018;--red:#D4705A;--red-light:#2A1410;
-  --blue:#5A82A8;--blue-light:#0F1825;--radius:16px;
-  --shadow:0 2px 24px rgba(0,0,0,0.5);--shadow-lg:0 8px 40px rgba(0,0,0,0.7);
+  --muted:#7A7570;--line:#2E2E2E;--gold:#C4A882;--gold-l:#2A2218;
+  --green:#5A9E6F;--green-l:#0F2018;--red:#D4705A;--red-l:#2A1410;
+  --blue:#5A82A8;--blue-l:#0F1825;
+  --sh:0 2px 24px rgba(0,0,0,.5);--shl:0 8px 40px rgba(0,0,0,.7);
 }
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+.app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:140px;}
 
-/* ── DARK MODE SPECIFIC OVERRIDES ── */
+/* ── AUTH SCREENS ── */
+.auth-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;}
+.auth-screen.hidden{display:none;}
+.auth-box{background:var(--white);border-radius:24px;padding:36px 28px;width:100%;max-width:420px;box-shadow:var(--shl);}
+.auth-logo{text-align:center;margin-bottom:24px;}
+.auth-logo img{width:72px;height:72px;border-radius:16px;object-fit:cover;}
+.auth-logo .default-logo{width:72px;height:72px;border-radius:16px;background:var(--gold-l);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:32px;}
+.auth-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;text-align:center;margin-bottom:4px;}
+.auth-title em{font-style:italic;color:var(--gold);}
+.auth-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:24px;font-weight:300;}
+.auth-tabs{display:flex;background:var(--bg);border-radius:12px;padding:3px;margin-bottom:20px;}
+.auth-tab{flex:1;padding:9px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--muted);border-radius:10px;cursor:pointer;transition:all .2s;}
+.auth-tab.on{background:var(--white);color:var(--ink);box-shadow:var(--sh);}
+.af{margin-bottom:14px;}
+.al{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;}
+.ai{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:all .2s;-webkit-appearance:none;}
+.ai:focus{border-color:var(--gold);}
+.logo-upload-wrap{border:2px dashed var(--line);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.logo-upload-wrap:hover{border-color:var(--gold);background:var(--gold-l);}
+.logo-preview{width:64px;height:64px;border-radius:12px;object-fit:cover;margin:0 auto 8px;display:none;}
+.logo-upload-hint{font-size:12px;color:var(--muted);font-weight:300;}
+.logo-upload-hint span{font-size:24px;display:block;margin-bottom:6px;}
+.abtn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:all .2s;}
+.abtn:hover{opacity:.9;}
+.abtn:disabled{opacity:.5;cursor:not-allowed;}
+.aerr{font-size:12px;color:var(--red);margin-top:8px;text-align:center;min-height:18px;}
+.pending-screen{text-align:center;padding:40px 20px;}
+.pending-icon{font-size:48px;margin-bottom:16px;}
+.pending-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:8px;}
+.pending-sub{font-size:13px;color:var(--muted);font-weight:300;line-height:1.6;margin-bottom:24px;}
 
-/* Overall Insight card — dark bg in both modes, needs readable text */
-body.dark .tip{background:#2A2218;color:#F0EDE8;}
-body.dark .tip strong{color:var(--gold);}
-
-/* Score tiles */
-body.dark .stile{background:#242424;border-color:#333;}
-body.dark .snum{color:inherit;}
-
-/* Result items (positives, negatives, suggestions) */
-body.dark .ri{background:#242424;border-color:#333;color:#D4D0CA;}
-body.dark .ri.pos{border-left-color:var(--green);}
-body.dark .ri.neg{border-left-color:var(--red);}
-body.dark .ri.sug{border-left-color:var(--blue);}
-body.dark .ri.meal{border-left-color:var(--gold);}
-
-/* Cards */
-body.dark .card{background:#1C1C1E;border-color:#2E2E2E;}
-
-/* Header */
-body.dark .header{background:#1C1C1E;border-color:#2E2E2E;}
-
-/* Modal */
-body.dark .modal{background:#1C1C1E;}
-body.dark .modal-tabs{background:#0F0F0F;}
-body.dark .modal-tab.on{background:#2A2A2A;color:var(--ink);}
-body.dark .m-input{background:#0F0F0F;border-color:#333;color:var(--ink);}
-
-/* Inputs and selects */
-body.dark input[type="text"],
-body.dark input[type="number"],
-body.dark input[type="time"],
-body.dark input[type="email"],
-body.dark input[type="tel"],
-body.dark textarea,
-body.dark select{background:#0F0F0F;border-color:#333;color:#F0EDE8;}
-body.dark input:focus,body.dark textarea:focus,body.dark select:focus{border-color:var(--gold);background:#1A1A1A;}
-
-/* Sliders */
-body.dark input[type="range"]{background:#333;}
-body.dark input[type="range"]::-webkit-slider-thumb{background:#2A2A2A;border-color:var(--gold);}
-
-/* Mood & chips */
-body.dark .chip{background:#0F0F0F;border-color:#333;color:#7A7570;}
-body.dark .chip.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
-
-/* Macro boxes */
-body.dark .mbox{background:#242424;border-color:#333;}
-body.dark .mv{color:var(--gold);}
-body.dark .mn{color:#7A7570;}
-
-/* Nutrition bars */
-body.dark .bbg{background:#333;}
-
-/* Macro section heading */
-body.dark .sec-title{color:#F0EDE8;}
-body.dark .sec-desc{color:#7A7570;}
-body.dark .card-lbl{color:var(--gold);}
-
-/* History cards */
-body.dark .hist-card{background:#1C1C1E;border-color:#2E2E2E;}
-body.dark .hist-date{color:#7A7570;}
-body.dark .hist-tip{color:#D4D0CA;}
-
-/* Nav */
-body.dark .nav{background:#1C1C1E;border-color:#2E2E2E;}
-body.dark .nb{color:#7A7570;}
-body.dark .nb.on{background:#2A2218;color:var(--gold);}
-body.dark .nb.on[data-t="meals"]{background:#0F2018;color:var(--green);}
-body.dark .nb.on[data-t="analysis"]{background:#0F1825;color:var(--blue);}
-body.dark .nb.on[data-t="history"]{background:#2A1410;color:var(--red);}
-body.dark .nb.on[data-t="progress"]{background:#2A2218;color:var(--gold);}
-
-/* CTA button */
-body.dark .cta{background:#C4A882;color:#1A1814;}
-body.dark .cta:hover{background:#D4B892;}
-
-/* Empty state */
-body.dark .empty{color:#7A7570;}
-
-/* Rhead labels */
-body.dark .rhead.pos{color:var(--green);}
-body.dark .rhead.neg{color:var(--red);}
-body.dark .rhead.sug{color:var(--blue);}
-body.dark .rhead.msug{color:#C4A882;}
-body.dark .rhead::after{background:#2E2E2E;}
-
-/* Workout card */
-body.dark .workout-card{background:#1C1C1E;border-color:#2E2E2E;}
-body.dark .wtype{background:#0F0F0F;border-color:#333;color:#7A7570;}
-body.dark .wtype.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
-body.dark .ichip{background:#0F0F0F;border-color:#333;color:#7A7570;}
-body.dark .ichip.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
-
-/* Supplement cards */
-body.dark .supp-card{background:#242424;border-color:#333;}
-body.dark .supp-name{color:#D4D0CA;}
-body.dark .supp-text{color:#D4D0CA;}
-
-/* Progress bars section */
-body.dark .prog-bar-wrap{background:#333;}
-body.dark .prog-val{color:#7A7570;}
-body.dark .prog-day-lbl{color:#7A7570;}
-
-/* PDF button */
-body.dark .pdf-btn{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
-body.dark .pdf-btn:hover{background:var(--gold);color:#1A1814;}
-
-/* Scroll popup */
-body.dark .scroll-popup{background:#1C1C1E;border-color:#2E2E2E;}
-body.dark .sp-title{color:#F0EDE8;}
-body.dark .sp-sub{color:#7A7570;}
-body.dark .sp-yes{background:#C4A882;color:#1A1814;}
-
-/* Status bar */
-body.dark .status-bar{border-color:#2E2E2E;}
-body.dark .reset-btn{border-color:#333;color:#7A7570;}
-body.dark .reset-btn:hover{border-color:var(--gold);color:var(--gold);background:#2A2218;}
-body.dark .signin-hdr-btn{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
-body.dark .signout-btn{background:#2A1410;color:var(--red);}
-
-/* Activity rows */
-body.dark .erow.act{border-color:#2E2E2E;}
-body.dark .del{border-color:#333;color:#7A7570;}
-body.dark .add-r{border-color:#333;color:#7A7570;}
-body.dark .add-r:hover{border-color:var(--gold);color:var(--gold);background:#2A2218;}
-
-/* Section header after gradient line */
-body.dark .header::after{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-
-/* Lsteps in loading */
-body.dark .lstep{background:#242424;border-color:#333;color:#7A7570;}
-body.dark .lstep.active{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
-body.dark .lstep.done{background:#0F2018;border-color:var(--green);color:var(--green);}
-
-/* Global transition for smooth dark mode switch */
-body,body *{transition:background-color 0.3s ease,border-color 0.3s ease,color 0.3s ease;}
-/* But don't transition transforms or shadows */
-.cta,.chip,.wtype,.ichip,.nb,.modal{transition:background-color 0.3s ease,border-color 0.3s ease,color 0.3s ease,box-shadow 0.3s ease;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;}
-.app{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:140px;}
-
-/* AUTH MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(26,24,20,0.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
-.modal-overlay.hidden{display:none;}
-.modal{background:var(--white);border-radius:24px 24px 0 0;padding:32px 24px 40px;width:100%;max-width:420px;animation:slideUp 0.3s ease;}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;margin-bottom:6px;}
-.modal-title em{font-style:italic;color:var(--gold);}
-.modal-sub{font-size:13px;color:var(--muted);margin-bottom:24px;font-weight:300;}
-.modal-tabs{display:flex;background:var(--bg);border-radius:12px;padding:3px;margin-bottom:20px;}
-.modal-tab{flex:1;padding:9px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--muted);border-radius:10px;cursor:pointer;transition:all 0.2s;}
-.modal-tab.on{background:var(--white);color:var(--ink);box-shadow:var(--shadow);}
-.m-field{margin-bottom:14px;}
-.m-lbl{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;}
-.m-input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:all 0.2s;}
-.m-input:focus{border-color:var(--gold);}
-.m-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
-.m-skip{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;margin-top:8px;}
-.m-err{font-size:12px;color:var(--red);margin-top:8px;text-align:center;}
-
-/* SCROLL POPUP */
-.scroll-popup{position:fixed;bottom:160px;left:50%;transform:translateX(-50%) translateY(20px);width:calc(100% - 40px);max-width:380px;background:var(--white);border-radius:20px;padding:18px 20px;box-shadow:0 12px 48px rgba(26,24,20,0.18);border:1px solid var(--line);z-index:150;display:flex;align-items:center;gap:14px;opacity:0;pointer-events:none;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);}
-.scroll-popup.show{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);}
-.sp-icon{width:44px;height:44px;border-radius:12px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-.sp-body{flex:1;}
-.sp-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;}
-.sp-sub{font-size:11px;color:var(--muted);font-weight:300;line-height:1.4;}
-.sp-acts{display:flex;gap:8px;margin-top:10px;}
-.sp-yes{flex:1;padding:9px;border-radius:10px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
-.sp-no{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;}
-.sp-x{position:absolute;top:12px;right:14px;border:none;background:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;}
-
-/* HEADER */
-.header{padding:52px 28px 24px;background:var(--white);border-bottom:1px solid var(--line);position:relative;}
-.header::after{content:'';position:absolute;bottom:0;left:28px;right:28px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-.eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:8px;}
-.header h1{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;line-height:1.1;letter-spacing:-0.5px;}
+/* ── HEADER ── */
+.header{padding:48px 24px 20px;background:var(--white);border-bottom:1px solid var(--line);position:relative;transition:background .3s,border-color .3s;}
+.header::after{content:'';position:absolute;bottom:0;left:24px;right:24px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.header-brand{flex:1;}
+.eyebrow{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:6px;}
+.header h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:300;line-height:1.1;}
 .header h1 em{font-style:italic;color:var(--gold);}
-.header-sub{font-size:13px;color:var(--muted);font-weight:300;margin-top:8px;line-height:1.5;}
-.status-bar{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
-.user-info{font-size:12px;color:var(--muted);display:none;}
-.user-info span{color:var(--gold);font-weight:600;}
-.hdr-btns{display:flex;align-items:center;gap:8px;margin-left:auto;}
-.reset-btn{font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--line);padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:500;transition:all 0.2s;}
-.theme-btn{width:36px;height:20px;border-radius:20px;border:none;background:var(--line);cursor:pointer;position:relative;transition:background 0.3s;flex-shrink:0;padding:0;}
-.theme-btn::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:var(--white);top:3px;left:3px;transition:transform 0.3s,background 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.header-sub{font-size:12px;color:var(--muted);font-weight:300;margin-top:5px;}
+.gym-logo-wrap{width:52px;height:52px;border-radius:12px;overflow:hidden;border:1px solid var(--line);flex-shrink:0;margin-left:12px;}
+.gym-logo-wrap img{width:100%;height:100%;object-fit:cover;}
+.gym-logo-default{width:100%;height:100%;background:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.status-bar{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
+.gym-name-badge{font-size:11px;color:var(--gold);font-weight:600;background:var(--gold-l);padding:4px 10px;border-radius:16px;}
+.hdr-btns{display:flex;align-items:center;gap:7px;}
+.theme-wrap{display:flex;align-items:center;gap:5px;}
+.theme-icon{font-size:11px;}
+.theme-btn{width:34px;height:18px;border-radius:20px;border:none;background:var(--line);cursor:pointer;position:relative;padding:0;transition:background .3s;}
+.theme-btn::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:var(--white);top:3px;left:3px;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
 body.dark .theme-btn{background:var(--gold);}
 body.dark .theme-btn::after{transform:translateX(16px);}
-.theme-wrap{display:flex;align-items:center;gap:6px;}
-.theme-icon{font-size:12px;line-height:1;}
-.reset-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-light);}
-.signin-hdr-btn{font-size:11px;color:var(--ink2);background:var(--gold-light);border:1px solid var(--gold);padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;transition:all 0.2s;}
-.signin-hdr-btn:hover{background:var(--gold);color:var(--white);}
-.signout-btn{font-size:11px;color:var(--red);background:var(--red-light);border:none;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:500;display:none;}
+.reset-btn{font-size:10px;color:var(--muted);background:transparent;border:1px solid var(--line);padding:4px 10px;border-radius:16px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:500;transition:all .2s;}
+.reset-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-l);}
+.signout-hdr-btn{font-size:10px;color:var(--red);background:var(--red-l);border:none;padding:4px 10px;border-radius:16px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:500;}
 
-/* SECTIONS */
-.section{display:none;animation:up 0.35s ease;}
+/* ── SECTIONS ── */
+.section{display:none;animation:up .35s ease;}
 .section.active{display:block;}
 @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.sec-head{padding:24px 28px 0;}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;letter-spacing:-0.3px;}
-.sec-desc{font-size:13px;color:var(--muted);font-weight:300;margin-top:4px;}
+.sec-head{padding:22px 24px 0;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;}
+.sec-desc{font-size:12px;color:var(--muted);font-weight:300;margin-top:3px;}
 
-/* CARDS */
-.card{background:var(--white);border-radius:var(--radius);padding:22px;margin:16px 16px 0;box-shadow:var(--shadow);border:1px solid var(--line);}
-.card-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.card-lbl::after{content:'';flex:1;height:1px;background:var(--line);}
-
-/* INPUTS */
-.field{margin-bottom:14px;}
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:var(--radius);padding:20px;margin:14px 14px 0;box-shadow:var(--sh);border:1px solid var(--line);transition:background .3s,border-color .3s;}
+.clbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.clbl::after{content:'';flex:1;height:1px;background:var(--line);}
+.field{margin-bottom:12px;}
 .field:last-child{margin-bottom:0;}
-.f-lbl{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;}
-input[type="text"],input[type="number"],input[type="time"],input[type="email"],input[type="tel"],textarea,select{
+.flbl{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:5px;}
+input[type=text],input[type=number],input[type=time],input[type=email],textarea,select{
   width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
-  padding:12px 14px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:14px;
-  outline:none;transition:border-color 0.2s,background 0.3s,color 0.3s;-webkit-appearance:none;
+  padding:11px 13px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:13px;
+  outline:none;transition:all .2s;-webkit-appearance:none;
 }
 input:focus,textarea:focus,select:focus{border-color:var(--gold);background:var(--white);}
-textarea{min-height:90px;resize:none;line-height:1.6;}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239B9690' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
-.sl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
-.sl-name{font-size:13px;color:var(--ink2);}
-.sl-num{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);font-weight:600;}
-input[type="range"]{width:100%;-webkit-appearance:none;height:3px;border-radius:3px;background:var(--line);outline:none;padding:0;border:none;box-shadow:none;}
-input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--white);border:2px solid var(--gold);cursor:pointer;}
-.chips{display:flex;flex-wrap:wrap;gap:8px;}
-.chip{padding:8px 16px;border-radius:30px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'Outfit',sans-serif;}
-.chip.on{background:var(--gold-light);border-color:var(--gold);color:var(--ink2);font-weight:600;}
-.erow{display:grid;gap:8px;align-items:center;margin-bottom:8px;}
-.erow.act{grid-template-columns:88px 1fr 32px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line);}.erow.act:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none;}
-.erow.meal{grid-template-columns:110px 1fr 32px;}
-.erow input{margin:0;}
-.del{width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--line);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;}
-.del:hover{border-color:var(--red);color:var(--red);background:var(--red-light);}
-.add-r{width:100%;padding:10px;background:transparent;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;margin-top:4px;}
-.add-r:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-light);}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+textarea{min-height:80px;resize:none;line-height:1.6;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239B9690' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;}
+.sltop{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.slname{font-size:12px;color:var(--ink2);}
+.slnum{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);font-weight:600;}
+input[type=range]{width:100%;-webkit-appearance:none;height:3px;border-radius:3px;background:var(--line);outline:none;padding:0;border:none;box-shadow:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--white);border:2px solid var(--gold);cursor:pointer;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{padding:7px 14px;border-radius:24px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
+.chip.on{background:var(--gold-l);border-color:var(--gold);color:var(--ink2);font-weight:600;}
+.erow{display:grid;gap:7px;align-items:center;margin-bottom:7px;}
+.erow.act{grid-template-columns:80px 1fr 28px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line);}
+.erow.act:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.erow.meal{grid-template-columns:110px 1fr 28px;}
+.del{width:28px;height:28px;border-radius:7px;background:transparent;border:1px solid var(--line);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.del:hover{border-color:var(--red);color:var(--red);background:var(--red-l);}
+.addr{width:100%;padding:9px;background:transparent;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-family:'Outfit',sans-serif;font-size:11px;cursor:pointer;transition:all .2s;margin-top:4px;}
+.addr:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-l);}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 
-/* CTA */
-.cta-wrap{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;padding:12px 16px 28px;background:linear-gradient(transparent,var(--bg) 30%);z-index:100;}
-.cta{width:100%;padding:17px;border-radius:var(--radius);border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--shadow-lg);}
-.cta:hover{background:var(--ink2);}
-.cta:disabled{opacity:0.4;cursor:not-allowed;}
-.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:rot 0.7s linear infinite;display:none;}
+/* ── WORKOUT CARD ── */
+.workout-card{background:var(--white);border-radius:var(--radius);padding:20px;margin:14px 14px 0;box-shadow:var(--sh);border:1px solid var(--line);border-left:3px solid var(--gold);animation:up .35s ease;display:none;transition:background .3s,border-color .3s;}
+.workout-card.show{display:block;}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.wtype{padding:10px 8px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;font-family:'Outfit',sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.wtype span{font-size:18px;}
+.wtype.on{background:var(--gold-l);border-color:var(--gold);color:var(--ink2);font-weight:600;}
+.ichip{padding:7px 13px;border-radius:20px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
+.ichip.on{background:var(--gold-l);border-color:var(--gold);color:var(--ink2);font-weight:600;}
+
+/* ── CTA ── */
+.ctawrap{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;padding:10px 14px 24px;background:linear-gradient(transparent,var(--bg) 30%);z-index:100;}
+.cta{width:100%;padding:15px;border-radius:var(--radius);border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:var(--shl);}
+.cta:hover{opacity:.9;}
+.cta:disabled{opacity:.4;cursor:not-allowed;}
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;display:none;}
 .cta.loading .spin{display:block;}
 .cta.loading .btxt{display:none;}
 @keyframes rot{to{transform:rotate(360deg)}}
 
-/* NAV */
-.nav{display:flex;position:fixed;bottom:74px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:388px;background:var(--white);border-radius:20px;padding:6px;box-shadow:var(--shadow-lg);border:1px solid var(--line);z-index:99;transition:background 0.3s,border-color 0.3s;}
-.nb{flex:1;padding:8px 4px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:9px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;border-radius:14px;transition:all 0.25s;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.nb span{font-size:16px;}
-.nb.on{background:var(--gold-light);color:var(--gold);}
-.nb.on[data-t="meals"]{background:var(--green-light);color:var(--green);}
-.nb.on[data-t="analysis"]{background:var(--blue-light);color:var(--blue);}
-.nb.on[data-t="history"]{background:var(--red-light);color:var(--red);}
-.nb.on[data-t="progress"]{background:#EDE4D8;color:#8B6914;}
+/* ── NAV ── */
+.nav{display:flex;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:var(--white);border-radius:18px;padding:5px;box-shadow:var(--shl);border:1px solid var(--line);z-index:99;transition:background .3s,border-color .3s;}
+.nb{flex:1;padding:7px 3px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:8px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;border-radius:13px;transition:all .25s;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.nb span{font-size:14px;}
+.nb.on{background:var(--gold-l);color:var(--gold);}
+.nb.on[data-t=meals]{background:var(--green-l);color:var(--green);}
+.nb.on[data-t=analysis]{background:var(--blue-l);color:var(--blue);}
+.nb.on[data-t=history]{background:var(--red-l);color:var(--red);}
+.nb.on[data-t=progress]{background:#EDE4D8;color:#8B6914;}
 
-/* RESULTS */
-.scores{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 16px 0;}
-.stile{background:var(--white);border-radius:var(--radius);padding:20px 16px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--line);}
-.snum{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:600;line-height:1;}
-.slbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
-.tip{margin:12px 16px 0;padding:16px 18px;background:var(--ink);border-radius:var(--radius);color:rgba(255,255,255,0.9);font-size:13px;line-height:1.6;font-weight:300;}
-.tip strong{color:var(--gold);font-weight:600;font-size:10px;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:6px;}
-.rgroup{margin:0 16px;}
-.rhead{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:600;padding:20px 0 10px;display:flex;align-items:center;gap:8px;}
+/* ── RESULTS ── */
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 14px 0;}
+.stile{background:var(--white);border-radius:var(--radius);padding:16px 12px;text-align:center;box-shadow:var(--sh);border:1px solid var(--line);}
+.snum{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;line-height:1;}
+.slbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.tip{margin:10px 14px 0;padding:14px 16px;background:var(--ink);border-radius:var(--radius);color:rgba(255,255,255,.9);font-size:12px;line-height:1.6;font-weight:300;}
+.tip strong{color:var(--gold);font-weight:600;font-size:9px;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.rgroup{margin:0 14px;}
+.rhead{font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600;padding:14px 0 8px;display:flex;align-items:center;gap:6px;}
 .rhead.pos{color:var(--green);}
 .rhead.neg{color:var(--red);}
 .rhead.sug{color:var(--blue);}
-.rhead.meal-sug{color:#8B6914;}
+.rhead.msug{color:#8B6914;}
 .rhead::after{content:'';flex:1;height:1px;background:var(--line);}
-.ri{background:var(--white);border-radius:12px;padding:13px 16px;margin-bottom:8px;font-size:13px;line-height:1.55;color:var(--ink2);font-weight:300;border:1px solid var(--line);border-left-width:3px;}
+.ri{background:var(--white);border-radius:10px;padding:11px 14px;margin-bottom:7px;font-size:12px;line-height:1.55;color:var(--ink2);font-weight:300;border:1px solid var(--line);border-left-width:3px;}
 .ri.pos{border-left-color:var(--green);}
 .ri.neg{border-left-color:var(--red);}
 .ri.sug{border-left-color:var(--blue);}
-.ri.meal{border-left-color:#C4A882;}
-.mrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 16px;}
-.mbox{background:var(--white);border-radius:12px;padding:14px 8px;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow);}
-.mv{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--gold);line-height:1;}
-.mn{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:3px;}
-.bsec{margin:0 16px;}
-.brow{margin-bottom:14px;}
-.btop{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.ri.meal{border-left-color:var(--gold);}
+.mrow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:0 14px;}
+.mbox{background:var(--white);border-radius:10px;padding:12px 6px;text-align:center;border:1px solid var(--line);box-shadow:var(--sh);}
+.mv{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--gold);line-height:1;}
+.mn{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.bsec{margin:0 14px;}
+.brow{margin-bottom:12px;}
+.btop{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;}
 .bname{color:var(--ink2);}
-.bpct{color:var(--muted);font-size:11px;}
+.bpct{color:var(--muted);font-size:10px;}
 .bbg{height:4px;background:var(--line);border-radius:4px;overflow:hidden;}
 .bfill{height:100%;border-radius:4px;}
-.empty{text-align:center;padding:60px 32px;color:var(--muted);}
-.empty .ei{font-size:40px;margin-bottom:12px;opacity:0.4;}
-.empty p{font-size:14px;line-height:1.7;font-weight:300;}
-
-/* PDF BUTTON */
-.pdf-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 32px);margin:12px 16px 0;padding:13px;border-radius:12px;border:1px solid var(--gold);background:var(--gold-light);color:var(--ink2);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.pdf-btn:hover{background:var(--gold);color:var(--white);}
-
-/* HISTORY */
-.hist-card{background:var(--white);border-radius:14px;padding:16px;margin:10px 16px 0;border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;}
-.hist-card:hover{box-shadow:var(--shadow-lg);}
-.hist-date{font-size:11px;color:var(--muted);margin-bottom:6px;}
-.hist-scores{display:flex;gap:12px;align-items:center;}
-.hist-score{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;}
-.hist-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
-.hist-tip{font-size:12px;color:var(--ink2);font-weight:300;margin-top:8px;line-height:1.4;}
-
-/* PROGRESS */
-.prog-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 16px;}
-.prog-day{text-align:center;}
-.prog-day-lbl{font-size:9px;color:var(--muted);margin-bottom:4px;}
-.prog-bar-wrap{height:60px;background:var(--line);border-radius:6px;display:flex;align-items:flex-end;overflow:hidden;}
-.prog-bar{width:100%;border-radius:6px;transition:height 1s ease;}
-.prog-val{font-size:9px;color:var(--muted);margin-top:4px;}
-
-/* LOADING */
-.lstep{font-size:12px;color:var(--muted);padding:10px 14px;border-radius:10px;background:var(--white);border:1px solid var(--line);text-align:left;transition:all 0.4s ease;font-weight:300;}
-.lstep.active{color:var(--ink2);border-color:var(--gold);background:var(--gold-light);font-weight:500;}
-.lstep.done{color:var(--green);border-color:var(--green);background:var(--green-light);}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-.supp-card{background:var(--white);border-radius:10px;padding:13px 16px;margin-bottom:8px;border:1px solid var(--line);border-left:3px solid #8B6914;display:flex;flex-direction:column;gap:4px;}
+.empty{text-align:center;padding:48px 24px;color:var(--muted);}
+.empty .ei{font-size:36px;margin-bottom:10px;opacity:.4;}
+.empty p{font-size:13px;line-height:1.7;font-weight:300;}
+.supp-card{background:var(--white);border-radius:10px;padding:12px 14px;margin-bottom:7px;border:1px solid var(--line);border-left:3px solid #8B6914;}
 .supp-name{font-size:12px;font-weight:600;color:var(--ink2);}
-.supp-bar-wrap{display:flex;align-items:center;gap:8px;margin:2px 0;}
+.supp-bar-wrap{display:flex;align-items:center;gap:8px;margin:3px 0;}
 .supp-bar-bg{flex:1;height:4px;background:var(--line);border-radius:4px;overflow:hidden;}
 .supp-bar-fill{height:100%;border-radius:4px;}
-.supp-pct{font-size:10px;color:var(--muted);min-width:30px;}
+.supp-pct{font-size:10px;color:var(--muted);min-width:28px;}
 .supp-text{font-size:11px;color:var(--ink2);font-weight:300;line-height:1.5;}
 .supp-dosage{font-size:10px;color:#8B6914;font-weight:500;margin-top:2px;}
-/* WORKOUT CARD */
-.workout-card{background:var(--white);border-radius:var(--radius);padding:22px;margin:16px 16px 0;box-shadow:var(--shadow);border:1px solid var(--line);border-left:3px solid var(--gold);animation:up 0.35s ease;display:none;}
-.workout-card.show{display:block;}
-.workout-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
-.wtype{padding:12px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;text-align:center;font-family:'Outfit',sans-serif;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.wtype span{font-size:20px;}
-.wtype.on{background:var(--gold-light);border-color:var(--gold);color:var(--ink2);font-weight:600;}
-.workout-intensity{margin-top:14px;}
-.intensity-chips{display:flex;gap:8px;margin-top:8px;}
-.ichip{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'Outfit',sans-serif;}
-.ichip.on{background:var(--gold-light);border-color:var(--gold);color:var(--ink2);font-weight:600;}
+
+/* ── SAVE BUTTONS ── */
+.save-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 14px 0;}
+.save-btn{padding:13px;border-radius:12px;border:none;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.save-btn.primary{background:var(--ink);color:var(--white);}
+.save-btn.secondary{background:var(--gold-l);border:1px solid var(--gold);color:var(--ink2);}
+.save-btn:hover{opacity:.85;}
+.pdf-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 28px);margin:10px 14px 0;padding:12px;border-radius:11px;border:1px solid var(--gold);background:var(--gold-l);color:var(--ink2);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.pdf-btn:hover{background:var(--gold);color:var(--white);}
+
+/* ── PT MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,24,20,.65);z-index:400;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--white);border-radius:20px 20px 0 0;padding:28px 20px 36px;width:100%;max-width:480px;animation:su .3s ease;}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:18px;font-weight:300;}
+.mbtn{width:100%;padding:13px;border-radius:10px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;}
+.mskip{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;margin-top:8px;}
+
+/* ── HISTORY / PROGRESS ── */
+.search-bar{display:flex;align-items:center;gap:10px;margin:14px 14px 0;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:var(--sh);}
+.search-bar input{flex:1;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ink);outline:none;}
+.search-icon{color:var(--muted);font-size:14px;}
+.hcard{background:var(--white);border-radius:12px;padding:14px;margin:10px 14px 0;border:1px solid var(--line);box-shadow:var(--sh);cursor:pointer;transition:all .2s;}
+.hcard:hover{box-shadow:var(--shl);}
+.hcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.hcard-name{font-size:13px;font-weight:600;color:var(--ink);}
+.hcard-date{font-size:10px;color:var(--muted);}
+.hcard-scores{display:flex;gap:10px;margin-bottom:6px;}
+.hscore{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;}
+.hlbl{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.hcard-tip{font-size:11px;color:var(--ink2);font-weight:300;line-height:1.4;}
+.trainer-card{background:var(--white);border-radius:12px;padding:16px;margin:10px 14px 0;border:1px solid var(--line);box-shadow:var(--sh);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px;}
+.trainer-card:hover{box-shadow:var(--shl);}
+.trainer-avatar{width:44px;height:44px;border-radius:12px;background:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--gold);font-family:'Cormorant Garamond',serif;flex-shrink:0;}
+.trainer-name{font-size:14px;font-weight:600;color:var(--ink);}
+.trainer-count{font-size:11px;color:var(--muted);margin-top:2px;}
+.back-btn{display:flex;align-items:center;gap:6px;margin:14px 14px 0;font-size:12px;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;background:none;border:none;padding:0;}
+.back-btn:hover{color:var(--gold);}
+
+/* ── LOADING STEPS ── */
+.lstep{font-size:11px;color:var(--muted);padding:9px 13px;border-radius:9px;background:var(--white);border:1px solid var(--line);text-align:left;transition:all .4s ease;font-weight:300;}
+.lstep.active{color:var(--ink2);border-color:var(--gold);background:var(--gold-l);font-weight:500;}
+.lstep.done{color:var(--green);border-color:var(--green);background:var(--green-l);}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* ── DARK MODE ── */
+body.dark .tip{background:#2A2218;color:#F0EDE8;}
+body.dark .card,.dark .workout-card{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .header{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .stile{background:#242424;border-color:#333;}
+body.dark .ri{background:#242424;border-color:#333;color:#D4D0CA;}
+body.dark .mbox{background:#242424;border-color:#333;}
+body.dark .supp-card{background:#242424;border-color:#333;}
+body.dark .hcard,.dark .trainer-card{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .chip{background:#0F0F0F;border-color:#333;color:#7A7570;}
+body.dark .chip.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark .wtype{background:#0F0F0F;border-color:#333;color:#7A7570;}
+body.dark .wtype.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark .ichip{background:#0F0F0F;border-color:#333;color:#7A7570;}
+body.dark .ichip.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark input[type=text],body.dark input[type=number],body.dark input[type=time],body.dark input[type=email],body.dark textarea,body.dark select{background:#0F0F0F;border-color:#333;color:#F0EDE8;}
+body.dark input:focus,body.dark textarea:focus,body.dark select:focus{border-color:var(--gold);background:#1A1A1A;}
+body.dark .nav{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .nb{color:#7A7570;}
+body.dark .search-bar{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .search-bar input{color:#F0EDE8;}
+body.dark .modal{background:#1C1C1E;}
+body.dark .ai{background:#0F0F0F;border-color:#333;color:#F0EDE8;}
+body.dark .save-btn.secondary{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark .lstep{background:#242424;border-color:#333;color:#7A7570;}
+body.dark .lstep.active{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark .lstep.done{background:#0F2018;border-color:var(--green);color:var(--green);}
+body.dark .cta{background:var(--gold);color:#1A1814;}
+body.dark .pdf-btn{background:#2A2218;color:#F0EDE8;}
+body.dark .trainer-avatar{background:#2A2218;color:var(--gold);}
 ::-webkit-scrollbar{width:0;}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- AUTH MODAL -->
-<div class="modal-overlay hidden" id="auth-modal">
+<!-- ── GYM AUTH SCREEN ── -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo"><div class="default-logo">🏋️</div></div>
+    <div class="auth-title"><em>Daily Wellness</em></div>
+    <div class="auth-sub" id="auth-screen-sub">Gym Management Platform</div>
+    <div class="auth-tabs">
+      <button class="auth-tab on" onclick="switchAuthMode('login')">Login</button>
+      <button class="auth-tab" onclick="switchAuthMode('register')">Register Gym</button>
+    </div>
+    <!-- LOGIN FIELDS -->
+    <div id="login-fields">
+      <div class="af"><div class="al">Email</div><input class="ai" type="email" id="login-email" placeholder="gym@email.com"></div>
+      <div class="af"><div class="al">Password</div><input class="ai" type="password" id="login-pass" placeholder="••••••••"></div>
+    </div>
+    <!-- REGISTER FIELDS -->
+    <div id="register-fields" style="display:none;">
+      <div class="af"><div class="al">Gym Name</div><input class="ai" type="text" id="reg-gymname" placeholder="e.g. FitZone Gym"></div>
+      <div class="af"><div class="al">City</div><input class="ai" type="text" id="reg-city" placeholder="e.g. Mumbai"></div>
+      <div class="af"><div class="al">Owner Name</div><input class="ai" type="text" id="reg-owner" placeholder="e.g. Rajesh Kumar"></div>
+      <div class="af"><div class="al">Phone</div><input class="ai" type="text" id="reg-phone" placeholder="+91 9999999999"></div>
+      <div class="af"><div class="al">Email</div><input class="ai" type="email" id="reg-email" placeholder="gym@email.com"></div>
+      <div class="af"><div class="al">Password</div><input class="ai" type="password" id="reg-pass" placeholder="Min 6 characters"></div>
+      <div class="af">
+        <div class="al">Gym Logo</div>
+        <div class="logo-upload-wrap" onclick="document.getElementById('logo-file').click()">
+          <img class="logo-preview" id="logo-preview" src="">
+          <div class="logo-upload-hint" id="logo-hint"><span>🖼️</span>Tap to upload your gym logo<br><small style="color:var(--muted);font-size:10px;">JPG, PNG · Max 500KB</small></div>
+        </div>
+        <input type="file" id="logo-file" accept="image/*" style="display:none;" onchange="previewLogo(this)">
+      </div>
+    </div>
+    <div class="aerr" id="auth-err"></div>
+    <button class="abtn" id="auth-submit-btn" onclick="handleAuthSubmit()">Login</button>
+    <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--muted);">
+      <span id="auth-switch-text">Don't have an account?</span>
+      <button onclick="switchAuthMode(document.querySelector('.auth-tab.on').textContent==='Login'?'register':'login')" style="border:none;background:none;color:var(--gold);font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;" id="auth-switch-btn">Register your Gym</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PENDING APPROVAL SCREEN ── -->
+<div class="auth-screen hidden" id="pending-screen">
+  <div class="auth-box">
+    <div class="pending-screen">
+      <div class="pending-icon">⏳</div>
+      <div class="pending-title">Account Under Review</div>
+      <div class="pending-sub">Your gym registration has been received.<br>We'll approve your account within 24 hours.<br>You'll be able to login once approved.</div>
+      <button class="abtn" onclick="handleLogout()" style="max-width:200px;margin:0 auto;">Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PT SAVE MODAL ── -->
+<div class="modal-overlay hidden" id="pt-modal">
   <div class="modal">
-    <div class="modal-title">Welcome to <em>Daily Wellness</em></div>
-    <p class="modal-sub">Sign in to save your analysis & track weekly progress</p>
-    <div class="modal-tabs">
-      <button class="modal-tab on" onclick="switchAuthTab('signin')">Sign In</button>
-      <button class="modal-tab" onclick="switchAuthTab('signup')">Sign Up</button>
-    </div>
-    <div class="m-field"><div class="m-lbl">Email or Phone</div><input class="m-input" type="text" id="auth-id" placeholder="you@email.com or +91 9999999999"></div>
-    <div class="m-field" id="name-field" style="display:none;"><div class="m-lbl">Full Name</div><input class="m-input" type="text" id="auth-name" placeholder="Your name"></div>
-    <div class="m-field"><div class="m-lbl">Password</div><input class="m-input" type="password" id="auth-pass" placeholder="••••••••"></div>
-    <div class="m-err" id="auth-err"></div>
-    <button class="m-btn" onclick="handleAuth()">Continue</button>
-    <button class="m-skip" onclick="skipAuth()">Skip for now</button>
+    <div class="modal-title">Save under Personal Trainer</div>
+    <div class="modal-sub">Enter the trainer's name for this client's analysis</div>
+    <div class="af"><div class="al">Trainer Name</div><input class="ai" type="text" id="pt-trainer-name" placeholder="e.g. Shivam Sharma"></div>
+    <div class="aerr" id="pt-err"></div>
+    <button class="mbtn" onclick="confirmSavePT()">Save under PT</button>
+    <button class="mskip" onclick="closePTModal()">Cancel</button>
   </div>
 </div>
 
-<!-- SCROLL POPUP -->
-<div class="scroll-popup" id="scroll-popup">
-  <button class="sp-x" onclick="dismissPop()">×</button>
-  <div class="sp-icon">💾</div>
-  <div class="sp-body">
-    <div class="sp-title">Save this analysis?</div>
-    <div class="sp-sub">Sign in free to save & track weekly progress.</div>
-    <div class="sp-acts">
-      <button class="sp-yes" onclick="popSignIn()">Sign In / Sign Up</button>
-      <button class="sp-no" onclick="dismissPop()">Not now</button>
-    </div>
-  </div>
-</div>
+<!-- ── MAIN APP ── -->
+<div class="app" id="main-app" style="display:none;">
 
-<!-- HEADER -->
 <div class="header">
-  <div class="eyebrow">Daily Wellness</div>
-  <h1>Know your<br><em>day better</em></h1>
-  <p class="header-sub">Track routine & diet · Get personalized insights</p>
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="eyebrow">Daily Wellness</div>
+      <h1>Know your<br><em>day better</em></h1>
+      <p class="header-sub">Track routine & diet · Get personalized insights</p>
+    </div>
+    <div class="gym-logo-wrap" id="gym-logo-wrap">
+      <div class="gym-logo-default" id="gym-logo-default">🏋️</div>
+      <img id="gym-logo-img" src="" style="display:none;width:100%;height:100%;object-fit:cover;">
+    </div>
+  </div>
   <div class="status-bar">
-    <div class="user-info" id="user-info">Hello, <span id="user-name-display"></span></div>
+    <div class="gym-name-badge" id="gym-name-badge">Gym</div>
     <div class="hdr-btns">
       <div class="theme-wrap">
         <span class="theme-icon" id="theme-icon">☀️</span>
-        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle dark mode"></button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()"></button>
       </div>
-      <button class="reset-btn" id="reset-btn" onclick="resetApp()">↺ Reset</button>
-      <button class="signin-hdr-btn" id="signin-hdr-btn" onclick="showAuthModal(false)">Sign In</button>
-      <button class="signout-btn" id="signout-btn" onclick="signOut()">Sign Out</button>
+      <button class="reset-btn" onclick="resetApp()">↺ Reset</button>
+      <button class="signout-hdr-btn" onclick="handleLogout()">Sign Out</button>
     </div>
   </div>
 </div>
 
 <!-- ROUTINE -->
 <div class="section active" id="sec-routine">
-  <div class="sec-head"><div class="sec-title">Your Routine</div><div class="sec-desc">About you, sleep, activities &amp; mood</div></div>
+  <div class="sec-head"><div class="sec-title">Client Routine</div><div class="sec-desc">About the client, sleep, activities & mood</div></div>
   <div class="card">
-    <div class="card-lbl">About You</div>
-    <div class="field"><div class="f-lbl">Your Name</div><input type="text" id="user-name-input" placeholder="e.g. Arjun"></div>
+    <div class="clbl">About Client</div>
+    <div class="field"><div class="flbl">Client Name</div><input type="text" id="user-name-input" placeholder="e.g. Arjun Sharma"></div>
     <div class="two">
-      <div class="field"><div class="f-lbl">Age</div><input type="number" id="age" placeholder="25" min="10" max="100"></div>
-      <div class="field"><div class="f-lbl">Weight (kg)</div><input type="number" id="weight" placeholder="70"></div>
-      <div class="field"><div class="f-lbl">Height (cm)</div><input type="number" id="height" placeholder="170"></div>
-      <div class="field"><div class="f-lbl">Gender</div><select id="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
+      <div class="field"><div class="flbl">Age</div><input type="number" id="age" placeholder="25" min="10" max="100"></div>
+      <div class="field"><div class="flbl">Weight (kg)</div><input type="number" id="weight" placeholder="70"></div>
+      <div class="field"><div class="flbl">Height (cm)</div><input type="number" id="height" placeholder="170"></div>
+      <div class="field"><div class="flbl">Gender</div><select id="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
     </div>
   </div>
   <div class="card">
-    <div class="card-lbl">Sleep</div>
-    <div class="sl-top"><span class="sl-name">Hours of sleep</span><span class="sl-num" id="sv">7h</span></div>
+    <div class="clbl">Sleep</div>
+    <div class="sltop"><span class="slname">Hours of sleep</span><span class="slnum" id="sv">7h</span></div>
     <input type="range" min="3" max="12" step="0.5" value="7" oninput="document.getElementById('sv').textContent=this.value+'h'">
-    <div class="field" style="margin-top:14px;"><div class="f-lbl">Wake-up time</div><input type="time" id="wake" value="07:00"></div>
+    <div class="field" style="margin-top:12px;"><div class="flbl">Wake-up time</div><input type="time" id="wake" value="07:00"></div>
   </div>
   <div class="card">
-    <div class="card-lbl">Activities</div>
+    <div class="clbl">Activities</div>
     <div id="act-list">
       <div class="erow act">
-        <input type="time" value="07:30" style="padding:10px;font-size:13px;">
-        <input type="text" placeholder="e.g. Morning jog" oninput="checkWorkoutActivity()">
+        <input type="time" value="07:30" style="padding:9px;font-size:12px;">
+        <input type="text" placeholder="e.g. Morning jog" oninput="checkWorkout()">
         <button class="del" onclick="removeRow(this)">×</button>
-        <div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>
-      </div>
-      <div class="erow act">
-        <input type="time" value="09:00" style="padding:10px;font-size:13px;">
-        <input type="text" placeholder="e.g. Work / Study" oninput="checkWorkoutActivity()">
-        <button class="del" onclick="removeRow(this)">×</button>
-        <div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 2 hours" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>
+        <div style="grid-column:1/-1;margin-top:4px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-dur" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;flex:1;"></div>
       </div>
     </div>
-    <button class="add-r" onclick="addAct()">+ Add activity</button>
+    <button class="addr" onclick="addAct()">+ Add activity</button>
   </div>
-  <!-- WORKOUT DETAILS CARD — shown when workout activity detected -->
+
+  <!-- WORKOUT DETAILS CARD -->
   <div class="workout-card" id="workout-card">
-    <div class="card-lbl">Workout Details</div>
-    <div class="f-lbl" style="margin-bottom:4px;">Type of Workout</div>
+    <div class="clbl">Workout Details</div>
+    <div class="flbl" style="margin-bottom:4px;">Type of Workout</div>
     <div style="font-size:10px;color:var(--muted);margin-bottom:10px;font-weight:300;">Tap to select one or more</div>
-    <div class="workout-type-grid" id="workout-type-grid">
-      <div class="wtype" onclick="pickWorkout(this,'Weight Lifting')"><span>🏋️</span>Weight Lifting</div>
-      <div class="wtype" onclick="pickWorkout(this,'Cardio')"><span>🏃</span>Cardio</div>
-      <div class="wtype" onclick="pickWorkout(this,'Functional Training')"><span>⚡</span>Functional Training</div>
-      <div class="wtype" onclick="pickWorkout(this,'CrossFit')"><span>🔥</span>CrossFit</div>
-      <div class="wtype" onclick="pickWorkout(this,'Boxing')"><span>🥊</span>Boxing</div>
-      <div class="wtype" onclick="pickWorkout(this,'MMA')"><span>🥋</span>MMA</div>
-      <div class="wtype" onclick="pickWorkout(this,'Yoga')"><span>🧘</span>Yoga</div>
-      <div class="wtype" onclick="pickWorkout(this,'Swimming')"><span>🏊</span>Swimming</div>
-      <div class="wtype" onclick="pickWorkout(this,'Cycling')"><span>🚴</span>Cycling</div>
-      <div class="wtype" onclick="pickWorkout(this,'Sports')"><span>⚽</span>Sports</div>
+    <div class="wgrid" id="workout-type-grid">
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>🏋️</span>Weight Lifting</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>🏃</span>Cardio</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>⚡</span>Functional</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>🔥</span>CrossFit</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>🥊</span>Boxing</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>🥋</span>MMA</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>🧘</span>Yoga</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>🏊</span>Swimming</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>🚴</span>Cycling</div>
+      <div class="wtype" onclick="this.classList.toggle('on')"><span>⚽</span>Sports</div>
     </div>
-    <div class="workout-intensity">
-      <div class="f-lbl">Intensity</div>
-      <div class="intensity-chips">
+    <div style="margin-top:14px;">
+      <div class="flbl">Intensity</div>
+      <div style="display:flex;gap:8px;margin-top:7px;">
         <div class="ichip" onclick="pickIntensity(this)">🟢 Light</div>
         <div class="ichip" onclick="pickIntensity(this)">🟡 Moderate</div>
         <div class="ichip" onclick="pickIntensity(this)">🔴 Intense</div>
       </div>
     </div>
-    <div class="field" style="margin-top:14px;">
-      <div class="f-lbl">Workout Goal</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:10px;font-weight:300;">Tap to select one or more</div>
-      <div class="workout-type-grid" id="workout-goals-grid">
-        <div class="wtype" onclick="pickGoal(this,'Weight Loss')"><span>⚖️</span>Weight Loss</div>
-        <div class="wtype" onclick="pickGoal(this,'Muscle Gain')"><span>💪</span>Muscle Gain</div>
-        <div class="wtype" onclick="pickGoal(this,'Endurance')"><span>🏅</span>Endurance</div>
-        <div class="wtype" onclick="pickGoal(this,'Strength')"><span>🔩</span>Strength</div>
-        <div class="wtype" onclick="pickGoal(this,'Flexibility')"><span>🤸</span>Flexibility</div>
-        <div class="wtype" onclick="pickGoal(this,'General Fitness')"><span>✨</span>General Fitness</div>
-        <div class="wtype" onclick="pickGoal(this,'Sports Performance')"><span>🏆</span>Sports Performance</div>
-        <div class="wtype" onclick="pickGoal(this,'Fat Burn')"><span>🔥</span>Fat Burn</div>
-        <div class="wtype" onclick="pickGoal(this,'Stress Relief')"><span>🧠</span>Stress Relief</div>
-        <div class="wtype" onclick="pickGoal(this,'Rehabilitation')"><span>🩺</span>Rehabilitation</div>
+    <div style="margin-top:14px;">
+      <div class="flbl">Workout Goals</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:300;">Tap to select one or more</div>
+      <div class="wgrid" id="workout-goals-grid">
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>⚖️</span>Weight Loss</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>💪</span>Muscle Gain</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>🏅</span>Endurance</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>🔩</span>Strength</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>🤸</span>Flexibility</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>✨</span>General Fitness</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>🏆</span>Sports Perf.</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>🔥</span>Fat Burn</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>🧠</span>Stress Relief</div>
+        <div class="wtype" onclick="this.classList.toggle('on')"><span>🩺</span>Rehab</div>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-lbl">Mood</div>
+    <div class="clbl">Mood</div>
     <div class="chips" id="mood">
       <div class="chip" onclick="pickMood(this)">😄 Great</div>
       <div class="chip" onclick="pickMood(this)">😊 Good</div>
@@ -511,42 +479,42 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
     </div>
   </div>
   <div class="card">
-    <div class="card-lbl">Notes</div>
-    <textarea id="notes" placeholder="Anything noteworthy about today…"></textarea>
+    <div class="clbl">Notes</div>
+    <textarea id="notes" placeholder="Anything noteworthy about this client…"></textarea>
   </div>
 </div>
 
 <!-- MEALS -->
 <div class="section" id="sec-meals">
-  <div class="sec-head"><div class="sec-title">Today's Meals</div><div class="sec-desc">Log your food &amp; water intake</div></div>
+  <div class="sec-head"><div class="sec-title">Today's Meals</div><div class="sec-desc">Log food & water intake</div></div>
   <div class="card">
-    <div class="card-lbl">Food Log</div>
+    <div class="clbl">Food Log</div>
     <div id="meal-list"></div>
   </div>
   <div class="card">
-    <div class="card-lbl">Hydration</div>
-    <div class="sl-top"><span class="sl-name">Water Intake</span><span class="sl-num" id="wv" style="color:var(--blue);">2L</span></div>
+    <div class="clbl">Hydration</div>
+    <div class="sltop"><span class="slname">Water Intake</span><span class="slnum" id="wv" style="color:var(--blue);">2L</span></div>
     <input type="range" min="1" max="10" step="0.5" value="2" oninput="document.getElementById('wv').textContent=this.value+'L'">
   </div>
 </div>
 
 <!-- ANALYSIS -->
 <div class="section" id="sec-analysis">
-  <div id="empty-state" class="empty"><div class="ei">◎</div><p>Fill in your routine & meals,<br>then tap <strong>Analyse My Day</strong>.</p></div>
-  <div id="loading-state" style="display:none;padding:48px 20px;text-align:center;">
-    <div style="font-size:40px;margin-bottom:18px;animation:pulse 1.5s ease-in-out infinite;">🔬</div>
-    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--ink);margin-bottom:6px;">Analysing your day…</div>
-    <div style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:24px;" id="loading-msg">Reading your routine & diet data</div>
-    <div style="background:var(--line);border-radius:99px;height:5px;overflow:hidden;margin-bottom:8px;">
-      <div id="progress-bar" style="height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--green));transition:width .6s ease;"></div>
+  <div id="empty-state" class="empty"><div class="ei">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong>.</p></div>
+  <div id="loading-state" style="display:none;padding:40px 16px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:16px;animation:pulse 1.5s ease-in-out infinite;">🔬</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--ink);margin-bottom:4px;">Analysing…</div>
+    <div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:20px;" id="lmsg">Reading data…</div>
+    <div style="background:var(--line);border-radius:99px;height:4px;overflow:hidden;margin-bottom:6px;">
+      <div id="pbar" style="height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--green));transition:width .6s ease;"></div>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:28px;" id="progress-pct">0%</div>
-    <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
-      <div class="lstep" id="step-1">🌅 Checking your daily routine</div>
-      <div class="lstep" id="step-2">🥗 Analysing your meals & nutrition</div>
-      <div class="lstep" id="step-3">🧮 Calculating macro & micro nutrients</div>
-      <div class="lstep" id="step-4">🍛 Preparing Indian meal suggestions</div>
-      <div class="lstep" id="step-5">✨ Generating your wellness report</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:20px;" id="ppct">0%</div>
+    <div style="display:flex;flex-direction:column;gap:7px;text-align:left;">
+      <div class="lstep" id="s1">🌅 Checking daily routine</div>
+      <div class="lstep" id="s2">🥗 Analysing meals & nutrition</div>
+      <div class="lstep" id="s3">🧮 Calculating macros & micros</div>
+      <div class="lstep" id="s4">🍛 Preparing meal suggestions</div>
+      <div class="lstep" id="s5">✨ Generating wellness report</div>
     </div>
   </div>
   <div id="results" style="display:none;padding-bottom:16px;"></div>
@@ -554,26 +522,48 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 
 <!-- HISTORY -->
 <div class="section" id="sec-history">
-  <div class="sec-head"><div class="sec-title">Past Analyses</div><div class="sec-desc">Your saved health reports</div></div>
+  <div class="sec-head"><div class="sec-title">History</div><div class="sec-desc">All saved client analyses</div></div>
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="history-search" placeholder="Search by client name…" oninput="filterHistory()">
+  </div>
   <div id="history-list" style="padding-bottom:16px;"></div>
 </div>
 
-<!-- PROGRESS -->
+<!-- PROGRESS (PT) -->
 <div class="section" id="sec-progress">
-  <div class="sec-head"><div class="sec-title">Weekly Progress</div><div class="sec-desc">Your wellness trend this week</div></div>
-  <div id="progress-content" style="padding-bottom:16px;"></div>
+  <div id="progress-trainers-view">
+    <div class="sec-head"><div class="sec-title">PT Progress</div><div class="sec-desc">Personal training client analyses</div></div>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="trainer-search" placeholder="Search trainer name…" oninput="filterTrainers()">
+    </div>
+    <div id="trainers-list" style="padding-bottom:16px;"></div>
+  </div>
+  <div id="progress-clients-view" style="display:none;">
+    <div class="sec-head">
+      <button class="back-btn" onclick="showTrainersView()">← Back to Trainers</button>
+      <div class="sec-title" id="progress-trainer-title">Trainer</div>
+      <div class="sec-desc">Client analyses</div>
+    </div>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="client-search" placeholder="Search by client name…" oninput="filterClients()">
+    </div>
+    <div id="clients-list" style="padding-bottom:16px;"></div>
+  </div>
 </div>
 
 </div><!-- end .app -->
 
-<nav class="nav">
+<nav class="nav" id="main-nav" style="display:none;">
   <button class="nb on" data-t="routine" onclick="go('routine')"><span>🌅</span>Routine</button>
   <button class="nb" data-t="meals" onclick="go('meals')"><span>🥗</span>Meals</button>
   <button class="nb" data-t="analysis" onclick="go('analysis')"><span>✦</span>Analysis</button>
   <button class="nb" data-t="history" onclick="go('history')"><span>📋</span>History</button>
-  <button class="nb" data-t="progress" onclick="go('progress')"><span>📈</span>Progress</button>
+  <button class="nb" data-t="progress" onclick="go('progress')"><span>📈</span>PT</button>
 </nav>
-<div class="cta-wrap">
+<div class="ctawrap" id="main-cta" style="display:none;">
   <button class="cta" id="cta" onclick="ctaClick()">
     <div class="spin"></div>
     <span class="btxt" id="cta-txt">Next →</span>
@@ -581,338 +571,334 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 </div>
 
 <script>
-// ── THEME ──
-function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark');
-  document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
-  localStorage.setItem('dw_theme', isDark ? 'dark' : 'light');
-}
-function initTheme() {
-  const saved = localStorage.getItem('dw_theme');
-  if (saved === 'dark') {
-    document.body.classList.add('dark');
-    document.getElementById('theme-icon').textContent = '🌙';
-  }
-}
-
-// ── STATE — no free use limit ──
-let currentUser = null;
-let authMode = 'signin';
+let gymData = null;
 let lastAnalysis = null;
-let popDismissed = false;
-let popShown = false;
-let store = { users: {} };
+let allHistoryData = [];
+let allPTData = [];
+let currentTrainer = '';
 
-// ── INIT ──
-window.onload = () => {
-  initTheme();
-  initMealList();
-  window.addEventListener('scroll', handleScroll, { passive: true });
-};
-
-function initMealList() {
-  const ml = document.getElementById('meal-list');
-  ml.innerHTML = '';
-  ml.appendChild(createMealRow('Breakfast'));
-  ml.appendChild(createMealRow('Lunch'));
+// ── THEME ──
+function toggleTheme(){
+  const d = document.body.classList.toggle('dark');
+  document.getElementById('theme-icon').textContent = d ? '🌙' : '☀️';
+  localStorage.setItem('dw_theme', d ? 'dark' : 'light');
+}
+function initTheme(){
+  if(localStorage.getItem('dw_theme') === 'dark'){
+    document.body.classList.add('dark');
+    const ti = document.getElementById('theme-icon');
+    if(ti) ti.textContent = '🌙';
+  }
 }
 
-// ── RESET ──
-function resetApp() {
-  lastAnalysis = null; popDismissed = false; popShown = false;
-  document.querySelector('[oninput*="sv"]').value = 7;
-  document.getElementById('sv').textContent = '7h';
-  document.querySelector('[oninput*="wv"]').value = 2;
-  document.getElementById('wv').textContent = '2L';
-  document.getElementById('wake').value = '07:00';
-  document.getElementById('act-list').innerHTML = `
-    <div class="erow act"><input type="time" value="07:30" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Morning jog" oninput="checkWorkoutActivity()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div></div>
-    <div class="erow act"><input type="time" value="09:00" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Work / Study" oninput="checkWorkoutActivity()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 2 hours" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div></div>`;
-  document.querySelectorAll('#mood .chip').forEach(c => c.classList.remove('on'));
-  document.getElementById('notes').value = '';
-  ['age','weight','height'].forEach(id => document.getElementById(id).value = '');
-  const nameInput = document.getElementById('user-name-input'); if(nameInput) nameInput.value = '';
-  document.getElementById('workout-card').classList.remove('show');
-  document.querySelectorAll('.wtype').forEach(w => w.classList.remove('on'));
-  document.querySelectorAll('.ichip').forEach(c => c.classList.remove('on'));
-  document.getElementById('gender').value = 'male';
-  initMealList();
-  document.getElementById('empty-state').style.display = 'block';
-  document.getElementById('empty-state').innerHTML = '<div class="ei">◎</div><p>Fill in your routine & meals,<br>then tap <strong>Analyse My Day</strong>.</p>';
-  document.getElementById('results').style.display = 'none';
-  document.getElementById('loading-state').style.display = 'none';
-  go('routine');
-  const btn = document.getElementById('reset-btn');
-  btn.textContent = '✓ Done';
-  btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)'; btn.style.background = 'var(--green-light)';
-  setTimeout(() => { btn.textContent = '↺ Reset'; btn.style.borderColor = ''; btn.style.color = ''; btn.style.background = ''; }, 1500);
-}
-
-// ── AUTH ──
-function showAuthModal(mandatory = false) {
-  document.getElementById('auth-modal').classList.remove('hidden');
+// ── AUTH MODE ──
+function switchAuthMode(mode){
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('on', (i===0&&mode==='login')||(i===1&&mode==='register')));
+  document.getElementById('login-fields').style.display = mode==='login' ? 'block' : 'none';
+  document.getElementById('register-fields').style.display = mode==='register' ? 'block' : 'none';
+  document.getElementById('auth-submit-btn').textContent = mode==='login' ? 'Login' : 'Register Gym';
   document.getElementById('auth-err').textContent = '';
+  document.getElementById('auth-switch-text').textContent = mode==='login' ? "Don't have an account?" : 'Already registered?';
+  document.getElementById('auth-switch-btn').textContent = mode==='login' ? 'Register your Gym' : 'Login here';
 }
-function hideAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
-function switchAuthTab(mode) {
-  authMode = mode;
-  document.querySelectorAll('.modal-tab').forEach((t, i) => t.classList.toggle('on', (i===0&&mode==='signin')||(i===1&&mode==='signup')));
-  document.getElementById('name-field').style.display = mode === 'signup' ? 'block' : 'none';
-  document.getElementById('auth-err').textContent = '';
+
+function previewLogo(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 2*1024*1024){ alert('Logo must be under 2MB'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('logo-preview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    document.getElementById('logo-hint').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
 }
-function handleAuth() {
-  const id = document.getElementById('auth-id').value.trim();
-  const pass = document.getElementById('auth-pass').value.trim();
-  const name = document.getElementById('auth-name').value.trim();
+
+async function handleAuthSubmit(){
+  const btn = document.getElementById('auth-submit-btn');
   const err = document.getElementById('auth-err');
-  if (!id || !pass) { err.textContent = 'Please fill in all fields.'; return; }
-  if (pass.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
-  if (authMode === 'signup') {
-    if (!name) { err.textContent = 'Please enter your name.'; return; }
-    if (store.users[id]) { err.textContent = 'Account already exists. Please sign in.'; return; }
-    store.users[id] = { id, name, pass, analyses: [] };
-    currentUser = store.users[id];
-  } else {
-    if (!store.users[id]) { err.textContent = 'Account not found. Please sign up.'; return; }
-    if (store.users[id].pass !== pass) { err.textContent = 'Incorrect password.'; return; }
-    currentUser = store.users[id];
+  const isLogin = document.querySelector('.auth-tab.on').textContent === 'Login';
+  btn.disabled = true; btn.textContent = isLogin ? 'Logging in…' : 'Registering…';
+  err.textContent = '';
+
+  const fb = window._fb;
+
+  try {
+    if(isLogin){
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-pass').value.trim();
+      if(!email||!pass){ err.textContent = 'Please fill in all fields.'; return; }
+      const cred = await fb.signInWithEmailAndPassword(fb.auth, email, pass);
+      const gymDoc = await fb.getDoc(fb.doc(fb.db, 'gyms', cred.user.uid));
+      if(!gymDoc.exists()){ err.textContent = 'Gym account not found.'; return; }
+      const data = gymDoc.data();
+      if(data.status !== 'approved'){ showPendingScreen(); return; }
+      gymData = data;
+      showMainApp();
+    } else {
+      const gymName = document.getElementById('reg-gymname').value.trim();
+      const city = document.getElementById('reg-city').value.trim();
+      const owner = document.getElementById('reg-owner').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value.trim();
+      if(!gymName||!city||!owner||!email||!pass){ err.textContent = 'Please fill in all fields.'; return; }
+      if(pass.length < 6){ err.textContent = 'Password must be at least 6 characters.'; return; }
+
+      const cred = await fb.createUserWithEmailAndPassword(fb.auth, email, pass);
+
+      // Convert logo to base64 and store in Firestore
+      let logoUrl = '';
+      const logoFile = document.getElementById('logo-file').files[0];
+      if(logoFile){
+        if(logoFile.size > 500*1024){
+          err.textContent = 'Logo must be under 500KB for storage. Please compress it.';
+          btn.disabled = false; btn.textContent = 'Register Gym';
+          return;
+        }
+        logoUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.onerror = () => reject(new Error('Failed to read logo'));
+          reader.readAsDataURL(logoFile);
+        });
+      }
+
+      await fb.setDoc(fb.doc(fb.db, 'gyms', cred.user.uid), {
+        gymName, city, owner, phone, email,
+        logoUrl, status: 'pending',
+        createdAt: fb.serverTimestamp()
+      });
+
+      showPendingScreen();
+    }
+  } catch(e){
+    err.textContent = e.message.replace('Firebase: ','').replace(/\(auth.*\)/,'').trim();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isLogin ? 'Login' : 'Register Gym';
   }
-  hideAuthModal();
-  updateUserUI();
-  if (lastAnalysis) saveAnalysis(lastAnalysis);
 }
-function skipAuth() { hideAuthModal(); }
-function signOut() { currentUser = null; updateUserUI(); }
-function updateUserUI() {
-  const ui = document.getElementById('user-info');
-  const so = document.getElementById('signout-btn');
-  const si = document.getElementById('signin-hdr-btn');
-  const rb = document.getElementById('reset-btn');
-  if (currentUser) {
-    ui.style.display = 'block';
-    document.getElementById('user-name-display').textContent = currentUser.name || currentUser.id;
-    so.style.display = 'block'; si.style.display = 'none'; rb.style.display = 'none';
-  } else {
-    ui.style.display = 'none';
-    so.style.display = 'none'; si.style.display = 'block'; rb.style.display = 'block';
+
+function showPendingScreen(){
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('pending-screen').classList.remove('hidden');
+}
+
+function showMainApp(){
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('pending-screen').classList.add('hidden');
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('main-nav').style.display = 'flex';
+  document.getElementById('main-cta').style.display = 'block';
+  document.getElementById('gym-name-badge').textContent = gymData.gymName || 'Gym';
+  if(gymData.logoUrl){
+    document.getElementById('gym-logo-img').src = gymData.logoUrl;
+    document.getElementById('gym-logo-img').style.display = 'block';
+    document.getElementById('gym-logo-default').style.display = 'none';
   }
+  initMeals();
+  initTheme();
 }
+
+async function handleLogout(){
+  await window._fb.fbSignOut(window._fb.auth);
+  gymData = null; lastAnalysis = null;
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('main-nav').style.display = 'none';
+  document.getElementById('main-cta').style.display = 'none';
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('pending-screen').classList.add('hidden');
+}
+
+// ── FIREBASE AUTH STATE ──
+window.addEventListener('firebase-ready', () => {
+  window._fb.onAuthStateChanged(window._fb.auth, async (user) => {
+    if(user){
+      try {
+        const gymDoc = await window._fb.getDoc(window._fb.doc(window._fb.db, 'gyms', user.uid));
+        if(gymDoc.exists()){
+          const data = gymDoc.data();
+          if(data.status === 'approved'){
+            gymData = data;
+            showMainApp();
+          } else {
+            showPendingScreen();
+          }
+        }
+      } catch(e){ console.log(e); }
+    }
+    initTheme();
+  });
+});
 
 // ── NAV ──
-function go(t) {
-  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+function go(t){
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   document.querySelector(`[data-t="${t}"]`).classList.add('on');
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById(`sec-${t}`).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (t === 'history') loadHistory();
-  if (t === 'progress') loadProgress();
-  document.getElementById('cta-txt').textContent = t === 'routine' ? 'Next →' : 'Analyse My Day';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(t==='history') loadHistory();
+  if(t==='progress') loadProgress();
+  document.getElementById('cta-txt').textContent = t==='routine' ? 'Next →' : 'Analyse';
 }
-function ctaClick() {
-  const tab = document.querySelector('.nb.on')?.dataset.t;
-  if (tab === 'routine') go('meals'); else analyse();
-}
-
-// ── WORKOUT DETECTION ──
-const WORKOUT_KEYWORDS = ['workout','gym','exercise','training','cardio','run','jog','walk','cycling','swim','yoga','crossfit','boxing','mma','lifting','weights','hiit','zumba','dance','sport','football','cricket','badminton','tennis','basketball','physical'];
-
-function checkWorkoutActivity() {
-  const inputs = document.querySelectorAll('#act-list .erow input[type="text"]');
-  let found = false;
-  inputs.forEach(inp => {
-    const val = inp.value.toLowerCase().trim();
-    if (WORKOUT_KEYWORDS.some(kw => val.includes(kw))) found = true;
-  });
-  const card = document.getElementById('workout-card');
-  if (found) card.classList.add('show');
-  else card.classList.remove('show');
-}
-
-function pickWorkout(el, type) {
-  el.classList.toggle('on');
-}
-
-function pickIntensity(el) {
-  document.querySelectorAll('.ichip').forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
-}
-
-function pickGoal(el, goal) {
-  el.classList.toggle('on');
-}
-
-function getWorkoutData() {
-  const typeEls = [...document.querySelectorAll('#workout-type-grid .wtype.on')];
-  const types = typeEls.map(w => w.textContent.trim().replace(/[\u{1F300}-\u{1FFFF}]/gu,'').trim()).filter(Boolean);
-  const goalEls = [...document.querySelectorAll('#workout-goals-grid .wtype.on')];
-  const goals = goalEls.map(w => w.textContent.trim().replace(/[\u{1F300}-\u{1FFFF}]/gu,'').trim()).filter(Boolean);
-  const intensity = document.querySelector('.ichip.on')?.textContent?.replace(/[🟢🟡🔴]/g,'').trim() || '';
-  return { types, goals, intensity };
-}
+function ctaClick(){ const t=document.querySelector('.nb.on')?.dataset.t; if(t==='routine') go('meals'); else analyse(); }
 
 // ── FORM HELPERS ──
-function removeRow(b) { b.closest('.erow').remove(); }
-function pickMood(c) { document.querySelectorAll('#mood .chip').forEach(x => x.classList.remove('on')); c.classList.add('on'); }
-function addAct() {
-  const d = document.createElement('div'); d.className = 'erow act';
-  d.innerHTML = `<input type="time" style="padding:10px;font-size:13px;"><input type="text" placeholder="Activity" oninput="checkWorkoutActivity()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>`;
+function removeRow(b){ b.closest('.erow').remove(); checkWorkout(); }
+function pickMood(c){ document.querySelectorAll('#mood .chip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); }
+function pickIntensity(el){ document.querySelectorAll('.ichip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); }
+function addAct(){
+  const d=document.createElement('div'); d.className='erow act';
+  d.innerHTML=`<input type="time" style="padding:9px;font-size:12px;"><input type="text" placeholder="Activity" oninput="checkWorkout()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:4px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-dur" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;flex:1;"></div>`;
   document.getElementById('act-list').appendChild(d);
 }
-const MEAL_OPTS = ['Breakfast','Lunch','Dinner','Snacks','Pre-Workout','Post-Workout'];
-function createMealRow(tv = 'Breakfast', fv = '') {
-  const row = document.createElement('div'); row.className = 'erow meal';
-  const sel = MEAL_OPTS.map(o => `<option value="${o}"${o===tv?' selected':''}>${o}</option>`).join('');
-  row.innerHTML = `<select class="meal-type">${sel}</select><input type="text" class="meal-food" placeholder="e.g. 2 roti with dal" value="${fv}" oninput="ensureEmptyRow()"><button class="del" onclick="removeMealRow(this)">×</button>`;
+const WORKOUT_KW=['workout','gym','exercise','training','cardio','run','jog','walk','cycling','swim','yoga','crossfit','boxing','mma','lifting','weights','hiit','zumba','dance','sport','football','cricket','badminton','tennis','basketball','physical'];
+function checkWorkout(){
+  const inputs=document.querySelectorAll('#act-list .erow input[type="text"]');
+  let found=false;
+  inputs.forEach(i=>{ if(WORKOUT_KW.some(kw=>i.value.toLowerCase().includes(kw))) found=true; });
+  document.getElementById('workout-card').classList.toggle('show', found);
+}
+const MOPTS=['Breakfast','Lunch','Dinner','Snacks','Pre-Workout','Post-Workout'];
+function initMeals(){
+  const ml=document.getElementById('meal-list'); ml.innerHTML='';
+  ml.appendChild(mkMeal('Breakfast')); ml.appendChild(mkMeal('Lunch'));
+}
+function mkMeal(tv='Breakfast',fv=''){
+  const row=document.createElement('div'); row.className='erow meal';
+  const sel=MOPTS.map(o=>`<option value="${o}"${o===tv?' selected':''}>${o}</option>`).join('');
+  row.innerHTML=`<select class="meal-type">${sel}</select><input type="text" class="meal-food" placeholder="e.g. 2 roti with dal" value="${fv}" oninput="ensureRow()"><button class="del" onclick="rmMeal(this)">×</button>`;
   return row;
 }
-function removeMealRow(btn) { btn.closest('.erow').remove(); ensureEmptyRow(); }
-function ensureEmptyRow() {
-  const list = document.getElementById('meal-list');
-  const rows = list.querySelectorAll('.erow');
-  if (!rows.length) { list.appendChild(createMealRow()); return; }
-  const lastRow = rows[rows.length - 1];
-  if (lastRow.querySelector('.meal-food').value.trim() !== '') {
-    const lastType = lastRow.querySelector('.meal-type').value;
-    const seq = ['Breakfast','Lunch','Dinner','Snacks'];
-    list.appendChild(createMealRow(seq[(seq.indexOf(lastType)+1)%seq.length]));
+function rmMeal(btn){ btn.closest('.erow').remove(); ensureRow(); }
+function ensureRow(){
+  const list=document.getElementById('meal-list'),rows=list.querySelectorAll('.erow');
+  if(!rows.length){list.appendChild(mkMeal());return;}
+  const last=rows[rows.length-1];
+  if(last.querySelector('.meal-food').value.trim()){
+    const lt=last.querySelector('.meal-type').value,seq=['Breakfast','Lunch','Dinner','Snacks','Pre-Workout','Post-Workout'];
+    list.appendChild(mkMeal(seq[(seq.indexOf(lt)+1)%seq.length]));
   }
 }
-function getData() {
-  const acts = [];
-  document.querySelectorAll('#act-list .erow').forEach(r => {
-    const inputs = r.querySelectorAll('input');
-    const duration = r.querySelector('.act-duration')?.value.trim() || '';
-    if (inputs[1].value.trim()) {
-      const entry = `${inputs[0].value||'?'}: ${inputs[1].value}${duration ? ' ('+duration+')' : ''}`;
-      acts.push(entry);
-    }
+
+function getData(){
+  const acts=[];
+  document.querySelectorAll('#act-list .erow').forEach(r=>{
+    const ins=r.querySelectorAll('input'); const dur=r.querySelector('.act-dur')?.value.trim()||'';
+    if(ins[1]?.value.trim()) acts.push(`${ins[0].value||'?'}: ${ins[1].value}${dur?' ('+dur+')':''}`);
   });
-  const mm = { Breakfast:[], Lunch:[], Dinner:[], Snacks:[], 'Pre-Workout':[], 'Post-Workout':[] };
-  document.querySelectorAll('#meal-list .erow').forEach(r => { const t = r.querySelector('.meal-type')?.value; const f = r.querySelector('.meal-food')?.value.trim(); if (t && f) mm[t].push(f); });
-  const wo = getWorkoutData();
-  return {
-    name: document.getElementById('user-name-input')?.value.trim() || '',
-    sleep: document.querySelector('[oninput*="sv"]').value,
-    wake: document.getElementById('wake').value,
-    water: document.querySelector('[oninput*="wv"]').value,
-    mood: document.querySelector('#mood .chip.on')?.textContent || 'Not set',
-    notes: document.getElementById('notes').value,
-    activities: acts, age: document.getElementById('age').value,
-    weight: document.getElementById('weight').value, height: document.getElementById('height').value,
-    gender: document.getElementById('gender').value,
-    breakfast: mm['Breakfast'], lunch: mm['Lunch'], dinner: mm['Dinner'], snacks: mm['Snacks'], preworkout: mm['Pre-Workout'], postworkout: mm['Post-Workout'],
-    workoutTypes: wo.types, workoutIntensity: wo.intensity, workoutGoals: wo.goals
+  const mm={Breakfast:[],Lunch:[],Dinner:[],Snacks:[],'Pre-Workout':[],'Post-Workout':[]};
+  document.querySelectorAll('#meal-list .erow').forEach(r=>{const t=r.querySelector('.meal-type')?.value,f=r.querySelector('.meal-food')?.value.trim();if(t&&f)mm[t].push(f);});
+  const wtypes=[...document.querySelectorAll('#workout-type-grid .wtype.on')].map(w=>w.textContent.trim().replace(/[^\w\s]/g,'').trim()).filter(Boolean);
+  const wgoals=[...document.querySelectorAll('#workout-goals-grid .wtype.on')].map(w=>w.textContent.trim().replace(/[^\w\s]/g,'').trim()).filter(Boolean);
+  const wintensity=document.querySelector('.ichip.on')?.textContent?.replace(/[🟢🟡🔴]/g,'').trim()||'';
+  return{
+    name:document.getElementById('user-name-input')?.value.trim()||'Client',
+    age:document.getElementById('age').value, weight:document.getElementById('weight').value,
+    height:document.getElementById('height').value, gender:document.getElementById('gender').value,
+    sleep:document.querySelector('[oninput*="sv"]').value, wake:document.getElementById('wake').value,
+    water:document.querySelector('[oninput*="wv"]').value,
+    mood:document.querySelector('#mood .chip.on')?.textContent||'Not set',
+    notes:document.getElementById('notes').value, activities:acts,
+    breakfast:mm['Breakfast'],lunch:mm['Lunch'],dinner:mm['Dinner'],snacks:mm['Snacks'],
+    preworkout:mm['Pre-Workout'],postworkout:mm['Post-Workout'],
+    workoutTypes:wtypes, workoutGoals:wgoals, workoutIntensity:wintensity
   };
 }
 
 // ── ANALYSE ──
-async function analyse() {
-  const d = getData();
-  const btn = document.getElementById('cta');
-  btn.disabled = true; btn.classList.add('loading');
+async function analyse(){
+  const d=getData(),btn=document.getElementById('cta');
+  btn.disabled=true; btn.classList.add('loading');
   go('analysis');
-  document.getElementById('empty-state').style.display = 'none';
-  document.getElementById('results').style.display = 'none';
-  document.getElementById('loading-state').style.display = 'block';
+  document.getElementById('empty-state').style.display='none';
+  document.getElementById('results').style.display='none';
+  document.getElementById('loading-state').style.display='block';
 
-  const steps = ['step-1','step-2','step-3','step-4','step-5'];
-  const msgs = ['Reading your daily routine & activities…','Analysing your meals & food intake…','Calculating macro & micro nutrients…','Preparing Indian meal suggestions…','Generating your wellness report…'];
-  const pcts = [10,30,55,75,90];
-  let si = 0;
-  const pb = document.getElementById('progress-bar'), pp = document.getElementById('progress-pct'), lm = document.getElementById('loading-msg');
-  steps.forEach(s => { const el = document.getElementById(s); el.classList.remove('active','done'); el.textContent = el.textContent.replace('✓ ',''); });
-  pb.style.width = '0%'; pp.textContent = '0%';
+  const steps=['s1','s2','s3','s4','s5'];
+  const msgs=['Reading daily routine…','Analysing meals & food intake…','Calculating macros & micros…','Preparing Indian meal suggestions…','Generating wellness report…'];
+  const pcts=[10,30,55,75,90];
+  let si=0;
+  const pb=document.getElementById('pbar'),pp=document.getElementById('ppct'),lm=document.getElementById('lmsg');
+  steps.forEach(s=>{const el=document.getElementById(s);el.classList.remove('active','done');el.textContent=el.textContent.replace('✓ ','');});
+  pb.style.width='0%'; pp.textContent='0%';
 
-  function advance() {
-    if (si > 0) { const p = document.getElementById(steps[si-1]); p.classList.remove('active'); p.classList.add('done'); if (!p.textContent.startsWith('✓')) p.textContent = '✓ ' + p.textContent; }
-    if (si < steps.length) { document.getElementById(steps[si]).classList.add('active'); pb.style.width = pcts[si]+'%'; pp.textContent = pcts[si]+'%'; lm.textContent = msgs[si]; si++; }
+  function adv(){
+    if(si>0){const p=document.getElementById(steps[si-1]);p.classList.remove('active');p.classList.add('done');if(!p.textContent.startsWith('✓'))p.textContent='✓ '+p.textContent;}
+    if(si<steps.length){document.getElementById(steps[si]).classList.add('active');pb.style.width=pcts[si]+'%';pp.textContent=pcts[si]+'%';lm.textContent=msgs[si];si++;}
   }
-  advance();
-  const timer = setInterval(() => { if (si < steps.length) advance(); else clearInterval(timer); }, 900);
+  adv();
+  const timer=setInterval(()=>{if(si<steps.length)adv();else clearInterval(timer);},900);
 
-  const prompt = `You are a certified nutritionist and health expert specializing in Indian diet. Your task is to provide highly accurate nutritional analysis.
+  const prompt=`You are a certified nutritionist and health expert specializing in Indian diet. Provide highly accurate nutritional analysis.
 
-PERSON: name=${d.name||'User'}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}
-ROUTINE: sleep=${d.sleep}h, wake time=${d.wake}, water=${d.water} liters, mood=${d.mood}
-ACTIVITIES: ${d.activities.join('; ')||'none logged'}
-WORKOUT: ${d.workoutTypes && d.workoutTypes.length ? `Types: ${d.workoutTypes.join(' + ')}, Intensity: ${d.workoutIntensity||'not specified'}, Goals: ${d.workoutGoals && d.workoutGoals.length ? d.workoutGoals.join(' + ') : 'not specified'}` : 'No specific workout logged'}
+PERSON: name=${d.name}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}
+ROUTINE: sleep=${d.sleep}h, wake=${d.wake}, water=${d.water}L, mood=${d.mood}
+ACTIVITIES: ${d.activities.join('; ')||'none'}
+WORKOUT: ${d.workoutTypes.length?`Types: ${d.workoutTypes.join(' + ')}, Intensity: ${d.workoutIntensity||'not specified'}, Goals: ${d.workoutGoals.join(' + ')||'not specified'}`:'No workout logged'}
 NOTES: ${d.notes||'none'}
-DIET TODAY:
-- Breakfast: ${d.breakfast.join(', ')||'skipped'}
-- Lunch: ${d.lunch.join(', ')||'skipped'}
-- Dinner: ${d.dinner.join(', ')||'skipped'}
-- Snacks: ${d.snacks.join(', ')||'none'}
-- Pre-Workout: ${d.preworkout.join(', ')||'none'}
-- Post-Workout: ${d.postworkout.join(', ')||'none'}
+DIET: Breakfast:${d.breakfast.join(', ')||'skipped'} | Lunch:${d.lunch.join(', ')||'skipped'} | Dinner:${d.dinner.join(', ')||'skipped'} | Snacks:${d.snacks.join(', ')||'none'} | Pre-Workout:${d.preworkout.join(', ')||'none'} | Post-Workout:${d.postworkout.join(', ')||'none'}
 
-WORKOUT-SPECIFIC ANALYSIS (if workout logged):
-- If multiple workout types selected, combine their calorie burns (e.g. Weight Lifting + Cardio = 600-900 kcal burn total)
-- Calorie burn per workout: Weight Lifting 300-500, Cardio 400-600, CrossFit 500-700, Boxing 500-650, MMA 600-750, Functional Training 400-550, Yoga 200-350, Swimming 450-600, Cycling 400-600, Sports 400-600
-- Evaluate if pre/post workout meals are optimal for ALL selected workout types and the goal
-- If multiple goals selected, balance recommendations across all goals. Priority order: Rehabilitation > Strength > Muscle Gain > Fat Burn > Weight Loss > Endurance > Sports Performance > General Fitness > Flexibility > Stress Relief
-- Protein targets per goal: Muscle Gain 1.8-2.2g/kg, Strength 2.0-2.4g/kg, Fat Burn/Weight Loss 1.4-1.8g/kg, Endurance 1.2-1.6g/kg, Sports Performance 1.6-2.0g/kg, Stress Relief/Flexibility 1.0-1.2g/kg
-- For conflicting goals (e.g. Weight Loss + Muscle Gain), suggest body recomposition approach with moderate calorie deficit and high protein
-- Tailor meal suggestions specifically to serve ALL selected goals simultaneously
-- For combined workouts (e.g. Weights + Cardio), prioritize protein for muscle recovery and carbs for energy replenishment
-- Factor workout intensity and variety into lifestyle score (multiple workouts = higher score if recovery is adequate)
+INSTRUCTIONS:
+1. Use ICMR/NIN Indian food database values for calorie calculations
+2. Realistic portions: 1 roti=80kcal, 1 cup cooked rice=200kcal, 1 cup dal=150kcal, 100g paneer=265kcal
+3. Account for cooking methods - ghee/oil adds ~40kcal per tsp
+4. If workout logged: adjust calorie needs (Weight Lifting 300-500kcal burn, Cardio 400-600, CrossFit 500-700, Boxing 500-650, MMA 600-750)
+5. Multiple workout types: combine calorie burns
+6. Protein targets: Muscle Gain 1.8-2.2g/kg, Strength 2.0-2.4g/kg, Weight Loss 1.4-1.8g/kg, Endurance 1.2-1.6g/kg
+7. Only suggest supplements if micronutrient is below 50% RDI
 
-CALORIE & MACRO INSTRUCTIONS (follow strictly):
-1. Calculate calories and macros using standard Indian food nutrition databases (ICMR/NIN values).
-2. Use realistic Indian portion sizes: 1 roti = 80 kcal, 1 cup cooked rice = 200 kcal, 1 cup dal = 150 kcal, 1 cup sabzi = 100-150 kcal, 1 egg = 70 kcal, 100g paneer = 265 kcal, 1 cup milk = 150 kcal etc.
-3. Account for cooking methods: if fried add 50-100 kcal extra, if ghee/oil used add 40 kcal per tsp.
-4. If quantity not mentioned, assume standard single serving.
-5. Sum up ALL meals for total daily calories and macros.
-6. Micronutrient percentages should reflect % of daily recommended intake (RDI) actually consumed.
-
-SUPPLEMENT INSTRUCTIONS:
-- Only suggest supplements if a micronutrient is below 50% of RDI.
-- Suggest practical, commonly available Indian supplements (e.g. brands like HealthKart, Himalaya, etc. or natural food sources).
-- Keep suggestions specific: dosage, timing, and whether food source or supplement pill.
-
-Return ONLY this exact JSON (no markdown, no extra text):
+Return ONLY this exact JSON (no markdown):
 {"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"supplements":[{"nutrient":"string","level":number,"suggestion":"string","dosage":"string","timing":"string"}],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"],"pre_workout":["item1"],"post_workout":["item1"]}}`;
 
-  try {
-    const res = await fetch("https://lifepulse2.dynamicwebstudio-india.workers.dev", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages: [{ role: "user", content: prompt }] })
+  try{
+    const res=await fetch('https://lifepulse2.dynamicwebstudio-india.workers.dev',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
     });
-    const raw = await res.json();
-    const txt = raw.content.map(i => i.text || '').join('').replace(/```json|```/g, '').trim();
-    lastAnalysis = { ...JSON.parse(txt), date: new Date().toISOString(), data: d };
+    const raw=await res.json();
+    const txt=raw.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    lastAnalysis={...JSON.parse(txt),date:new Date().toISOString(),data:d,clientName:d.name};
     clearInterval(timer);
-    steps.forEach(s => { const el = document.getElementById(s); el.classList.remove('active'); el.classList.add('done'); if (!el.textContent.startsWith('✓')) el.textContent = '✓ ' + el.textContent; });
-    pb.style.width = '100%'; pp.textContent = '100%'; lm.textContent = 'Analysis complete!';
-    setTimeout(() => { document.getElementById('loading-state').style.display = 'none'; render(lastAnalysis); if (currentUser) saveAnalysis(lastAnalysis); }, 600);
-  } catch(e) {
+    steps.forEach(s=>{const el=document.getElementById(s);el.classList.remove('active');el.classList.add('done');if(!el.textContent.startsWith('✓'))el.textContent='✓ '+el.textContent;});
+    pb.style.width='100%'; pp.textContent='100%'; lm.textContent='Analysis complete!';
+    setTimeout(()=>{document.getElementById('loading-state').style.display='none';renderResults(lastAnalysis);},600);
+  }catch(e){
     clearInterval(timer);
-    document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('empty-state').style.display = 'block';
-    document.getElementById('empty-state').innerHTML = '<div class="ei">⚠</div><p>Something went wrong.<br>Please check your API connection and try again.</p>';
+    document.getElementById('loading-state').style.display='none';
+    document.getElementById('empty-state').style.display='block';
+    document.getElementById('empty-state').innerHTML='<div class="ei">⚠</div><p>Something went wrong.<br>Please check WiFi and try again.</p>';
   }
-  btn.disabled = false; btn.classList.remove('loading');
-  popDismissed = false; popShown = false;
+  btn.disabled=false; btn.classList.remove('loading');
 }
 
 // ── RENDER ──
-function bc(v) { return v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--gold)' : 'var(--red)'; }
-function render(a) {
-  document.getElementById('empty-state').style.display = 'none';
-  const el = document.getElementById('results'); el.style.display = 'block';
-  const items = (arr, cls) => arr.map(x => `<div class="ri ${cls}">${x}</div>`).join('');
-  const vbars = Object.entries(a.vitamins).map(([k,v]) => `<div class="brow"><div class="btop"><span class="bname">${k}</span><span class="bpct">${v}%</span></div><div class="bbg"><div class="bfill" style="width:${v}%;background:${bc(v)};"></div></div></div>`).join('');
-  let msugs = '';
-  if (a.indian_meal_suggestions) {
-    const ms = a.indian_meal_suggestions;
-    [['🌅 Breakfast',ms.breakfast],['☀️ Lunch',ms.lunch],['🌙 Dinner',ms.dinner],['🍎 Snacks',ms.snacks],['💪 Pre-Workout',ms.pre_workout],['🥤 Post-Workout',ms.post_workout]].forEach(([l,it]) => {
-      if (it && it.length) msugs += `<div class="ri meal"><strong style="font-size:10px;color:var(--gold);font-weight:600;">${l}</strong><br>${it.join(' · ')}</div>`;
+function bc(v){return v>=70?'var(--green)':v>=40?'var(--gold)':'var(--red)';}
+function renderResults(a){
+  document.getElementById('empty-state').style.display='none';
+  const el=document.getElementById('results'); el.style.display='block';
+  const items=(arr,cls)=>arr.map(x=>`<div class="ri ${cls}">${x}</div>`).join('');
+  const vbars=Object.entries(a.vitamins).map(([k,v])=>`<div class="brow"><div class="btop"><span class="bname">${k}</span><span class="bpct">${v}%</span></div><div class="bbg"><div class="bfill" style="width:${v}%;background:${bc(v)};"></div></div></div>`).join('');
+  let msugs='';
+  if(a.indian_meal_suggestions){
+    const ms=a.indian_meal_suggestions;
+    [['🌅 Breakfast',ms.breakfast],['☀️ Lunch',ms.lunch],['🌙 Dinner',ms.dinner],['🍎 Snacks',ms.snacks],['💪 Pre-Workout',ms.pre_workout],['🥤 Post-Workout',ms.post_workout]].forEach(([l,it])=>{
+      if(it&&it.length)msugs+=`<div class="ri meal"><strong style="font-size:10px;color:var(--gold);font-weight:600;">${l}</strong><br>${it.join(' · ')}</div>`;
     });
   }
-  const dateStr = a.date ? new Date(a.date).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '';
-  el.innerHTML = `
-    ${dateStr ? `<div style="text-align:center;padding:16px 0 0;font-size:11px;color:var(--muted);">${dateStr}</div>` : ''}
+  let suppHtml='';
+  if(a.supplements&&a.supplements.length){
+    suppHtml=`<div class="rgroup"><div class="rhead msug">💊 Supplement Suggestions</div>${a.supplements.map(s=>`<div class="supp-card"><div class="supp-name">${s.nutrient} <span style="font-weight:300;color:var(--muted);">— ${s.level}% of daily need</span></div><div class="supp-bar-wrap"><div class="supp-bar-bg"><div class="supp-bar-fill" style="width:${s.level}%;background:${s.level<30?'var(--red)':'var(--gold)'};"></div></div><span class="supp-pct">${s.level}%</span></div><div class="supp-text">💡 ${s.suggestion}</div><div class="supp-dosage">📌 ${s.dosage} · ⏰ ${s.timing}</div></div>`).join('')}</div>`;
+  }
+  const ds=a.date?new Date(a.date).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
+  el.innerHTML=`
+    ${ds?`<div style="text-align:center;padding:12px 0 0;font-size:10px;color:var(--muted);">${ds}</div>`:''}
+    ${a.clientName?`<div style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);padding-top:4px;">${a.clientName}</div>`:''}
     <div class="scores">
       <div class="stile"><div class="snum" style="color:var(--gold)">${a.lifestyle_score}</div><div class="slbl">Lifestyle</div></div>
       <div class="stile"><div class="snum" style="color:var(--green)">${a.diet_score}</div><div class="slbl">Diet</div></div>
@@ -923,17 +909,16 @@ function render(a) {
       <div class="rhead neg">→ Watch Out</div>${items(a.routine_negatives,'neg')}
       <div class="rhead sug">◎ Suggestions</div>${items(a.routine_suggestions,'sug')}
     </div>
-    <div class="sec-head" style="padding:20px 0 12px;margin:0 16px;"><div class="sec-title" style="font-size:22px;">Nutrition</div><div class="sec-desc">Estimated daily intake</div></div>
+    <div class="sec-head" style="padding:16px 0 8px;margin:0 14px;"><div class="sec-title" style="font-size:18px;">Nutrition</div><div class="sec-desc">Estimated daily intake</div></div>
     <div class="mrow">
       <div class="mbox"><div class="mv">${a.calories}</div><div class="mn">kcal</div></div>
       <div class="mbox"><div class="mv" style="color:var(--green)">${a.protein}g</div><div class="mn">protein</div></div>
       <div class="mbox"><div class="mv" style="color:var(--blue)">${a.carbs}g</div><div class="mn">carbs</div></div>
       <div class="mbox"><div class="mv" style="color:var(--red)">${a.fat}g</div><div class="mn">fat</div></div>
     </div>
-    <div class="bsec" style="margin-top:16px;">
-      <div class="card-lbl" style="margin-bottom:12px;padding:0 16px;">Micronutrients</div>
-      <div style="padding:0 16px;">
-        <div class="brow"><div class="btop"><span class="bname">Fiber</span><span class="bpct">${a.fiber}g / 30g</span></div><div class="bbg"><div class="bfill" style="width:${Math.min(100,(a.fiber/30)*100)}%;background:var(--gold);"></div></div></div>
+    <div class="bsec" style="margin-top:12px;"><div class="clbl" style="margin-bottom:10px;padding:0 14px;">Micronutrients</div>
+      <div style="padding:0 14px;">
+        <div class="brow"><div class="btop"><span class="bname">Fiber</span><span class="bpct">${a.fiber}g/30g</span></div><div class="bbg"><div class="bfill" style="width:${Math.min(100,(a.fiber/30)*100)}%;background:var(--gold);"></div></div></div>
         ${vbars}
       </div>
     </div>
@@ -941,166 +926,269 @@ function render(a) {
       <div class="rhead pos">✓ Diet Wins</div>${items(a.diet_positives,'pos')}
       <div class="rhead neg">→ Diet Gaps</div>${items(a.diet_negatives,'neg')}
       <div class="rhead sug">◎ Improve With</div>${items(a.diet_suggestions,'sug')}
-      <div class="rhead meal-sug">🍛 Indian Meal Suggestions</div>${msugs}
+      <div class="rhead msug">🍛 Indian Meal Suggestions</div>${msugs}
     </div>
-    ${a.supplements && a.supplements.length ? `
-    <div class="rgroup">
-      <div class="rhead msug" style="color:#8B6914;">💊 Supplement Suggestions</div>
-      ${a.supplements.map(s => `
-        <div class="supp-card">
-          <div class="supp-name">${s.nutrient} <span style="font-weight:300;color:var(--muted);">— ${s.level}% of daily need</span></div>
-          <div class="supp-bar-wrap">
-            <div class="supp-bar-bg"><div class="supp-bar-fill" style="width:${s.level}%;background:${s.level < 30 ? 'var(--red)' : 'var(--gold)'};"></div></div>
-            <span class="supp-pct">${s.level}%</span>
-          </div>
-          <div class="supp-text">💡 ${s.suggestion}</div>
-          <div class="supp-dosage">📌 ${s.dosage} · ⏰ ${s.timing}</div>
-        </div>`).join('')}
-    </div>` : ''}
-    <button class="pdf-btn" onclick="exportPDF()">📄 Export Health Report as PDF</button>
-    ${!currentUser ? `<div style="text-align:center;padding:12px;font-size:12px;color:var(--muted);">Sign in to save this → <button onclick="showAuthModal(false)" style="border:none;background:none;color:var(--gold);font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;">Sign In</button></div>` : ''}
+    ${suppHtml}
+    <div class="save-btns">
+      <button class="save-btn primary" onclick="saveToHistory()">💾 Save</button>
+      <button class="save-btn secondary" onclick="openPTModal()">👤 Save under PT</button>
+    </div>
+    <button class="pdf-btn" onclick="exportPDF()">📄 Export as PDF</button>
   `;
 }
 
-// ── SAVE / HISTORY / PROGRESS ──
-function saveAnalysis(a) {
-  if (!currentUser || !store.users[currentUser.id]) return;
-  store.users[currentUser.id].analyses = store.users[currentUser.id].analyses || [];
-  store.users[currentUser.id].analyses.unshift(a);
-  store.users[currentUser.id].analyses = store.users[currentUser.id].analyses.slice(0, 30);
-  currentUser = store.users[currentUser.id];
+// ── SAVE TO HISTORY ──
+async function saveToHistory(){
+  if(!lastAnalysis){ alert('No analysis to save.'); return; }
+  if(!gymData){ alert('Not logged in.'); return; }
+  try{
+    const fb=window._fb;
+    const uid=fb.auth.currentUser.uid;
+    await fb.addDoc(fb.collection(fb.db,'gyms',uid,'history'),{
+      ...lastAnalysis,
+      clientName: lastAnalysis.clientName || lastAnalysis.data?.name || 'Client',
+      savedAt: fb.serverTimestamp(),
+      type: 'general'
+    });
+    const btn=event.target;
+    btn.textContent='✓ Saved!';
+    btn.style.background='var(--green)';
+    setTimeout(()=>{btn.textContent='💾 Save';btn.style.background='';},2000);
+  }catch(e){ alert('Error saving: '+e.message); }
 }
-function loadHistory() {
-  const el = document.getElementById('history-list');
-  if (!currentUser) { el.innerHTML = `<div class="empty"><div class="ei">🔒</div><p>Sign in to view saved analyses.</p><button onclick="showAuthModal(false)" style="margin-top:14px;padding:10px 22px;border-radius:10px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sign In</button></div>`; return; }
-  const analyses = currentUser.analyses || [];
-  if (!analyses.length) { el.innerHTML = `<div class="empty"><div class="ei">📋</div><p>No saved analyses yet.<br>Analyse your day to get started!</p></div>`; return; }
-  el.innerHTML = analyses.map((a, i) => {
-    const date = new Date(a.date).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-    return `<div class="hist-card" onclick="viewHist(${i})"><div class="hist-date">${date}</div><div class="hist-scores"><div><div class="hist-score" style="color:var(--gold)">${a.lifestyle_score}</div><div class="hist-lbl">Lifestyle</div></div><div style="margin-left:6px;"><div class="hist-score" style="color:var(--green)">${a.diet_score}</div><div class="hist-lbl">Diet</div></div></div><div class="hist-tip">${(a.overall_tip||'').substring(0,80)}…</div></div>`;
+
+// ── PT MODAL ──
+function openPTModal(){
+  document.getElementById('pt-modal').classList.remove('hidden');
+  document.getElementById('pt-trainer-name').value='';
+  document.getElementById('pt-err').textContent='';
+}
+function closePTModal(){ document.getElementById('pt-modal').classList.add('hidden'); }
+
+async function confirmSavePT(){
+  const trainerName=document.getElementById('pt-trainer-name').value.trim();
+  if(!trainerName){ document.getElementById('pt-err').textContent='Please enter trainer name.'; return; }
+  if(!lastAnalysis){ closePTModal(); return; }
+  try{
+    const fb=window._fb;
+    const uid=fb.auth.currentUser.uid;
+    await fb.addDoc(fb.collection(fb.db,'gyms',uid,'pt_analyses'),{
+      ...lastAnalysis,
+      clientName: lastAnalysis.clientName || lastAnalysis.data?.name || 'Client',
+      trainerName,
+      savedAt: fb.serverTimestamp(),
+      type: 'pt'
+    });
+    closePTModal();
+    const btn=document.querySelector('.save-btn.secondary');
+    if(btn){ btn.textContent='✓ Saved under PT!'; btn.style.background='var(--green)'; btn.style.color='white'; setTimeout(()=>{btn.textContent='👤 Save under PT';btn.style.background='';btn.style.color='';},2000); }
+  }catch(e){ document.getElementById('pt-err').textContent='Error: '+e.message; }
+}
+
+// ── HISTORY ──
+async function loadHistory(){
+  const el=document.getElementById('history-list');
+  el.innerHTML='<div class="empty"><div class="ei">⏳</div><p>Loading…</p></div>';
+  try{
+    const fb=window._fb;
+    const uid=fb.auth.currentUser.uid;
+    const q=fb.query(fb.collection(fb.db,'gyms',uid,'history'),fb.orderBy('savedAt','desc'));
+    const snap=await fb.getDocs(q);
+    allHistoryData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderHistory(allHistoryData);
+  }catch(e){ el.innerHTML=`<div class="empty"><p>Error loading history.</p></div>`; }
+}
+
+function renderHistory(data){
+  const el=document.getElementById('history-list');
+  if(!data.length){ el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No saved analyses yet.<br>Analyse a client to get started!</p></div>'; return; }
+  el.innerHTML=data.map(a=>{
+    const date=a.savedAt?.toDate?a.savedAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    return`<div class="hcard" onclick="viewHistoryItem(${JSON.stringify(a).replace(/"/g,'&quot;')})">
+      <div class="hcard-top"><div class="hcard-name">${a.clientName||'Client'}</div><div class="hcard-date">${date}</div></div>
+      <div class="hcard-scores">
+        <div><div class="hscore" style="color:var(--gold)">${a.lifestyle_score}</div><div class="hlbl">Lifestyle</div></div>
+        <div><div class="hscore" style="color:var(--green)">${a.diet_score}</div><div class="hlbl">Diet</div></div>
+      </div>
+      <div class="hcard-tip">${(a.overall_tip||'').substring(0,80)}…</div>
+    </div>`;
   }).join('');
 }
-function viewHist(i) { lastAnalysis = currentUser.analyses[i]; go('analysis'); render(lastAnalysis); }
-function loadProgress() {
-  const el = document.getElementById('progress-content');
-  if (!currentUser) { el.innerHTML = `<div class="empty"><div class="ei">🔒</div><p>Sign in to track weekly progress.</p><button onclick="showAuthModal(false)" style="margin-top:14px;padding:10px 22px;border-radius:10px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sign In</button></div>`; return; }
-  const analyses = currentUser.analyses || [];
-  if (!analyses.length) { el.innerHTML = `<div class="empty"><div class="ei">📈</div><p>No data yet.<br>Analyse a few days to see your weekly progress!</p></div>`; return; }
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const today = new Date();
-  const weekData = [];
-  for (let i = 6; i >= 0; i--) { const d = new Date(today); d.setDate(today.getDate()-i); const match = analyses.find(a => new Date(a.date).toDateString() === d.toDateString()); weekData.push({day:days[d.getDay()],lifestyle:match?.lifestyle_score||0,diet:match?.diet_score||0,has:!!match}); }
-  const wd = weekData.filter(d => d.has);
-  const avgL = wd.length ? Math.round(wd.reduce((s,d)=>s+d.lifestyle,0)/wd.length) : 0;
-  const avgD = wd.length ? Math.round(wd.reduce((s,d)=>s+d.diet,0)/wd.length) : 0;
-  const barRow = (key, color) => weekData.map(d => `<div class="prog-day"><div class="prog-day-lbl">${d.day}</div><div class="prog-bar-wrap"><div class="prog-bar" style="height:${d.has?d[key]:0}%;background:${d.has?color:'var(--line)'};"></div></div><div class="prog-val">${d.has?d[key]:'–'}</div></div>`).join('');
-  el.innerHTML = `
-    <div class="scores" style="margin-bottom:4px;">
-      <div class="stile"><div class="snum" style="color:var(--gold);font-size:40px;">${avgL}</div><div class="slbl">Avg Lifestyle</div></div>
-      <div class="stile"><div class="snum" style="color:var(--green);font-size:40px;">${avgD}</div><div class="slbl">Avg Diet</div></div>
-    </div>
-    <div class="card" style="margin-top:12px;"><div class="card-lbl">Lifestyle — This Week</div><div class="prog-week">${barRow('lifestyle','var(--gold)')}</div></div>
-    <div class="card"><div class="card-lbl">Diet — This Week</div><div class="prog-week">${barRow('diet','var(--green)')}</div></div>
-    <div class="card"><div class="card-lbl">All Time</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
-      <div><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--gold)">${analyses.length}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Analyses</div></div>
-      <div><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--green)">${Math.max(...analyses.map(a=>a.lifestyle_score))}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Best Life</div></div>
-      <div><div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--blue)">${Math.max(...analyses.map(a=>a.diet_score))}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Best Diet</div></div>
-    </div></div>`;
+
+function filterHistory(){
+  const q=document.getElementById('history-search').value.toLowerCase();
+  renderHistory(allHistoryData.filter(a=>(a.clientName||'').toLowerCase().includes(q)));
 }
 
-// ── SCROLL POPUP ──
-function handleScroll() {
-  if (currentUser || popDismissed || popShown) return;
-  if (document.getElementById('results').style.display === 'none') return;
-  const scrollY = window.scrollY || window.pageYOffset;
-  const docH = document.documentElement.scrollHeight - window.innerHeight;
-  if (docH > 0 && (scrollY/docH)*100 > 30) {
-    popShown = true;
-    document.getElementById('scroll-popup').classList.add('show');
-    setTimeout(() => document.getElementById('scroll-popup').classList.remove('show'), 8000);
-  }
+function viewHistoryItem(a){
+  lastAnalysis=a;
+  go('analysis');
+  renderResults(a);
 }
-function dismissPop() { document.getElementById('scroll-popup').classList.remove('show'); popDismissed = true; }
-function popSignIn() { dismissPop(); showAuthModal(false); }
+
+// ── PROGRESS / PT ──
+async function loadProgress(){
+  showTrainersView();
+  const el=document.getElementById('trainers-list');
+  el.innerHTML='<div class="empty"><div class="ei">⏳</div><p>Loading…</p></div>';
+  try{
+    const fb=window._fb;
+    const uid=fb.auth.currentUser.uid;
+    const q=fb.query(fb.collection(fb.db,'gyms',uid,'pt_analyses'),fb.orderBy('savedAt','desc'));
+    const snap=await fb.getDocs(q);
+    allPTData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderTrainers();
+  }catch(e){ el.innerHTML=`<div class="empty"><p>Error loading PT data.</p></div>`; }
+}
+
+function renderTrainers(){
+  const el=document.getElementById('trainers-list');
+  const q=document.getElementById('trainer-search').value.toLowerCase();
+  // Group by trainer
+  const trainers={};
+  allPTData.forEach(a=>{
+    const t=a.trainerName||'Unknown';
+    if(!trainers[t]) trainers[t]={name:t,count:0,clients:new Set()};
+    trainers[t].count++;
+    trainers[t].clients.add(a.clientName||'Client');
+  });
+  const trainerList=Object.values(trainers).filter(t=>t.name.toLowerCase().includes(q));
+  if(!trainerList.length){ el.innerHTML='<div class="empty"><div class="ei">📈</div><p>No PT analyses yet.<br>Use "Save under PT" after analysis.</p></div>'; return; }
+  el.innerHTML=trainerList.map(t=>`
+    <div class="trainer-card" onclick="showClientsView('${t.name}')">
+      <div class="trainer-avatar">${t.name.charAt(0).toUpperCase()}</div>
+      <div>
+        <div class="trainer-name">${t.name}</div>
+        <div class="trainer-count">${t.count} ${t.count===1?'analysis':'analyses'} · ${t.clients.size} ${t.clients.size===1?'client':'clients'}</div>
+      </div>
+      <div style="margin-left:auto;color:var(--muted);font-size:18px;">›</div>
+    </div>`).join('');
+}
+
+function filterTrainers(){ renderTrainers(); }
+
+function showTrainersView(){
+  document.getElementById('progress-trainers-view').style.display='block';
+  document.getElementById('progress-clients-view').style.display='none';
+}
+
+function showClientsView(trainerName){
+  currentTrainer=trainerName;
+  document.getElementById('progress-trainers-view').style.display='none';
+  document.getElementById('progress-clients-view').style.display='block';
+  document.getElementById('progress-trainer-title').textContent=trainerName;
+  document.getElementById('client-search').value='';
+  renderClients();
+}
+
+function renderClients(){
+  const el=document.getElementById('clients-list');
+  const q=document.getElementById('client-search').value.toLowerCase();
+  const data=allPTData.filter(a=>a.trainerName===currentTrainer&&(a.clientName||'').toLowerCase().includes(q));
+  if(!data.length){ el.innerHTML='<div class="empty"><div class="ei">👤</div><p>No analyses found.</p></div>'; return; }
+  el.innerHTML=data.map(a=>{
+    const date=a.savedAt?.toDate?a.savedAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    return`<div class="hcard" onclick="viewPTItem(${JSON.stringify(a).replace(/"/g,'&quot;')})">
+      <div class="hcard-top"><div class="hcard-name">${a.clientName||'Client'}</div><div class="hcard-date">${date}</div></div>
+      <div class="hcard-scores">
+        <div><div class="hscore" style="color:var(--gold)">${a.lifestyle_score}</div><div class="hlbl">Lifestyle</div></div>
+        <div><div class="hscore" style="color:var(--green)">${a.diet_score}</div><div class="hlbl">Diet</div></div>
+      </div>
+      <div class="hcard-tip">${(a.overall_tip||'').substring(0,80)}…</div>
+    </div>`;
+  }).join('');
+}
+
+function filterClients(){ renderClients(); }
+
+function viewPTItem(a){
+  lastAnalysis=a;
+  go('analysis');
+  renderResults(a);
+}
+
+// ── RESET ──
+function resetApp(){
+  lastAnalysis=null;
+  document.querySelector('[oninput*="sv"]').value=7; document.getElementById('sv').textContent='7h';
+  document.querySelector('[oninput*="wv"]').value=2; document.getElementById('wv').textContent='2L';
+  document.getElementById('wake').value='07:00';
+  document.getElementById('user-name-input').value='';
+  ['age','weight','height'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('gender').value='male';
+  document.getElementById('notes').value='';
+  document.querySelectorAll('#mood .chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('act-list').innerHTML=`<div class="erow act"><input type="time" value="07:30" style="padding:9px;font-size:12px;"><input type="text" placeholder="e.g. Morning jog" oninput="checkWorkout()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:4px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-dur" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;flex:1;"></div></div>`;
+  document.getElementById('workout-card').classList.remove('show');
+  document.querySelectorAll('.wtype').forEach(w=>w.classList.remove('on'));
+  document.querySelectorAll('.ichip').forEach(c=>c.classList.remove('on'));
+  initMeals();
+  document.getElementById('empty-state').style.display='block';
+  document.getElementById('empty-state').innerHTML='<div class="ei">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong>.</p>';
+  document.getElementById('results').style.display='none';
+  document.getElementById('loading-state').style.display='none';
+  go('routine');
+}
 
 // ── PDF EXPORT ──
-function exportPDF() {
-  if (!lastAnalysis) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const a = lastAnalysis;
-  const date = new Date(a.date).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  let y = 20;
-  const addText = (text, size, bold, color) => {
-    doc.setFontSize(size); doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    if (color) doc.setTextColor(...color); else doc.setTextColor(26,24,20);
-    doc.text(text, 20, y); y += size * 0.5 + 3;
-  };
-  const addSection = (title, items, color) => {
-    y += 4; doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...color);
-    doc.text(title.toUpperCase(), 20, y); y += 6;
-    items.forEach(item => { doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(61,58,53); const lines = doc.splitTextToSize('• ' + item, 170); doc.text(lines, 20, y); y += lines.length * 5 + 1; });
-  };
-  const d = a.data || {};
-
-  addText('DAILY WELLNESS', 10, false, [196,168,130]); y += 2;
-  addText('Health Analysis Report', 22, true); y += 2;
-  addText(date, 10, false, [155,150,144]); y += 6;
-  doc.setDrawColor(196,168,130); doc.line(20, y, 190, y); y += 8;
-
-  // ── ABOUT YOU SECTION ──
-  addText('About You', 13, true);
-  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(61,58,53);
-  const aboutCols = [];
-  if (d.name)   aboutCols.push(`Name: ${d.name}`);
-  if (d.age)    aboutCols.push(`Age: ${d.age} yrs`);
-  if (d.gender) aboutCols.push(`Gender: ${d.gender.charAt(0).toUpperCase() + d.gender.slice(1)}`);
-  if (d.weight) aboutCols.push(`Weight: ${d.weight} kg`);
-  if (d.height) aboutCols.push(`Height: ${d.height} cm`);
-  if (aboutCols.length) {
-    // Print in two columns
-    const half = Math.ceil(aboutCols.length / 2);
-    const col1 = aboutCols.slice(0, half);
-    const col2 = aboutCols.slice(half);
-    const maxRows = Math.max(col1.length, col2.length);
-    for (let i = 0; i < maxRows; i++) {
-      if (col1[i]) doc.text(col1[i], 20, y);
-      if (col2[i]) doc.text(col2[i], 110, y);
-      y += 6;
-    }
+function exportPDF(){
+  if(!lastAnalysis) return;
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const a=lastAnalysis; const d=a.data||{};
+  const date=new Date(a.date||a.savedAt?.toDate?.()?.toISOString()||Date.now()).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  let y=20;
+  const T=(text,size,bold,color)=>{doc.setFontSize(size);doc.setFont('helvetica',bold?'bold':'normal');if(color)doc.setTextColor(...color);else doc.setTextColor(26,24,20);doc.text(String(text),20,y);y+=size*.5+3;};
+  const SEC=(title,items,color)=>{y+=4;doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...color);doc.text(title.toUpperCase(),20,y);y+=6;items.forEach(item=>{doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);const lines=doc.splitTextToSize('• '+item,170);doc.text(lines,20,y);y+=lines.length*5+1;});};
+  // Header with gym info
+  if(gymData?.gymName){doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(196,168,130);doc.text(gymData.gymName.toUpperCase(),20,y);y+=5;}
+  T('Daily Wellness',10,false,[196,168,130]); y+=2;
+  T('Client Analysis Report',22,true); y+=2;
+  T(date,10,false,[155,150,144]); y+=6;
+  doc.setDrawColor(196,168,130);doc.line(20,y,190,y);y+=8;
+  // Client info
+  T('Client Information',13,true);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);
+  const info=[];
+  if(d.name||a.clientName)info.push(`Name: ${d.name||a.clientName}`);
+  if(d.age)info.push(`Age: ${d.age} yrs`);
+  if(d.gender)info.push(`Gender: ${d.gender.charAt(0).toUpperCase()+d.gender.slice(1)}`);
+  if(d.weight)info.push(`Weight: ${d.weight} kg`);
+  if(d.height)info.push(`Height: ${d.height} cm`);
+  if(a.trainerName)info.push(`Trainer: ${a.trainerName}`);
+  const half=Math.ceil(info.length/2);
+  for(let i=0;i<Math.max(half,info.length-half);i++){
+    if(info[i])doc.text(info[i],20,y);
+    if(info[i+half])doc.text(info[i+half],110,y);
+    y+=6;
   }
-  y += 2;
-  doc.setDrawColor(232,228,223); doc.line(20, y, 190, y); y += 8;
-
-  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(196,168,130); doc.text(`Lifestyle Score: ${a.lifestyle_score}/100`, 20, y);
-  doc.setTextColor(74,124,89); doc.text(`Diet Score: ${a.diet_score}/100`, 110, y); y += 10;
-  addText('Overall Insight', 12, true); doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(61,58,53);
-  const tipLines = doc.splitTextToSize(a.overall_tip, 170); doc.text(tipLines, 20, y); y += tipLines.length * 5 + 6;
-  doc.setDrawColor(232,228,223); doc.line(20, y, 190, y); y += 6;
-  addSection('Routine Positives', a.routine_positives, [74,124,89]);
-  addSection('Watch Out', a.routine_negatives, [196,97,74]);
-  addSection('Suggestions', a.routine_suggestions, [74,107,138]);
-  y += 4; doc.setDrawColor(232,228,223); doc.line(20, y, 190, y); y += 6;
-  addText('Nutrition Summary', 13, true);
-  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(61,58,53);
-  doc.text(`Calories: ${a.calories} kcal   Protein: ${a.protein}g   Carbs: ${a.carbs}g   Fat: ${a.fat}g   Fiber: ${a.fiber}g`, 20, y); y += 8;
-  Object.entries(a.vitamins).forEach(([k,v]) => { doc.text(`${k}: ${v}%`, 20, y); y += 5; });
-  if (y > 240) { doc.addPage(); y = 20; }
-  addSection('Diet Positives', a.diet_positives, [74,124,89]);
-  addSection('Diet Gaps', a.diet_negatives, [196,97,74]);
-  addSection('Improve With', a.diet_suggestions, [74,107,138]);
-  if (a.indian_meal_suggestions) {
-    y += 4; doc.setDrawColor(232,228,223); doc.line(20, y, 190, y); y += 6;
-    addText('Indian Meal Suggestions', 13, true);
-    const ms = a.indian_meal_suggestions;
-    [['Breakfast',ms.breakfast],['Lunch',ms.lunch],['Dinner',ms.dinner],['Snacks',ms.snacks]].forEach(([l,it]) => {
-      if (it && it.length) { doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(196,168,130); doc.text(l, 20, y); y += 5; doc.setFont('helvetica','normal'); doc.setTextColor(61,58,53); doc.text(it.join(', '), 20, y); y += 6; }
-    });
-  }
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(155,150,144); doc.text(`Daily Wellness Report · Page ${i} of ${pageCount}`, 20, 287); }
-  const userName = (a.data?.name || '').replace(/\s+/g,'-') || 'Report'; doc.save(`Daily-Wellness-${userName}-${new Date().toISOString().split('T')[0]}.pdf`);
+  y+=2;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=8;
+  doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(196,168,130);doc.text(`Lifestyle: ${a.lifestyle_score}/100`,20,y);
+  doc.setTextColor(74,124,89);doc.text(`Diet: ${a.diet_score}/100`,110,y);y+=10;
+  T('Overall Insight',12,true);doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);
+  const tipLines=doc.splitTextToSize(a.overall_tip,170);doc.text(tipLines,20,y);y+=tipLines.length*5+6;
+  doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;
+  SEC('Routine Positives',a.routine_positives,[74,124,89]);
+  SEC('Watch Out',a.routine_negatives,[196,97,74]);
+  SEC('Suggestions',a.routine_suggestions,[74,107,138]);
+  y+=4;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;
+  T('Nutrition Summary',13,true);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);
+  doc.text(`Calories: ${a.calories} kcal   Protein: ${a.protein}g   Carbs: ${a.carbs}g   Fat: ${a.fat}g   Fiber: ${a.fiber}g`,20,y);y+=8;
+  Object.entries(a.vitamins).forEach(([k,v])=>{doc.text(`${k}: ${v}%`,20,y);y+=5;});
+  if(y>240){doc.addPage();y=20;}
+  SEC('Diet Positives',a.diet_positives,[74,124,89]);
+  SEC('Diet Gaps',a.diet_negatives,[196,97,74]);
+  SEC('Improve With',a.diet_suggestions,[74,107,138]);
+  if(a.supplements&&a.supplements.length){y+=4;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;T('Supplement Suggestions',13,true);a.supplements.forEach(s=>{doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(139,105,20);doc.text(s.nutrient,20,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);doc.text(`${s.suggestion} | ${s.dosage} | ${s.timing}`,20,y);y+=6;});}
+  if(a.indian_meal_suggestions){y+=4;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;T('Indian Meal Suggestions',13,true);const ms=a.indian_meal_suggestions;[['Breakfast',ms.breakfast],['Lunch',ms.lunch],['Dinner',ms.dinner],['Snacks',ms.snacks],['Pre-Workout',ms.pre_workout],['Post-Workout',ms.post_workout]].forEach(([l,it])=>{if(it&&it.length){doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(196,168,130);doc.text(l,20,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);const lines=doc.splitTextToSize(it.join(', '),170);doc.text(lines,20,y);y+=lines.length*5+3;}});}
+  const pc=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(155,150,144);doc.text(`${gymData?.gymName||'Daily Wellness'} · Client Report · Page ${i} of ${pc}`,20,287);}
+  const cn=(a.clientName||d.name||'Client').replace(/\s+/g,'-');
+  doc.save(`${gymData?.gymName?.replace(/\s+/g,'-')||'DailyWellness'}-${cn}-${new Date().toISOString().split('T')[0]}.pdf`);
 }
+
+initTheme();
 </script>
 </body>
 </html>
