@@ -100,7 +100,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 .chip{padding:8px 16px;border-radius:30px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'Outfit',sans-serif;}
 .chip.on{background:var(--gold-light);border-color:var(--gold);color:var(--ink2);font-weight:600;}
 .erow{display:grid;gap:8px;align-items:center;margin-bottom:8px;}
-.erow.act{grid-template-columns:88px 1fr 32px;}
+.erow.act{grid-template-columns:88px 1fr 32px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line);}.erow.act:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none;}
 .erow.meal{grid-template-columns:110px 1fr 32px;}
 .erow input{margin:0;}
 .del{width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--line);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;}
@@ -244,7 +244,17 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 
 <!-- ROUTINE -->
 <div class="section active" id="sec-routine">
-  <div class="sec-head"><div class="sec-title">Your Routine</div><div class="sec-desc">Sleep, hydration, activities & mood</div></div>
+  <div class="sec-head"><div class="sec-title">Your Routine</div><div class="sec-desc">About you, sleep, activities &amp; mood</div></div>
+  <div class="card">
+    <div class="card-lbl">About You</div>
+    <div class="field"><div class="f-lbl">Your Name</div><input type="text" id="user-name-input" placeholder="e.g. Arjun"></div>
+    <div class="two">
+      <div class="field"><div class="f-lbl">Age</div><input type="number" id="age" placeholder="25" min="10" max="100"></div>
+      <div class="field"><div class="f-lbl">Weight (kg)</div><input type="number" id="weight" placeholder="70"></div>
+      <div class="field"><div class="f-lbl">Height (cm)</div><input type="number" id="height" placeholder="170"></div>
+      <div class="field"><div class="f-lbl">Gender</div><select id="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
+    </div>
+  </div>
   <div class="card">
     <div class="card-lbl">Sleep</div>
     <div class="sl-top"><span class="sl-name">Hours of sleep</span><span class="sl-num" id="sv">7h</span></div>
@@ -252,15 +262,20 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
     <div class="field" style="margin-top:14px;"><div class="f-lbl">Wake-up time</div><input type="time" id="wake" value="07:00"></div>
   </div>
   <div class="card">
-    <div class="card-lbl">Hydration</div>
-    <div class="sl-top"><span class="sl-name">Water Intake</span><span class="sl-num" id="wv" style="color:var(--blue);">2L</span></div>
-    <input type="range" min="1" max="10" step="0.5" value="2" oninput="document.getElementById('wv').textContent=this.value+'L'">
-  </div>
-  <div class="card">
     <div class="card-lbl">Activities</div>
     <div id="act-list">
-      <div class="erow act"><input type="time" value="07:30" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Morning jog"><button class="del" onclick="removeRow(this)">×</button></div>
-      <div class="erow act"><input type="time" value="09:00" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Work / Study"><button class="del" onclick="removeRow(this)">×</button></div>
+      <div class="erow act">
+        <input type="time" value="07:30" style="padding:10px;font-size:13px;">
+        <input type="text" placeholder="e.g. Morning jog">
+        <button class="del" onclick="removeRow(this)">×</button>
+        <div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>
+      </div>
+      <div class="erow act">
+        <input type="time" value="09:00" style="padding:10px;font-size:13px;">
+        <input type="text" placeholder="e.g. Work / Study">
+        <button class="del" onclick="removeRow(this)">×</button>
+        <div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 2 hours" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>
+      </div>
     </div>
     <button class="add-r" onclick="addAct()">+ Add activity</button>
   </div>
@@ -283,19 +298,15 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 
 <!-- MEALS -->
 <div class="section" id="sec-meals">
-  <div class="sec-head"><div class="sec-title">Today's Meals</div><div class="sec-desc">Log everything you've eaten</div></div>
-  <div class="card">
-    <div class="card-lbl">About You</div>
-    <div class="two">
-      <div class="field"><div class="f-lbl">Age</div><input type="number" id="age" placeholder="25" min="10" max="100"></div>
-      <div class="field"><div class="f-lbl">Weight (kg)</div><input type="number" id="weight" placeholder="70"></div>
-      <div class="field"><div class="f-lbl">Height (cm)</div><input type="number" id="height" placeholder="170"></div>
-      <div class="field"><div class="f-lbl">Gender</div><select id="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
-    </div>
-  </div>
+  <div class="sec-head"><div class="sec-title">Today's Meals</div><div class="sec-desc">Log your food &amp; water intake</div></div>
   <div class="card">
     <div class="card-lbl">Food Log</div>
     <div id="meal-list"></div>
+  </div>
+  <div class="card">
+    <div class="card-lbl">Hydration</div>
+    <div class="sl-top"><span class="sl-name">Water Intake</span><span class="sl-num" id="wv" style="color:var(--blue);">2L</span></div>
+    <input type="range" min="1" max="10" step="0.5" value="2" oninput="document.getElementById('wv').textContent=this.value+'L'">
   </div>
 </div>
 
@@ -380,11 +391,12 @@ function resetApp() {
   document.getElementById('wv').textContent = '2L';
   document.getElementById('wake').value = '07:00';
   document.getElementById('act-list').innerHTML = `
-    <div class="erow act"><input type="time" value="07:30" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Morning jog"><button class="del" onclick="removeRow(this)">×</button></div>
-    <div class="erow act"><input type="time" value="09:00" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Work / Study"><button class="del" onclick="removeRow(this)">×</button></div>`;
+    <div class="erow act"><input type="time" value="07:30" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Morning jog"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div></div>
+    <div class="erow act"><input type="time" value="09:00" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Work / Study"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 2 hours" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div></div>`;
   document.querySelectorAll('#mood .chip').forEach(c => c.classList.remove('on'));
   document.getElementById('notes').value = '';
   ['age','weight','height'].forEach(id => document.getElementById(id).value = '');
+  const nameInput = document.getElementById('user-name-input'); if(nameInput) nameInput.value = '';
   document.getElementById('gender').value = 'male';
   initMealList();
   document.getElementById('empty-state').style.display = 'block';
@@ -469,10 +481,10 @@ function removeRow(b) { b.closest('.erow').remove(); }
 function pickMood(c) { document.querySelectorAll('#mood .chip').forEach(x => x.classList.remove('on')); c.classList.add('on'); }
 function addAct() {
   const d = document.createElement('div'); d.className = 'erow act';
-  d.innerHTML = `<input type="time" style="padding:10px;font-size:13px;"><input type="text" placeholder="Activity"><button class="del" onclick="removeRow(this)">×</button>`;
+  d.innerHTML = `<input type="time" style="padding:10px;font-size:13px;"><input type="text" placeholder="Activity"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>`;
   document.getElementById('act-list').appendChild(d);
 }
-const MEAL_OPTS = ['Breakfast','Lunch','Dinner','Snacks'];
+const MEAL_OPTS = ['Breakfast','Lunch','Dinner','Snacks','Pre-Workout','Post-Workout'];
 function createMealRow(tv = 'Breakfast', fv = '') {
   const row = document.createElement('div'); row.className = 'erow meal';
   const sel = MEAL_OPTS.map(o => `<option value="${o}"${o===tv?' selected':''}>${o}</option>`).join('');
@@ -493,10 +505,18 @@ function ensureEmptyRow() {
 }
 function getData() {
   const acts = [];
-  document.querySelectorAll('#act-list .erow').forEach(r => { const i = r.querySelectorAll('input'); if (i[1].value.trim()) acts.push(`${i[0].value||'?'}: ${i[1].value}`); });
+  document.querySelectorAll('#act-list .erow').forEach(r => {
+    const inputs = r.querySelectorAll('input');
+    const duration = r.querySelector('.act-duration')?.value.trim() || '';
+    if (inputs[1].value.trim()) {
+      const entry = `${inputs[0].value||'?'}: ${inputs[1].value}${duration ? ' ('+duration+')' : ''}`;
+      acts.push(entry);
+    }
+  });
   const mm = { Breakfast:[], Lunch:[], Dinner:[], Snacks:[] };
   document.querySelectorAll('#meal-list .erow').forEach(r => { const t = r.querySelector('.meal-type')?.value; const f = r.querySelector('.meal-food')?.value.trim(); if (t && f) mm[t].push(f); });
   return {
+    name: document.getElementById('user-name-input')?.value.trim() || '',
     sleep: document.querySelector('[oninput*="sv"]').value,
     wake: document.getElementById('wake').value,
     water: document.querySelector('[oninput*="wv"]').value,
@@ -535,7 +555,7 @@ async function analyse() {
   const timer = setInterval(() => { if (si < steps.length) advance(); else clearInterval(timer); }, 900);
 
   const prompt = `You are a health and nutrition expert specializing in Indian diet and lifestyle. Analyse this data and return ONLY valid JSON (no markdown fences).
-PERSON: age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}
+PERSON: name=${d.name||'User'}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}
 ROUTINE: sleep=${d.sleep}h, wake=${d.wake}, water=${d.water} liters, mood=${d.mood}
 ACTIVITIES: ${d.activities.join('; ')||'none'}
 NOTES: ${d.notes||'none'}
