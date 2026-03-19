@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Daily Wellness – Gym Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -48,9 +48,68 @@ body.dark{
 }
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
 .app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:140px;}
+@media(min-width:768px){.app{max-width:100%;padding-bottom:160px;}}
+
+/* ── TABLET LAYOUT (iPad) ── */
+@media (min-width:768px){
+  .app{max-width:100%;display:grid;grid-template-columns:320px 1fr;grid-template-rows:auto 1fr;min-height:100vh;padding-bottom:0;}
+  .header{grid-column:1/-1;padding:28px 32px 20px;}
+  #sec-routine{overflow-y:auto;height:calc(100vh - 140px);padding-bottom:20px;border-right:1px solid var(--line);}
+  #sec-meals{overflow-y:auto;height:calc(100vh - 140px);padding-bottom:20px;border-right:1px solid var(--line);}
+  #sec-analysis{overflow-y:auto;height:calc(100vh - 140px);padding-bottom:20px;}
+  #sec-history{overflow-y:auto;height:calc(100vh - 140px);padding-bottom:20px;}
+  #sec-progress{overflow-y:auto;height:calc(100vh - 140px);padding-bottom:20px;}
+  .nav{width:auto;max-width:none;left:0;right:0;transform:none;bottom:0;border-radius:0;border-top:1px solid var(--line);border-bottom:none;border-left:none;border-right:none;padding:8px 16px;}
+  .ctawrap{width:auto;max-width:none;left:0;right:0;transform:none;padding:12px 24px 16px;}
+  .scores{grid-template-columns:1fr 1fr;gap:12px;padding:16px 20px 0;}
+  .card{margin:12px 20px 0;}
+  .rgroup{margin:0 20px;}
+  .mrow{margin:0 20px;grid-template-columns:repeat(4,1fr);}
+  .bsec{margin:0 20px;}
+  .save-btns{margin:14px 20px 0;}
+  .pdf-btn{width:calc(100% - 40px);margin:10px 20px 0;}
+  .search-bar{margin:14px 20px 0;}
+  .hcard,.trainer-card{margin:10px 20px 0;}
+  .back-btn{margin:14px 20px 0;}
+  .sec-head{padding:20px 20px 0;}
+  .workout-card{margin:12px 20px 0;}
+  /* Two column form layout on tablet */
+  .tablet-two{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .tablet-two .card{margin:12px 12px 0;}
+}
+
+/* iPad specific - show routine+analysis side by side */
+@media (min-width:768px){
+  .app{display:block;max-width:100%;}
+  .section{max-width:700px;margin:0 auto;}
+  .section.active{display:block;}
+  #sec-analysis .scores{max-width:700px;margin-left:auto;margin-right:auto;padding:16px 20px 0;}
+  .nav{max-width:100%;width:100%;left:0;right:0;transform:none;bottom:0;border-radius:0;border:none;border-top:1px solid var(--line);padding:6px 40px;}
+  .ctawrap{max-width:100%;width:100%;left:0;right:0;transform:none;padding:10px 40px 20px;}
+  .cta{max-width:600px;margin:0 auto;}
+  /* Bigger touch targets for tablet */
+  .chip{padding:10px 18px;font-size:13px;}
+  .nb{padding:10px 8px;font-size:9px;}
+  .nb span{font-size:18px;}
+  .card{padding:22px 24px;}
+  input[type=text],input[type=number],input[type=time],textarea,select{font-size:14px;padding:13px 15px;}
+  .wtype{padding:14px 10px;font-size:12px;}
+  .wtype span{font-size:22px;}
+  /* Larger score numbers */
+  .snum{font-size:52px;}
+  .header h1{font-size:42px;}
+}
+
+/* Landscape iPad optimization */
+@media (min-width:1024px){
+  .section{max-width:800px;}
+  .mrow{grid-template-columns:repeat(4,1fr);}
+  .two{grid-template-columns:repeat(4,1fr);}
+}
 
 /* ── AUTH SCREENS ── */
-.auth-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;}
+.auth-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
+@media(min-width:768px){.auth-screen{align-items:center;}.auth-box{max-width:520px;max-height:95vh;padding:40px 40px;}}
 .auth-screen.hidden{display:none;}
 .auth-box{background:var(--white);border-radius:24px;padding:36px 28px;width:100%;max-width:420px;box-shadow:var(--shl);max-height:90vh;overflow-y:auto;}
 .auth-logo{text-align:center;margin-bottom:24px;}
@@ -161,6 +220,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
 /* ── CTA ── */
 .ctawrap{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;padding:10px 14px 24px;background:linear-gradient(transparent,var(--bg) 30%);z-index:100;}
+@media(min-width:768px){.ctawrap{left:0;right:0;transform:none;max-width:100%;padding:10px 60px 14px;bottom:62px;background:linear-gradient(transparent,var(--bg) 40%);}}
 .cta{width:100%;padding:15px;border-radius:var(--radius);border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:var(--shl);}
 .cta:hover{opacity:.9;}
 .cta:disabled{opacity:.4;cursor:not-allowed;}
@@ -171,6 +231,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
 /* ── NAV ── */
 .nav{display:flex;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:var(--white);border-radius:18px;padding:5px;box-shadow:var(--shl);border:1px solid var(--line);z-index:99;transition:background .3s,border-color .3s;}
+@media(min-width:768px){.nav{bottom:0;left:0;right:0;transform:none;width:100%;max-width:100%;border-radius:0;border-top:1px solid var(--line);box-shadow:var(--shl);padding:5px 60px;}}
 .nb{flex:1;padding:7px 3px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:8px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;border-radius:13px;transition:all .25s;display:flex;flex-direction:column;align-items:center;gap:2px;}
 .nb span{font-size:14px;}
 .nb.on{background:var(--gold-l);color:var(--gold);}
@@ -407,7 +468,9 @@ body.dark .trainer-avatar{background:#2A2218;color:var(--gold);}
 
 <!-- ROUTINE -->
 <div class="section active" id="sec-routine">
-  <div class="sec-head"><div class="sec-title">Client Routine</div><div class="sec-desc">About the client, sleep, activities & mood</div></div>
+  <div class="sec-head"><div class="sec-title">Client Routine</div><div class="sec-desc">Quick form · Tap to select</div></div>
+
+  <!-- ABOUT CLIENT -->
   <div class="card">
     <div class="clbl">About Client</div>
     <div class="field"><div class="flbl">Client Name</div><input type="text" id="user-name-input" placeholder="e.g. Arjun Sharma"></div>
@@ -415,26 +478,57 @@ body.dark .trainer-avatar{background:#2A2218;color:var(--gold);}
       <div class="field"><div class="flbl">Age</div><input type="number" id="age" placeholder="25" min="10" max="100"></div>
       <div class="field"><div class="flbl">Weight (kg)</div><input type="number" id="weight" placeholder="70"></div>
       <div class="field"><div class="flbl">Height (cm)</div><input type="number" id="height" placeholder="170"></div>
-      <div class="field"><div class="flbl">Gender</div><select id="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="clbl">Sleep</div>
-    <div class="sltop"><span class="slname">Hours of sleep</span><span class="slnum" id="sv">7h</span></div>
-    <input type="range" min="3" max="12" step="0.5" value="7" oninput="document.getElementById('sv').textContent=this.value+'h'">
-    <div class="field" style="margin-top:12px;"><div class="flbl">Wake-up time</div><input type="time" id="wake" value="07:00"></div>
-  </div>
-  <div class="card">
-    <div class="clbl">Activities</div>
-    <div id="act-list">
-      <div class="erow act">
-        <input type="time" value="07:30" style="padding:9px;font-size:12px;">
-        <input type="text" placeholder="e.g. Morning jog" oninput="checkWorkout()">
-        <button class="del" onclick="removeRow(this)">×</button>
-        <div style="grid-column:1/-1;margin-top:4px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-dur" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;flex:1;"></div>
+      <div class="field"><div class="flbl">Gender</div>
+        <div class="chips" style="margin-top:4px;">
+          <div class="chip on" id="g-male" onclick="pickGender('male')">👨 Male</div>
+          <div class="chip" id="g-female" onclick="pickGender('female')">👩 Female</div>
+        </div>
       </div>
     </div>
-    <button class="addr" onclick="addAct()">+ Add activity</button>
+  </div>
+
+  <!-- SLEEP -->
+  <div class="card">
+    <div class="clbl">Sleep</div>
+    <div class="flbl" style="margin-bottom:8px;">Hours of sleep last night</div>
+    <div class="chips" id="sleep-chips">
+      <div class="chip" onclick="pickSleep(this,'4')">4h</div>
+      <div class="chip" onclick="pickSleep(this,'5')">5h</div>
+      <div class="chip" onclick="pickSleep(this,'6')">6h</div>
+      <div class="chip on" onclick="pickSleep(this,'7')">7h</div>
+      <div class="chip" onclick="pickSleep(this,'8')">8h</div>
+      <div class="chip" onclick="pickSleep(this,'9')">9h+</div>
+    </div>
+    <div class="field" style="margin-top:12px;"><div class="flbl">Wake-up time</div><input type="time" id="wake" value="07:00"></div>
+  </div>
+
+  <!-- ACTIVITIES - QUICK CHIPS -->
+  <div class="card">
+    <div class="clbl">Today's Activities</div>
+    <div class="flbl" style="margin-bottom:8px;">Tap all that apply</div>
+    <div class="chips" id="activity-chips">
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">🏋️ Gym</div>
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">🏃 Running</div>
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">🚶 Walking</div>
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">🧘 Yoga</div>
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">🚴 Cycling</div>
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">🏊 Swimming</div>
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">🥊 Boxing/MMA</div>
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">💼 Desk Job</div>
+      <div class="chip" onclick="this.classList.toggle('on');checkWorkout()">🏠 Rest Day</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🎯 Sports</div>
+    </div>
+    <div class="field" style="margin-top:12px;">
+      <div class="flbl">Duration of main activity</div>
+      <div class="chips" id="dur-chips" style="margin-top:6px;">
+        <div class="chip" onclick="pickDur(this)">20 min</div>
+        <div class="chip" onclick="pickDur(this)">30 min</div>
+        <div class="chip on" onclick="pickDur(this)">45 min</div>
+        <div class="chip" onclick="pickDur(this)">1 hour</div>
+        <div class="chip" onclick="pickDur(this)">1.5 hrs</div>
+        <div class="chip" onclick="pickDur(this)">2 hrs+</div>
+      </div>
+    </div>
   </div>
 
   <!-- WORKOUT DETAILS CARD -->
@@ -491,24 +585,136 @@ body.dark .trainer-avatar{background:#2A2218;color:var(--gold);}
       <div class="chip" onclick="pickMood(this)">😤 Anxious</div>
     </div>
   </div>
+  <!-- HEALTH CONDITIONS - QUICK CHIPS -->
   <div class="card">
-    <div class="clbl">Notes</div>
-    <textarea id="notes" placeholder="Anything noteworthy about this client…"></textarea>
+    <div class="clbl">Health Conditions</div>
+    <div class="flbl" style="margin-bottom:8px;">Tap all that apply</div>
+    <div class="chips" id="health-chips">
+      <div class="chip" onclick="this.classList.toggle('on')">✅ Healthy</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🩸 Diabetes</div>
+      <div class="chip" onclick="this.classList.toggle('on')">❤️ BP/Heart</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🦴 Joint Pain</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍽️ Acidity/IBS</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🧠 Thyroid</div>
+      <div class="chip" onclick="this.classList.toggle('on')">😴 Sleep Issues</div>
+      <div class="chip" onclick="this.classList.toggle('on')">⚖️ PCOD/PCOS</div>
+      <div class="chip" onclick="this.classList.toggle('on')">💊 On Medication</div>
+    </div>
+    <div class="field" style="margin-top:12px;">
+      <div class="flbl">Additional notes (optional)</div>
+      <textarea id="notes" placeholder="Any other details about this client…" style="min-height:60px;"></textarea>
+    </div>
   </div>
 </div>
 
 <!-- MEALS -->
 <div class="section" id="sec-meals">
-  <div class="sec-head"><div class="sec-title">Today's Meals</div><div class="sec-desc">Log food & water intake</div></div>
+  <div class="sec-head"><div class="sec-title">Today's Meals</div><div class="sec-desc">Quick tap · Add custom if needed</div></div>
+
+  <!-- BREAKFAST -->
   <div class="card">
-    <div class="clbl">Food Log</div>
-    <div id="meal-list"></div>
+    <div class="clbl">🌅 Breakfast</div>
+    <div class="flbl" style="margin-bottom:8px;">Tap all items consumed</div>
+    <div class="chips meal-quick" id="breakfast-chips">
+      <div class="chip" onclick="this.classList.toggle('on')">🫓 Paratha</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥣 Poha</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🫔 Upma</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥞 Idli/Dosa</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍳 Eggs</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥛 Milk/Tea</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍌 Fruits</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥤 Protein Shake</div>
+      <div class="chip" onclick="this.classList.toggle('on')">⏭️ Skipped</div>
+    </div>
+    <input type="text" id="breakfast-custom" placeholder="+ Add custom item (e.g. 2 roti with paneer)" style="margin-top:10px;font-size:12px;padding:9px 12px;">
   </div>
+
+  <!-- LUNCH -->
   <div class="card">
-    <div class="clbl">Hydration</div>
-    <div class="sltop"><span class="slname">Water Intake</span><span class="slnum" id="wv" style="color:var(--blue);">2L</span></div>
-    <input type="range" min="1" max="10" step="0.5" value="2" oninput="document.getElementById('wv').textContent=this.value+'L'">
+    <div class="clbl">☀️ Lunch</div>
+    <div class="chips meal-quick" id="lunch-chips">
+      <div class="chip" onclick="this.classList.toggle('on')">🍚 Rice + Dal</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🫓 Roti + Sabzi</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍛 Rajma/Chole</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥗 Salad</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍗 Chicken/Fish</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🧀 Paneer</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍱 Thali</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥙 Biryani</div>
+      <div class="chip" onclick="this.classList.toggle('on')">⏭️ Skipped</div>
+    </div>
+    <input type="text" id="lunch-custom" placeholder="+ Add custom item" style="margin-top:10px;font-size:12px;padding:9px 12px;">
   </div>
+
+  <!-- DINNER -->
+  <div class="card">
+    <div class="clbl">🌙 Dinner</div>
+    <div class="chips meal-quick" id="dinner-chips">
+      <div class="chip" onclick="this.classList.toggle('on')">🫓 Roti + Dal</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍚 Rice + Curry</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥗 Light Salad</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍗 Chicken/Fish</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🧀 Paneer Sabzi</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥣 Khichdi/Soup</div>
+      <div class="chip" onclick="this.classList.toggle('on')">⏭️ Skipped</div>
+    </div>
+    <input type="text" id="dinner-custom" placeholder="+ Add custom item" style="margin-top:10px;font-size:12px;padding:9px 12px;">
+  </div>
+
+  <!-- SNACKS -->
+  <div class="card">
+    <div class="clbl">🍎 Snacks & Extras</div>
+    <div class="chips meal-quick" id="snacks-chips">
+      <div class="chip" onclick="this.classList.toggle('on')">🍌 Fruits</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥜 Dry Fruits/Nuts</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥛 Curd/Lassi</div>
+      <div class="chip" onclick="this.classList.toggle('on')">☕ Tea/Coffee</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥤 Protein Shake</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍪 Biscuits/Snacks</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🧃 Juice</div>
+      <div class="chip" onclick="this.classList.toggle('on')">None</div>
+    </div>
+    <input type="text" id="snacks-custom" placeholder="+ Add custom snack" style="margin-top:10px;font-size:12px;padding:9px 12px;">
+  </div>
+
+  <!-- PRE/POST WORKOUT -->
+  <div class="card">
+    <div class="clbl">💪 Pre & Post Workout</div>
+    <div class="flbl" style="margin-bottom:8px;">Pre-Workout</div>
+    <div class="chips" id="pre-chips">
+      <div class="chip" onclick="this.classList.toggle('on')">🍌 Banana</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥤 Protein Shake</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍫 Energy Bar</div>
+      <div class="chip" onclick="this.classList.toggle('on')">☕ Black Coffee</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🫓 Roti/Toast</div>
+      <div class="chip" onclick="this.classList.toggle('on')">None</div>
+    </div>
+    <div class="flbl" style="margin-top:12px;margin-bottom:8px;">Post-Workout</div>
+    <div class="chips" id="post-chips">
+      <div class="chip" onclick="this.classList.toggle('on')">🥤 Protein Shake</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍳 Eggs</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🐔 Chicken</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🧀 Paneer</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🥛 Milk/Curd</div>
+      <div class="chip" onclick="this.classList.toggle('on')">🍌 Banana</div>
+      <div class="chip" onclick="this.classList.toggle('on')">None</div>
+    </div>
+  </div>
+
+  <!-- WATER -->
+  <div class="card">
+    <div class="clbl">💧 Hydration</div>
+    <div class="flbl" style="margin-bottom:8px;">Water intake today</div>
+    <div class="chips" id="water-chips">
+      <div class="chip" onclick="pickWater(this,'1')">1L</div>
+      <div class="chip" onclick="pickWater(this,'1.5')">1.5L</div>
+      <div class="chip on" onclick="pickWater(this,'2')">2L</div>
+      <div class="chip" onclick="pickWater(this,'2.5')">2.5L</div>
+      <div class="chip" onclick="pickWater(this,'3')">3L</div>
+      <div class="chip" onclick="pickWater(this,'3.5')">3.5L+</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ANALYSIS -->
@@ -699,7 +905,14 @@ async function handleAuthSubmit(){
       showPendingScreen();
     }
   } catch(e){
-    err.textContent = e.message.replace('Firebase: ','').replace(/\(auth.*\)/,'').trim();
+    const msg = e.message || 'Unknown error';
+    if(msg.includes('invalid-email') || msg.includes('invalid email')) err.textContent = 'Please enter a valid email address (e.g. gym@gmail.com)';
+    else if(msg.includes('email-already-in-use')) err.textContent = 'This email is already registered. Please login instead.';
+    else if(msg.includes('wrong-password') || msg.includes('invalid-credential')) err.textContent = 'Incorrect email or password. Please try again.';
+    else if(msg.includes('user-not-found')) err.textContent = 'No account found with this email. Please register first.';
+    else if(msg.includes('weak-password')) err.textContent = 'Password must be at least 6 characters.';
+    else if(msg.includes('network')) err.textContent = 'Network error. Please check your WiFi connection.';
+    else err.textContent = msg.replace('Firebase: ','').replace(/\(auth.*\)/,'').trim();
   } finally {
     btn.disabled = false;
     btn.textContent = isLogin ? 'Login' : 'Register Gym';
@@ -773,6 +986,28 @@ function ctaClick(){ const t=document.querySelector('.nb.on')?.dataset.t; if(t==
 
 // ── FORM HELPERS ──
 function removeRow(b){ b.closest('.erow').remove(); checkWorkout(); }
+
+function pickGender(g){
+  document.getElementById('g-male').classList.toggle('on', g==='male');
+  document.getElementById('g-female').classList.toggle('on', g==='female');
+}
+
+function pickSleep(el, val){
+  document.querySelectorAll('#sleep-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function pickDur(el){
+  document.querySelectorAll('#dur-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function pickWater(el, val){
+  document.querySelectorAll('#water-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function getChips(id){ return [...document.querySelectorAll(`#${id} .chip.on`)].map(c=>c.textContent.replace(/[⏭️✅]/g,'').trim()).filter(t=>t!=='Skipped'&&t!=='None'); }
 function pickMood(c){ document.querySelectorAll('#mood .chip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); }
 function pickIntensity(el){ document.querySelectorAll('.ichip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); }
 function addAct(){
@@ -780,11 +1015,14 @@ function addAct(){
   d.innerHTML=`<input type="time" style="padding:9px;font-size:12px;"><input type="text" placeholder="Activity" oninput="checkWorkout()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:4px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-dur" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;flex:1;"></div>`;
   document.getElementById('act-list').appendChild(d);
 }
-const WORKOUT_KW=['workout','gym','exercise','training','cardio','run','jog','walk','cycling','swim','yoga','crossfit','boxing','mma','lifting','weights','hiit','zumba','dance','sport','football','cricket','badminton','tennis','basketball','physical'];
 function checkWorkout(){
-  const inputs=document.querySelectorAll('#act-list .erow input[type="text"]');
-  let found=false;
-  inputs.forEach(i=>{ if(WORKOUT_KW.some(kw=>i.value.toLowerCase().includes(kw))) found=true; });
+  const gymSelected = document.querySelector('#activity-chips .chip.on');
+  const workoutChips = ['🏋️ Gym','🏃 Running','🚴 Cycling','🏊 Swimming','🥊 Boxing/MMA'];
+  let found = false;
+  document.querySelectorAll('#activity-chips .chip.on').forEach(c=>{
+    if(workoutChips.some(w=>c.textContent.includes(w.replace(/[^\w\s]/g,'').trim())||c.textContent.includes('Gym')||c.textContent.includes('Running')||c.textContent.includes('Cycling')||c.textContent.includes('Swimming')||c.textContent.includes('Boxing'))) found=true;
+  });
+  if(document.querySelector('#activity-chips .chip.on')) found=true;
   document.getElementById('workout-card').classList.toggle('show', found);
 }
 const MOPTS=['Breakfast','Lunch','Dinner','Snacks','Pre-Workout','Post-Workout'];
@@ -810,26 +1048,46 @@ function ensureRow(){
 }
 
 function getData(){
-  const acts=[];
-  document.querySelectorAll('#act-list .erow').forEach(r=>{
-    const ins=r.querySelectorAll('input'); const dur=r.querySelector('.act-dur')?.value.trim()||'';
-    if(ins[1]?.value.trim()) acts.push(`${ins[0].value||'?'}: ${ins[1].value}${dur?' ('+dur+')':''}`);
-  });
-  const mm={Breakfast:[],Lunch:[],Dinner:[],Snacks:[],'Pre-Workout':[],'Post-Workout':[]};
-  document.querySelectorAll('#meal-list .erow').forEach(r=>{const t=r.querySelector('.meal-type')?.value,f=r.querySelector('.meal-food')?.value.trim();if(t&&f)mm[t].push(f);});
+  // Activities from chips
+  const actChips = getChips('activity-chips');
+  const dur = document.querySelector('#dur-chips .chip.on')?.textContent?.trim() || '';
+  const acts = actChips.map(a => `${a}${dur?' ('+dur+')':''}`);
+
+  // Meals from chips + custom
+  const bf = [...getChips('breakfast-chips'), document.getElementById('breakfast-custom')?.value.trim()].filter(Boolean);
+  const ln = [...getChips('lunch-chips'), document.getElementById('lunch-custom')?.value.trim()].filter(Boolean);
+  const dn = [...getChips('dinner-chips'), document.getElementById('dinner-custom')?.value.trim()].filter(Boolean);
+  const sn = [...getChips('snacks-chips'), document.getElementById('snacks-custom')?.value.trim()].filter(Boolean);
+  const pre = getChips('pre-chips');
+  const post = getChips('post-chips');
+
+  // Sleep from chips
+  const sleepChip = document.querySelector('#sleep-chips .chip.on')?.textContent?.replace('h','').replace('+','').trim() || '7';
+
+  // Water from chips
+  const waterChip = document.querySelector('#water-chips .chip.on')?.textContent?.replace('L+','').replace('L','').trim() || '2';
+
+  // Health conditions
+  const health = getChips('health-chips');
+
+  // Workout
   const wtypes=[...document.querySelectorAll('#workout-type-grid .wtype.on')].map(w=>w.textContent.trim().replace(/[^\w\s]/g,'').trim()).filter(Boolean);
   const wgoals=[...document.querySelectorAll('#workout-goals-grid .wtype.on')].map(w=>w.textContent.trim().replace(/[^\w\s]/g,'').trim()).filter(Boolean);
   const wintensity=document.querySelector('.ichip.on')?.textContent?.replace(/[🟢🟡🔴]/g,'').trim()||'';
+
   return{
     name:document.getElementById('user-name-input')?.value.trim()||'Client',
     age:document.getElementById('age').value, weight:document.getElementById('weight').value,
-    height:document.getElementById('height').value, gender:document.getElementById('gender').value,
-    sleep:document.querySelector('[oninput*="sv"]').value, wake:document.getElementById('wake').value,
-    water:document.querySelector('[oninput*="wv"]').value,
+    height:document.getElementById('height').value,
+    gender:document.querySelector('#g-male.on') ? 'male' : 'female',
+    sleep:sleepChip, wake:document.getElementById('wake').value,
+    water:waterChip,
     mood:document.querySelector('#mood .chip.on')?.textContent||'Not set',
-    notes:document.getElementById('notes').value, activities:acts,
-    breakfast:mm['Breakfast'],lunch:mm['Lunch'],dinner:mm['Dinner'],snacks:mm['Snacks'],
-    preworkout:mm['Pre-Workout'],postworkout:mm['Post-Workout'],
+    notes:document.getElementById('notes').value,
+    healthConditions:health,
+    activities:acts,
+    breakfast:bf, lunch:ln, dinner:dn, snacks:sn,
+    preworkout:pre, postworkout:post,
     workoutTypes:wtypes, workoutGoals:wgoals, workoutIntensity:wintensity
   };
 }
@@ -861,6 +1119,7 @@ async function analyse(){
   const prompt=`You are a certified nutritionist and health expert specializing in Indian diet. Provide highly accurate nutritional analysis.
 
 PERSON: name=${d.name}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}
+HEALTH CONDITIONS: ${d.healthConditions&&d.healthConditions.length?d.healthConditions.join(', '):'None reported'}
 ROUTINE: sleep=${d.sleep}h, wake=${d.wake}, water=${d.water}L, mood=${d.mood}
 ACTIVITIES: ${d.activities.join('; ')||'none'}
 WORKOUT: ${d.workoutTypes.length?`Types: ${d.workoutTypes.join(' + ')}, Intensity: ${d.workoutIntensity||'not specified'}, Goals: ${d.workoutGoals.join(' + ')||'not specified'}`:'No workout logged'}
@@ -1142,11 +1401,18 @@ function resetApp(){
   document.getElementById('gender').value='male';
   document.getElementById('notes').value='';
   document.querySelectorAll('#mood .chip').forEach(c=>c.classList.remove('on'));
-  document.getElementById('act-list').innerHTML=`<div class="erow act"><input type="time" value="07:30" style="padding:9px;font-size:12px;"><input type="text" placeholder="e.g. Morning jog" oninput="checkWorkout()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:4px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-dur" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;flex:1;"></div></div>`;
+  // Reset activity chips
+  document.querySelectorAll('#activity-chips .chip, #dur-chips .chip, #sleep-chips .chip, #water-chips .chip, #health-chips .chip, #breakfast-chips .chip, #lunch-chips .chip, #dinner-chips .chip, #snacks-chips .chip, #pre-chips .chip, #post-chips .chip').forEach(c=>c.classList.remove('on'));
+  // Reset defaults
+  document.querySelector('#sleep-chips .chip:nth-child(4)')?.classList.add('on');
+  document.querySelector('#water-chips .chip:nth-child(3)')?.classList.add('on');
+  document.querySelector('#dur-chips .chip:nth-child(3)')?.classList.add('on');
+  pickGender('male');
+  // Reset custom inputs
+  ['breakfast-custom','lunch-custom','dinner-custom','snacks-custom'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('workout-card').classList.remove('show');
   document.querySelectorAll('.wtype').forEach(w=>w.classList.remove('on'));
   document.querySelectorAll('.ichip').forEach(c=>c.classList.remove('on'));
-  initMeals();
   document.getElementById('empty-state').style.display='block';
   document.getElementById('empty-state').innerHTML='<div class="ei">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong>.</p>';
   document.getElementById('results').style.display='none';
