@@ -16,12 +16,153 @@
   --shadow:0 2px 24px rgba(26,24,20,0.06);--shadow-lg:0 8px 40px rgba(26,24,20,0.10);
 }
 body.dark{
-  --bg:#0F0F0F;--white:#1A1A1A;--ink:#F0EDE8;--ink2:#C8C4BE;
-  --muted:#6B6762;--line:#2A2A2A;--gold:#C4A882;--gold-light:#2A2218;
-  --green:#4A7C59;--green-light:#0F1F14;--red:#C4614A;--red-light:#2A1410;
-  --blue:#4A6B8A;--blue-light:#0F1820;--radius:16px;
-  --shadow:0 2px 24px rgba(0,0,0,0.4);--shadow-lg:0 8px 40px rgba(0,0,0,0.6);
+  --bg:#0F0F0F;--white:#1C1C1E;--ink:#F0EDE8;--ink2:#D4D0CA;
+  --muted:#7A7570;--line:#2E2E2E;--gold:#C4A882;--gold-light:#2A2218;
+  --green:#5A9E6F;--green-light:#0F2018;--red:#D4705A;--red-light:#2A1410;
+  --blue:#5A82A8;--blue-light:#0F1825;--radius:16px;
+  --shadow:0 2px 24px rgba(0,0,0,0.5);--shadow-lg:0 8px 40px rgba(0,0,0,0.7);
 }
+
+/* ── DARK MODE SPECIFIC OVERRIDES ── */
+
+/* Overall Insight card — dark bg in both modes, needs readable text */
+body.dark .tip{background:#2A2218;color:#F0EDE8;}
+body.dark .tip strong{color:var(--gold);}
+
+/* Score tiles */
+body.dark .stile{background:#242424;border-color:#333;}
+body.dark .snum{color:inherit;}
+
+/* Result items (positives, negatives, suggestions) */
+body.dark .ri{background:#242424;border-color:#333;color:#D4D0CA;}
+body.dark .ri.pos{border-left-color:var(--green);}
+body.dark .ri.neg{border-left-color:var(--red);}
+body.dark .ri.sug{border-left-color:var(--blue);}
+body.dark .ri.meal{border-left-color:var(--gold);}
+
+/* Cards */
+body.dark .card{background:#1C1C1E;border-color:#2E2E2E;}
+
+/* Header */
+body.dark .header{background:#1C1C1E;border-color:#2E2E2E;}
+
+/* Modal */
+body.dark .modal{background:#1C1C1E;}
+body.dark .modal-tabs{background:#0F0F0F;}
+body.dark .modal-tab.on{background:#2A2A2A;color:var(--ink);}
+body.dark .m-input{background:#0F0F0F;border-color:#333;color:var(--ink);}
+
+/* Inputs and selects */
+body.dark input[type="text"],
+body.dark input[type="number"],
+body.dark input[type="time"],
+body.dark input[type="email"],
+body.dark input[type="tel"],
+body.dark textarea,
+body.dark select{background:#0F0F0F;border-color:#333;color:#F0EDE8;}
+body.dark input:focus,body.dark textarea:focus,body.dark select:focus{border-color:var(--gold);background:#1A1A1A;}
+
+/* Sliders */
+body.dark input[type="range"]{background:#333;}
+body.dark input[type="range"]::-webkit-slider-thumb{background:#2A2A2A;border-color:var(--gold);}
+
+/* Mood & chips */
+body.dark .chip{background:#0F0F0F;border-color:#333;color:#7A7570;}
+body.dark .chip.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+
+/* Macro boxes */
+body.dark .mbox{background:#242424;border-color:#333;}
+body.dark .mv{color:var(--gold);}
+body.dark .mn{color:#7A7570;}
+
+/* Nutrition bars */
+body.dark .bbg{background:#333;}
+
+/* Macro section heading */
+body.dark .sec-title{color:#F0EDE8;}
+body.dark .sec-desc{color:#7A7570;}
+body.dark .card-lbl{color:var(--gold);}
+
+/* History cards */
+body.dark .hist-card{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .hist-date{color:#7A7570;}
+body.dark .hist-tip{color:#D4D0CA;}
+
+/* Nav */
+body.dark .nav{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .nb{color:#7A7570;}
+body.dark .nb.on{background:#2A2218;color:var(--gold);}
+body.dark .nb.on[data-t="meals"]{background:#0F2018;color:var(--green);}
+body.dark .nb.on[data-t="analysis"]{background:#0F1825;color:var(--blue);}
+body.dark .nb.on[data-t="history"]{background:#2A1410;color:var(--red);}
+body.dark .nb.on[data-t="progress"]{background:#2A2218;color:var(--gold);}
+
+/* CTA button */
+body.dark .cta{background:#C4A882;color:#1A1814;}
+body.dark .cta:hover{background:#D4B892;}
+
+/* Empty state */
+body.dark .empty{color:#7A7570;}
+
+/* Rhead labels */
+body.dark .rhead.pos{color:var(--green);}
+body.dark .rhead.neg{color:var(--red);}
+body.dark .rhead.sug{color:var(--blue);}
+body.dark .rhead.msug{color:#C4A882;}
+body.dark .rhead::after{background:#2E2E2E;}
+
+/* Workout card */
+body.dark .workout-card{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .wtype{background:#0F0F0F;border-color:#333;color:#7A7570;}
+body.dark .wtype.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark .ichip{background:#0F0F0F;border-color:#333;color:#7A7570;}
+body.dark .ichip.on{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+
+/* Supplement cards */
+body.dark .supp-card{background:#242424;border-color:#333;}
+body.dark .supp-name{color:#D4D0CA;}
+body.dark .supp-text{color:#D4D0CA;}
+
+/* Progress bars section */
+body.dark .prog-bar-wrap{background:#333;}
+body.dark .prog-val{color:#7A7570;}
+body.dark .prog-day-lbl{color:#7A7570;}
+
+/* PDF button */
+body.dark .pdf-btn{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark .pdf-btn:hover{background:var(--gold);color:#1A1814;}
+
+/* Scroll popup */
+body.dark .scroll-popup{background:#1C1C1E;border-color:#2E2E2E;}
+body.dark .sp-title{color:#F0EDE8;}
+body.dark .sp-sub{color:#7A7570;}
+body.dark .sp-yes{background:#C4A882;color:#1A1814;}
+
+/* Status bar */
+body.dark .status-bar{border-color:#2E2E2E;}
+body.dark .reset-btn{border-color:#333;color:#7A7570;}
+body.dark .reset-btn:hover{border-color:var(--gold);color:var(--gold);background:#2A2218;}
+body.dark .signin-hdr-btn{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark .signout-btn{background:#2A1410;color:var(--red);}
+
+/* Activity rows */
+body.dark .erow.act{border-color:#2E2E2E;}
+body.dark .del{border-color:#333;color:#7A7570;}
+body.dark .add-r{border-color:#333;color:#7A7570;}
+body.dark .add-r:hover{border-color:var(--gold);color:var(--gold);background:#2A2218;}
+
+/* Section header after gradient line */
+body.dark .header::after{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+
+/* Lsteps in loading */
+body.dark .lstep{background:#242424;border-color:#333;color:#7A7570;}
+body.dark .lstep.active{background:#2A2218;border-color:var(--gold);color:#F0EDE8;}
+body.dark .lstep.done{background:#0F2018;border-color:var(--green);color:var(--green);}
+
+/* Global transition for smooth dark mode switch */
+body,body *{transition:background-color 0.3s ease,border-color 0.3s ease,color 0.3s ease;}
+/* But don't transition transforms or shadows */
+.cta,.chip,.wtype,.ichip,.nb,.modal{transition:background-color 0.3s ease,border-color 0.3s ease,color 0.3s ease,box-shadow 0.3s ease;}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;}
 .app{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:140px;}
 
