@@ -50,9 +50,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-h
 .app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:140px;}
 
 /* ── AUTH SCREENS ── */
-.auth-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;}
+.auth-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;}
 .auth-screen.hidden{display:none;}
-.auth-box{background:var(--white);border-radius:24px;padding:36px 28px;width:100%;max-width:420px;box-shadow:var(--shl);}
+.auth-box{background:var(--white);border-radius:24px;padding:36px 28px;width:100%;max-width:420px;box-shadow:var(--shl);max-height:90vh;overflow-y:auto;}
 .auth-logo{text-align:center;margin-bottom:24px;}
 .auth-logo img{width:72px;height:72px;border-radius:16px;object-fit:cover;}
 .auth-logo .default-logo{width:72px;height:72px;border-radius:16px;background:var(--gold-l);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:32px;}
@@ -72,6 +72,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-h
 .logo-upload-hint{font-size:12px;color:var(--muted);font-weight:300;}
 .logo-upload-hint span{font-size:24px;display:block;margin-bottom:6px;}
 .abtn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--ink);color:var(--white);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:all .2s;}
+.pw-wrap{position:relative;}
+.pw-wrap .ai{padding-right:44px;}
+.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;font-size:16px;color:var(--muted);padding:0;line-height:1;}
 .abtn:hover{opacity:.9;}
 .abtn:disabled{opacity:.5;cursor:not-allowed;}
 .aerr{font-size:12px;color:var(--red);margin-top:8px;text-align:center;min-height:18px;}
@@ -312,7 +315,12 @@ body.dark .trainer-avatar{background:#2A2218;color:var(--gold);}
     <!-- LOGIN FIELDS -->
     <div id="login-fields">
       <div class="af"><div class="al">Email</div><input class="ai" type="email" id="login-email" placeholder="gym@email.com"></div>
-      <div class="af"><div class="al">Password</div><input class="ai" type="password" id="login-pass" placeholder="••••••••"></div>
+      <div class="af"><div class="al">Password</div>
+      <div class="pw-wrap">
+        <input class="ai" type="password" id="login-pass" placeholder="••••••••">
+        <button class="pw-toggle" type="button" onclick="togglePw('login-pass',this)" tabindex="-1">👁️</button>
+      </div>
+    </div>
     </div>
     <!-- REGISTER FIELDS -->
     <div id="register-fields" style="display:none;">
@@ -321,7 +329,12 @@ body.dark .trainer-avatar{background:#2A2218;color:var(--gold);}
       <div class="af"><div class="al">Owner Name</div><input class="ai" type="text" id="reg-owner" placeholder="e.g. Rajesh Kumar"></div>
       <div class="af"><div class="al">Phone</div><input class="ai" type="text" id="reg-phone" placeholder="+91 9999999999"></div>
       <div class="af"><div class="al">Email</div><input class="ai" type="email" id="reg-email" placeholder="gym@email.com"></div>
-      <div class="af"><div class="al">Password</div><input class="ai" type="password" id="reg-pass" placeholder="Min 6 characters"></div>
+      <div class="af"><div class="al">Password</div>
+        <div class="pw-wrap">
+          <input class="ai" type="password" id="reg-pass" placeholder="Min 6 characters">
+          <button class="pw-toggle" type="button" onclick="togglePw('reg-pass',this)" tabindex="-1">👁️</button>
+        </div>
+      </div>
       <div class="af">
         <div class="al">Gym Logo</div>
         <div class="logo-upload-wrap" onclick="document.getElementById('logo-file').click()">
@@ -614,6 +627,17 @@ function previewLogo(input){
     document.getElementById('logo-hint').style.display = 'none';
   };
   reader.readAsDataURL(file);
+}
+
+function togglePw(inputId, btn){
+  const input = document.getElementById(inputId);
+  if(input.type === 'password'){
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
 }
 
 async function handleAuthSubmit(){
