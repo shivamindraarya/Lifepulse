@@ -15,6 +15,13 @@
   --blue:#4A6B8A;--blue-light:#E8EFF5;--radius:16px;
   --shadow:0 2px 24px rgba(26,24,20,0.06);--shadow-lg:0 8px 40px rgba(26,24,20,0.10);
 }
+body.dark{
+  --bg:#0F0F0F;--white:#1A1A1A;--ink:#F0EDE8;--ink2:#C8C4BE;
+  --muted:#6B6762;--line:#2A2A2A;--gold:#C4A882;--gold-light:#2A2218;
+  --green:#4A7C59;--green-light:#0F1F14;--red:#C4614A;--red-light:#2A1410;
+  --blue:#4A6B8A;--blue-light:#0F1820;--radius:16px;
+  --shadow:0 2px 24px rgba(0,0,0,0.4);--shadow-lg:0 8px 40px rgba(0,0,0,0.6);
+}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;}
 .app{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:140px;}
 
@@ -61,6 +68,12 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-h
 .user-info span{color:var(--gold);font-weight:600;}
 .hdr-btns{display:flex;align-items:center;gap:8px;margin-left:auto;}
 .reset-btn{font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--line);padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:500;transition:all 0.2s;}
+.theme-btn{width:36px;height:20px;border-radius:20px;border:none;background:var(--line);cursor:pointer;position:relative;transition:background 0.3s;flex-shrink:0;padding:0;}
+.theme-btn::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:var(--white);top:3px;left:3px;transition:transform 0.3s,background 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+body.dark .theme-btn{background:var(--gold);}
+body.dark .theme-btn::after{transform:translateX(16px);}
+.theme-wrap{display:flex;align-items:center;gap:6px;}
+.theme-icon{font-size:12px;line-height:1;}
 .reset-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-light);}
 .signin-hdr-btn{font-size:11px;color:var(--ink2);background:var(--gold-light);border:1px solid var(--gold);padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;transition:all 0.2s;}
 .signin-hdr-btn:hover{background:var(--gold);color:var(--white);}
@@ -86,7 +99,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--ink);min-h
 input[type="text"],input[type="number"],input[type="time"],input[type="email"],input[type="tel"],textarea,select{
   width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
   padding:12px 14px;color:var(--ink);font-family:'Outfit',sans-serif;font-size:14px;
-  outline:none;transition:border-color 0.2s;-webkit-appearance:none;
+  outline:none;transition:border-color 0.2s,background 0.3s,color 0.3s;-webkit-appearance:none;
 }
 input:focus,textarea:focus,select:focus{border-color:var(--gold);background:var(--white);}
 textarea{min-height:90px;resize:none;line-height:1.6;}
@@ -120,7 +133,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 @keyframes rot{to{transform:rotate(360deg)}}
 
 /* NAV */
-.nav{display:flex;position:fixed;bottom:74px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:388px;background:var(--white);border-radius:20px;padding:6px;box-shadow:var(--shadow-lg);border:1px solid var(--line);z-index:99;}
+.nav{display:flex;position:fixed;bottom:74px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:388px;background:var(--white);border-radius:20px;padding:6px;box-shadow:var(--shadow-lg);border:1px solid var(--line);z-index:99;transition:background 0.3s,border-color 0.3s;}
 .nb{flex:1;padding:8px 4px;border:none;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:9px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;border-radius:14px;transition:all 0.25s;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .nb span{font-size:16px;}
 .nb.on{background:var(--gold-light);color:var(--gold);}
@@ -189,6 +202,25 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 .lstep.active{color:var(--ink2);border-color:var(--gold);background:var(--gold-light);font-weight:500;}
 .lstep.done{color:var(--green);border-color:var(--green);background:var(--green-light);}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.supp-card{background:var(--white);border-radius:10px;padding:13px 16px;margin-bottom:8px;border:1px solid var(--line);border-left:3px solid #8B6914;display:flex;flex-direction:column;gap:4px;}
+.supp-name{font-size:12px;font-weight:600;color:var(--ink2);}
+.supp-bar-wrap{display:flex;align-items:center;gap:8px;margin:2px 0;}
+.supp-bar-bg{flex:1;height:4px;background:var(--line);border-radius:4px;overflow:hidden;}
+.supp-bar-fill{height:100%;border-radius:4px;}
+.supp-pct{font-size:10px;color:var(--muted);min-width:30px;}
+.supp-text{font-size:11px;color:var(--ink2);font-weight:300;line-height:1.5;}
+.supp-dosage{font-size:10px;color:#8B6914;font-weight:500;margin-top:2px;}
+/* WORKOUT CARD */
+.workout-card{background:var(--white);border-radius:var(--radius);padding:22px;margin:16px 16px 0;box-shadow:var(--shadow);border:1px solid var(--line);border-left:3px solid var(--gold);animation:up 0.35s ease;display:none;}
+.workout-card.show{display:block;}
+.workout-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.wtype{padding:12px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;text-align:center;font-family:'Outfit',sans-serif;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.wtype span{font-size:20px;}
+.wtype.on{background:var(--gold-light);border-color:var(--gold);color:var(--ink2);font-weight:600;}
+.workout-intensity{margin-top:14px;}
+.intensity-chips{display:flex;gap:8px;margin-top:8px;}
+.ichip{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'Outfit',sans-serif;}
+.ichip.on{background:var(--gold-light);border-color:var(--gold);color:var(--ink2);font-weight:600;}
 ::-webkit-scrollbar{width:0;}
 </style>
 </head>
@@ -235,6 +267,10 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
   <div class="status-bar">
     <div class="user-info" id="user-info">Hello, <span id="user-name-display"></span></div>
     <div class="hdr-btns">
+      <div class="theme-wrap">
+        <span class="theme-icon" id="theme-icon">☀️</span>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle dark mode"></button>
+      </div>
       <button class="reset-btn" id="reset-btn" onclick="resetApp()">↺ Reset</button>
       <button class="signin-hdr-btn" id="signin-hdr-btn" onclick="showAuthModal(false)">Sign In</button>
       <button class="signout-btn" id="signout-btn" onclick="signOut()">Sign Out</button>
@@ -266,19 +302,62 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
     <div id="act-list">
       <div class="erow act">
         <input type="time" value="07:30" style="padding:10px;font-size:13px;">
-        <input type="text" placeholder="e.g. Morning jog">
+        <input type="text" placeholder="e.g. Morning jog" oninput="checkWorkoutActivity()">
         <button class="del" onclick="removeRow(this)">×</button>
         <div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>
       </div>
       <div class="erow act">
         <input type="time" value="09:00" style="padding:10px;font-size:13px;">
-        <input type="text" placeholder="e.g. Work / Study">
+        <input type="text" placeholder="e.g. Work / Study" oninput="checkWorkoutActivity()">
         <button class="del" onclick="removeRow(this)">×</button>
         <div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 2 hours" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>
       </div>
     </div>
     <button class="add-r" onclick="addAct()">+ Add activity</button>
   </div>
+  <!-- WORKOUT DETAILS CARD — shown when workout activity detected -->
+  <div class="workout-card" id="workout-card">
+    <div class="card-lbl">Workout Details</div>
+    <div class="f-lbl" style="margin-bottom:4px;">Type of Workout</div>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:10px;font-weight:300;">Tap to select one or more</div>
+    <div class="workout-type-grid" id="workout-type-grid">
+      <div class="wtype" onclick="pickWorkout(this,'Weight Lifting')"><span>🏋️</span>Weight Lifting</div>
+      <div class="wtype" onclick="pickWorkout(this,'Cardio')"><span>🏃</span>Cardio</div>
+      <div class="wtype" onclick="pickWorkout(this,'Functional Training')"><span>⚡</span>Functional Training</div>
+      <div class="wtype" onclick="pickWorkout(this,'CrossFit')"><span>🔥</span>CrossFit</div>
+      <div class="wtype" onclick="pickWorkout(this,'Boxing')"><span>🥊</span>Boxing</div>
+      <div class="wtype" onclick="pickWorkout(this,'MMA')"><span>🥋</span>MMA</div>
+      <div class="wtype" onclick="pickWorkout(this,'Yoga')"><span>🧘</span>Yoga</div>
+      <div class="wtype" onclick="pickWorkout(this,'Swimming')"><span>🏊</span>Swimming</div>
+      <div class="wtype" onclick="pickWorkout(this,'Cycling')"><span>🚴</span>Cycling</div>
+      <div class="wtype" onclick="pickWorkout(this,'Sports')"><span>⚽</span>Sports</div>
+    </div>
+    <div class="workout-intensity">
+      <div class="f-lbl">Intensity</div>
+      <div class="intensity-chips">
+        <div class="ichip" onclick="pickIntensity(this)">🟢 Light</div>
+        <div class="ichip" onclick="pickIntensity(this)">🟡 Moderate</div>
+        <div class="ichip" onclick="pickIntensity(this)">🔴 Intense</div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <div class="f-lbl">Workout Goal</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:10px;font-weight:300;">Tap to select one or more</div>
+      <div class="workout-type-grid" id="workout-goals-grid">
+        <div class="wtype" onclick="pickGoal(this,'Weight Loss')"><span>⚖️</span>Weight Loss</div>
+        <div class="wtype" onclick="pickGoal(this,'Muscle Gain')"><span>💪</span>Muscle Gain</div>
+        <div class="wtype" onclick="pickGoal(this,'Endurance')"><span>🏅</span>Endurance</div>
+        <div class="wtype" onclick="pickGoal(this,'Strength')"><span>🔩</span>Strength</div>
+        <div class="wtype" onclick="pickGoal(this,'Flexibility')"><span>🤸</span>Flexibility</div>
+        <div class="wtype" onclick="pickGoal(this,'General Fitness')"><span>✨</span>General Fitness</div>
+        <div class="wtype" onclick="pickGoal(this,'Sports Performance')"><span>🏆</span>Sports Performance</div>
+        <div class="wtype" onclick="pickGoal(this,'Fat Burn')"><span>🔥</span>Fat Burn</div>
+        <div class="wtype" onclick="pickGoal(this,'Stress Relief')"><span>🧠</span>Stress Relief</div>
+        <div class="wtype" onclick="pickGoal(this,'Rehabilitation')"><span>🩺</span>Rehabilitation</div>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-lbl">Mood</div>
     <div class="chips" id="mood">
@@ -361,6 +440,20 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 </div>
 
 <script>
+// ── THEME ──
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('dw_theme', isDark ? 'dark' : 'light');
+}
+function initTheme() {
+  const saved = localStorage.getItem('dw_theme');
+  if (saved === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('theme-icon').textContent = '🌙';
+  }
+}
+
 // ── STATE — no free use limit ──
 let currentUser = null;
 let authMode = 'signin';
@@ -371,6 +464,7 @@ let store = { users: {} };
 
 // ── INIT ──
 window.onload = () => {
+  initTheme();
   initMealList();
   window.addEventListener('scroll', handleScroll, { passive: true });
 };
@@ -391,12 +485,15 @@ function resetApp() {
   document.getElementById('wv').textContent = '2L';
   document.getElementById('wake').value = '07:00';
   document.getElementById('act-list').innerHTML = `
-    <div class="erow act"><input type="time" value="07:30" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Morning jog"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div></div>
-    <div class="erow act"><input type="time" value="09:00" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Work / Study"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 2 hours" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div></div>`;
+    <div class="erow act"><input type="time" value="07:30" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Morning jog" oninput="checkWorkoutActivity()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div></div>
+    <div class="erow act"><input type="time" value="09:00" style="padding:10px;font-size:13px;"><input type="text" placeholder="e.g. Work / Study" oninput="checkWorkoutActivity()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 2 hours" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div></div>`;
   document.querySelectorAll('#mood .chip').forEach(c => c.classList.remove('on'));
   document.getElementById('notes').value = '';
   ['age','weight','height'].forEach(id => document.getElementById(id).value = '');
   const nameInput = document.getElementById('user-name-input'); if(nameInput) nameInput.value = '';
+  document.getElementById('workout-card').classList.remove('show');
+  document.querySelectorAll('.wtype').forEach(w => w.classList.remove('on'));
+  document.querySelectorAll('.ichip').forEach(c => c.classList.remove('on'));
   document.getElementById('gender').value = 'male';
   initMealList();
   document.getElementById('empty-state').style.display = 'block';
@@ -476,12 +573,49 @@ function ctaClick() {
   if (tab === 'routine') go('meals'); else analyse();
 }
 
+// ── WORKOUT DETECTION ──
+const WORKOUT_KEYWORDS = ['workout','gym','exercise','training','cardio','run','jog','walk','cycling','swim','yoga','crossfit','boxing','mma','lifting','weights','hiit','zumba','dance','sport','football','cricket','badminton','tennis','basketball','physical'];
+
+function checkWorkoutActivity() {
+  const inputs = document.querySelectorAll('#act-list .erow input[type="text"]');
+  let found = false;
+  inputs.forEach(inp => {
+    const val = inp.value.toLowerCase().trim();
+    if (WORKOUT_KEYWORDS.some(kw => val.includes(kw))) found = true;
+  });
+  const card = document.getElementById('workout-card');
+  if (found) card.classList.add('show');
+  else card.classList.remove('show');
+}
+
+function pickWorkout(el, type) {
+  el.classList.toggle('on');
+}
+
+function pickIntensity(el) {
+  document.querySelectorAll('.ichip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function pickGoal(el, goal) {
+  el.classList.toggle('on');
+}
+
+function getWorkoutData() {
+  const typeEls = [...document.querySelectorAll('#workout-type-grid .wtype.on')];
+  const types = typeEls.map(w => w.textContent.trim().replace(/[\u{1F300}-\u{1FFFF}]/gu,'').trim()).filter(Boolean);
+  const goalEls = [...document.querySelectorAll('#workout-goals-grid .wtype.on')];
+  const goals = goalEls.map(w => w.textContent.trim().replace(/[\u{1F300}-\u{1FFFF}]/gu,'').trim()).filter(Boolean);
+  const intensity = document.querySelector('.ichip.on')?.textContent?.replace(/[🟢🟡🔴]/g,'').trim() || '';
+  return { types, goals, intensity };
+}
+
 // ── FORM HELPERS ──
 function removeRow(b) { b.closest('.erow').remove(); }
 function pickMood(c) { document.querySelectorAll('#mood .chip').forEach(x => x.classList.remove('on')); c.classList.add('on'); }
 function addAct() {
   const d = document.createElement('div'); d.className = 'erow act';
-  d.innerHTML = `<input type="time" style="padding:10px;font-size:13px;"><input type="text" placeholder="Activity"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>`;
+  d.innerHTML = `<input type="time" style="padding:10px;font-size:13px;"><input type="text" placeholder="Activity" oninput="checkWorkoutActivity()"><button class="del" onclick="removeRow(this)">×</button><div style="grid-column:1/-1;margin-top:6px;display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--muted);font-weight:500;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;">Duration</span><input type="text" class="act-duration" placeholder="e.g. 30 mins" style="font-size:12px;padding:7px 11px;color:var(--ink2);flex:1;"></div>`;
   document.getElementById('act-list').appendChild(d);
 }
 const MEAL_OPTS = ['Breakfast','Lunch','Dinner','Snacks','Pre-Workout','Post-Workout'];
@@ -515,6 +649,7 @@ function getData() {
   });
   const mm = { Breakfast:[], Lunch:[], Dinner:[], Snacks:[], 'Pre-Workout':[], 'Post-Workout':[] };
   document.querySelectorAll('#meal-list .erow').forEach(r => { const t = r.querySelector('.meal-type')?.value; const f = r.querySelector('.meal-food')?.value.trim(); if (t && f) mm[t].push(f); });
+  const wo = getWorkoutData();
   return {
     name: document.getElementById('user-name-input')?.value.trim() || '',
     sleep: document.querySelector('[oninput*="sv"]').value,
@@ -525,7 +660,8 @@ function getData() {
     activities: acts, age: document.getElementById('age').value,
     weight: document.getElementById('weight').value, height: document.getElementById('height').value,
     gender: document.getElementById('gender').value,
-    breakfast: mm['Breakfast'], lunch: mm['Lunch'], dinner: mm['Dinner'], snacks: mm['Snacks'], preworkout: mm['Pre-Workout'], postworkout: mm['Post-Workout']
+    breakfast: mm['Breakfast'], lunch: mm['Lunch'], dinner: mm['Dinner'], snacks: mm['Snacks'], preworkout: mm['Pre-Workout'], postworkout: mm['Post-Workout'],
+    workoutTypes: wo.types, workoutIntensity: wo.intensity, workoutGoals: wo.goals
   };
 }
 
@@ -554,14 +690,47 @@ async function analyse() {
   advance();
   const timer = setInterval(() => { if (si < steps.length) advance(); else clearInterval(timer); }, 900);
 
-  const prompt = `You are a health and nutrition expert specializing in Indian diet and lifestyle. Analyse this data and return ONLY valid JSON (no markdown fences).
+  const prompt = `You are a certified nutritionist and health expert specializing in Indian diet. Your task is to provide highly accurate nutritional analysis.
+
 PERSON: name=${d.name||'User'}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}
-ROUTINE: sleep=${d.sleep}h, wake=${d.wake}, water=${d.water} liters, mood=${d.mood}
-ACTIVITIES: ${d.activities.join('; ')||'none'}
+ROUTINE: sleep=${d.sleep}h, wake time=${d.wake}, water=${d.water} liters, mood=${d.mood}
+ACTIVITIES: ${d.activities.join('; ')||'none logged'}
+WORKOUT: ${d.workoutTypes && d.workoutTypes.length ? `Types: ${d.workoutTypes.join(' + ')}, Intensity: ${d.workoutIntensity||'not specified'}, Goals: ${d.workoutGoals && d.workoutGoals.length ? d.workoutGoals.join(' + ') : 'not specified'}` : 'No specific workout logged'}
 NOTES: ${d.notes||'none'}
-DIET - Breakfast:${d.breakfast.join(',')||'skipped'} | Lunch:${d.lunch.join(',')||'skipped'} | Dinner:${d.dinner.join(',')||'skipped'} | Snacks:${d.snacks.join(',')||'none'} | Pre-Workout:${d.preworkout.join(',')||'none'} | Post-Workout:${d.postworkout.join(',')||'none'}
-Return exactly this JSON:
-{"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"],"pre_workout":["item1"],"post_workout":["item1"]}}`;
+DIET TODAY:
+- Breakfast: ${d.breakfast.join(', ')||'skipped'}
+- Lunch: ${d.lunch.join(', ')||'skipped'}
+- Dinner: ${d.dinner.join(', ')||'skipped'}
+- Snacks: ${d.snacks.join(', ')||'none'}
+- Pre-Workout: ${d.preworkout.join(', ')||'none'}
+- Post-Workout: ${d.postworkout.join(', ')||'none'}
+
+WORKOUT-SPECIFIC ANALYSIS (if workout logged):
+- If multiple workout types selected, combine their calorie burns (e.g. Weight Lifting + Cardio = 600-900 kcal burn total)
+- Calorie burn per workout: Weight Lifting 300-500, Cardio 400-600, CrossFit 500-700, Boxing 500-650, MMA 600-750, Functional Training 400-550, Yoga 200-350, Swimming 450-600, Cycling 400-600, Sports 400-600
+- Evaluate if pre/post workout meals are optimal for ALL selected workout types and the goal
+- If multiple goals selected, balance recommendations across all goals. Priority order: Rehabilitation > Strength > Muscle Gain > Fat Burn > Weight Loss > Endurance > Sports Performance > General Fitness > Flexibility > Stress Relief
+- Protein targets per goal: Muscle Gain 1.8-2.2g/kg, Strength 2.0-2.4g/kg, Fat Burn/Weight Loss 1.4-1.8g/kg, Endurance 1.2-1.6g/kg, Sports Performance 1.6-2.0g/kg, Stress Relief/Flexibility 1.0-1.2g/kg
+- For conflicting goals (e.g. Weight Loss + Muscle Gain), suggest body recomposition approach with moderate calorie deficit and high protein
+- Tailor meal suggestions specifically to serve ALL selected goals simultaneously
+- For combined workouts (e.g. Weights + Cardio), prioritize protein for muscle recovery and carbs for energy replenishment
+- Factor workout intensity and variety into lifestyle score (multiple workouts = higher score if recovery is adequate)
+
+CALORIE & MACRO INSTRUCTIONS (follow strictly):
+1. Calculate calories and macros using standard Indian food nutrition databases (ICMR/NIN values).
+2. Use realistic Indian portion sizes: 1 roti = 80 kcal, 1 cup cooked rice = 200 kcal, 1 cup dal = 150 kcal, 1 cup sabzi = 100-150 kcal, 1 egg = 70 kcal, 100g paneer = 265 kcal, 1 cup milk = 150 kcal etc.
+3. Account for cooking methods: if fried add 50-100 kcal extra, if ghee/oil used add 40 kcal per tsp.
+4. If quantity not mentioned, assume standard single serving.
+5. Sum up ALL meals for total daily calories and macros.
+6. Micronutrient percentages should reflect % of daily recommended intake (RDI) actually consumed.
+
+SUPPLEMENT INSTRUCTIONS:
+- Only suggest supplements if a micronutrient is below 50% of RDI.
+- Suggest practical, commonly available Indian supplements (e.g. brands like HealthKart, Himalaya, etc. or natural food sources).
+- Keep suggestions specific: dosage, timing, and whether food source or supplement pill.
+
+Return ONLY this exact JSON (no markdown, no extra text):
+{"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"supplements":[{"nutrient":"string","level":number,"suggestion":"string","dosage":"string","timing":"string"}],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"],"pre_workout":["item1"],"post_workout":["item1"]}}`;
 
   try {
     const res = await fetch("https://lifepulse2.dynamicwebstudio-india.workers.dev", {
@@ -633,6 +802,20 @@ function render(a) {
       <div class="rhead sug">◎ Improve With</div>${items(a.diet_suggestions,'sug')}
       <div class="rhead meal-sug">🍛 Indian Meal Suggestions</div>${msugs}
     </div>
+    ${a.supplements && a.supplements.length ? `
+    <div class="rgroup">
+      <div class="rhead msug" style="color:#8B6914;">💊 Supplement Suggestions</div>
+      ${a.supplements.map(s => `
+        <div class="supp-card">
+          <div class="supp-name">${s.nutrient} <span style="font-weight:300;color:var(--muted);">— ${s.level}% of daily need</span></div>
+          <div class="supp-bar-wrap">
+            <div class="supp-bar-bg"><div class="supp-bar-fill" style="width:${s.level}%;background:${s.level < 30 ? 'var(--red)' : 'var(--gold)'};"></div></div>
+            <span class="supp-pct">${s.level}%</span>
+          </div>
+          <div class="supp-text">💡 ${s.suggestion}</div>
+          <div class="supp-dosage">📌 ${s.dosage} · ⏰ ${s.timing}</div>
+        </div>`).join('')}
+    </div>` : ''}
     <button class="pdf-btn" onclick="exportPDF()">📄 Export Health Report as PDF</button>
     ${!currentUser ? `<div style="text-align:center;padding:12px;font-size:12px;color:var(--muted);">Sign in to save this → <button onclick="showAuthModal(false)" style="border:none;background:none;color:var(--gold);font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;">Sign In</button></div>` : ''}
   `;
@@ -717,10 +900,37 @@ function exportPDF() {
     doc.text(title.toUpperCase(), 20, y); y += 6;
     items.forEach(item => { doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(61,58,53); const lines = doc.splitTextToSize('• ' + item, 170); doc.text(lines, 20, y); y += lines.length * 5 + 1; });
   };
+  const d = a.data || {};
+
   addText('DAILY WELLNESS', 10, false, [196,168,130]); y += 2;
   addText('Health Analysis Report', 22, true); y += 2;
   addText(date, 10, false, [155,150,144]); y += 6;
   doc.setDrawColor(196,168,130); doc.line(20, y, 190, y); y += 8;
+
+  // ── ABOUT YOU SECTION ──
+  addText('About You', 13, true);
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(61,58,53);
+  const aboutCols = [];
+  if (d.name)   aboutCols.push(`Name: ${d.name}`);
+  if (d.age)    aboutCols.push(`Age: ${d.age} yrs`);
+  if (d.gender) aboutCols.push(`Gender: ${d.gender.charAt(0).toUpperCase() + d.gender.slice(1)}`);
+  if (d.weight) aboutCols.push(`Weight: ${d.weight} kg`);
+  if (d.height) aboutCols.push(`Height: ${d.height} cm`);
+  if (aboutCols.length) {
+    // Print in two columns
+    const half = Math.ceil(aboutCols.length / 2);
+    const col1 = aboutCols.slice(0, half);
+    const col2 = aboutCols.slice(half);
+    const maxRows = Math.max(col1.length, col2.length);
+    for (let i = 0; i < maxRows; i++) {
+      if (col1[i]) doc.text(col1[i], 20, y);
+      if (col2[i]) doc.text(col2[i], 110, y);
+      y += 6;
+    }
+  }
+  y += 2;
+  doc.setDrawColor(232,228,223); doc.line(20, y, 190, y); y += 8;
+
   doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(196,168,130); doc.text(`Lifestyle Score: ${a.lifestyle_score}/100`, 20, y);
   doc.setTextColor(74,124,89); doc.text(`Diet Score: ${a.diet_score}/100`, 110, y); y += 10;
   addText('Overall Insight', 12, true); doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(61,58,53);
@@ -748,7 +958,7 @@ function exportPDF() {
   }
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(155,150,144); doc.text(`Daily Wellness Report · Page ${i} of ${pageCount}`, 20, 287); }
-  doc.save(`Daily-Wellness-Report-${new Date().toISOString().split('T')[0]}.pdf`);
+  const userName = (a.data?.name || '').replace(/\s+/g,'-') || 'Report'; doc.save(`Daily-Wellness-${userName}-${new Date().toISOString().split('T')[0]}.pdf`);
 }
 </script>
 </body>
