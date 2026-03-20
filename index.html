@@ -51,7 +51,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);overflow
 .auth-screen.hidden{display:none;}
 .auth-box{background:var(--white);border-radius:28px;padding:40px 32px;width:100%;max-width:480px;box-shadow:var(--shl);overflow-y:auto;max-height:calc(100vh - 40px);}
 .auth-logo-wrap{text-align:center;margin-bottom:24px;}
-.auth-logo-icon{width:88px;height:88px;border-radius:24px;background:var(--gold-l);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:40px;border:2px solid var(--line);}
+.auth-logo-icon{width:88px;height:88px;border-radius:24px;background:var(--ink);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:var(--font-serif);font-size:28px;font-weight:400;color:var(--gold);letter-spacing:2px;border:2px solid var(--ink);}
 .auth-main-title{font-family:var(--font-serif);font-size:34px;font-weight:400;text-align:center;margin-bottom:4px;line-height:1.1;}
 .auth-main-title em{font-style:italic;color:var(--gold-d);}
 .auth-sub-text{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;font-weight:400;letter-spacing:.3px;}
@@ -106,7 +106,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);overflow
 .header h1 em{font-style:italic;color:var(--gold);}
 .header-sub{font-size:12px;color:rgba(255,255,255,.4);font-weight:400;margin-top:6px;letter-spacing:.3px;}
 .gym-logo-wrap{width:60px;height:60px;border-radius:16px;overflow:hidden;border:2px solid rgba(255,255,255,.15);flex-shrink:0;background:var(--gold-l);}
-.gym-logo-default{width:100%;height:100%;background:rgba(196,168,130,.15);display:flex;align-items:center;justify-content:center;font-size:26px;}
+.gym-logo-default{width:100%;height:100%;background:rgba(196,168,130,.15);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--gold);letter-spacing:1px;}
 .gym-logo-img{width:100%;height:100%;object-fit:cover;display:none;border-radius:14px;}
 .status-bar{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(255,255,255,.1);}
 .gym-badge{font-size:12px;color:var(--gold);font-weight:700;background:rgba(196,168,130,.15);border:1px solid rgba(196,168,130,.3);padding:5px 14px;border-radius:24px;letter-spacing:.3px;}
@@ -174,16 +174,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .workout-card{background:var(--white);border-radius:var(--r);padding:22px;margin:14px 16px 0;box-shadow:var(--sh);border:2px solid var(--gold);display:none;transition:background .3s;}
 .workout-card.show{display:block;animation:fadeUp .3s ease;}
 .wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px;}
-.wtype{padding:14px 8px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;font-family:var(--font-sans);display:flex;flex-direction:column;align-items:center;gap:5px;user-select:none;}
-.wtype span{font-size:22px;}
+.wtype{padding:13px 10px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;font-family:var(--font-sans);user-select:none;line-height:1.3;}
 .wtype.on{background:var(--gold-l);border-color:var(--gold);color:var(--gold-d);font-weight:700;}
 .ichip{padding:10px 16px;border-radius:24px;border:2px solid var(--line);background:var(--bg);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-sans);user-select:none;}
 .ichip.on{background:var(--gold-l);border-color:var(--gold);color:var(--gold-d);font-weight:700;}
 
 /* NAV */
 .nav{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:calc(var(--max) - 24px);background:var(--ink);border-radius:22px;padding:6px;box-shadow:var(--shl);z-index:99;display:none;}
-.nb{flex:1;padding:9px 4px;border:none;background:transparent;color:rgba(255,255,255,.35);font-family:var(--font-sans);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;border-radius:16px;transition:all .25s;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.nb span{font-size:17px;}
+.nb{flex:1;padding:11px 4px;border:none;background:transparent;color:rgba(255,255,255,.35);font-family:var(--font-sans);font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:16px;transition:all .25s;}
 .nb.on{background:rgba(184,150,90,.2);color:var(--gold);}
 .nb.on[data-t=meals]{background:rgba(61,107,74,.25);color:#7DC895;}
 .nb.on[data-t=analysis]{background:rgba(61,95,122,.25);color:#7AAAC9;}
@@ -361,7 +359,7 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
 <div class="auth-screen" id="auth-screen">
   <div class="auth-box">
     <div class="auth-logo-wrap">
-      <div class="auth-logo-icon">🏋️</div>
+      <div class="auth-logo-icon">DW</div>
       <div class="auth-main-title"><em>Daily Wellness</em></div>
       <div class="auth-sub-text">Premium Gym Management Platform</div>
     </div>
@@ -406,7 +404,7 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
 <div class="auth-screen hidden" id="pending-screen">
   <div class="auth-box">
     <div class="pending-box">
-      <div class="pending-icon">⏳</div>
+      <div class="pending-icon" style="font-family:var(--font-serif);font-size:48px;color:var(--gold-d);">~</div>
       <div class="pending-title">Account Under Review</div>
       <div class="pending-sub">Your gym registration has been received.<br>We'll approve your account within 24 hours.<br>You'll be notified once approved.</div>
       <button class="abtn" onclick="handleLogout()" style="max-width:240px;margin:0 auto;display:block;">← Back to Login</button>
@@ -437,7 +435,7 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
           <p class="header-sub">AI-powered wellness · Premium gyms</p>
         </div>
         <div class="gym-logo-wrap" id="gym-logo-wrap">
-          <div class="gym-logo-default" id="gym-logo-default">🏋️</div>
+          <div class="gym-logo-default" id="gym-logo-default">DW</div>
           <img id="gym-logo-img" class="gym-logo-img" src="" alt="Gym Logo">
         </div>
       </div>
@@ -475,11 +473,11 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
           <div class="clbl">Sleep</div>
           <div class="flbl" style="margin-bottom:10px;">Hours of sleep last night</div>
           <div class="chips" id="sleep-chips">
-            <div class="chip" data-val="5" onclick="pickSleep(this,'5')">😴 Less than 6 hrs</div>
-            <div class="chip" data-val="6" onclick="pickSleep(this,'6')">🌙 6 Hours</div>
-            <div class="chip on" data-val="7" onclick="pickSleep(this,'7')">✨ 7 Hours</div>
-            <div class="chip" data-val="8" onclick="pickSleep(this,'8')">💤 8 Hours</div>
-            <div class="chip" data-val="9" onclick="pickSleep(this,'9')">🛌 More than 8 hrs</div>
+            <div class="chip" data-val="5" onclick="pickSleep(this,'5')">Less than 6 hrs</div>
+            <div class="chip" data-val="6" onclick="pickSleep(this,'6')">6 Hours</div>
+            <div class="chip on" data-val="7" onclick="pickSleep(this,'7')">7 Hours</div>
+            <div class="chip" data-val="8" onclick="pickSleep(this,'8')">8 Hours</div>
+            <div class="chip" data-val="9" onclick="pickSleep(this,'9')">More than 8 hrs</div>
           </div>
         </div>
         <div class="card">
@@ -506,39 +504,39 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
           <div class="flbl" style="margin-bottom:6px;">Type of Workout</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:12px;font-weight:500;">Tap to select one or more</div>
           <div class="wgrid" id="workout-type-grid">
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>🏋️</span>Weight Lifting</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>🏃</span>Cardio</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>⚡</span>Functional</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>🔥</span>CrossFit</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>🥊</span>Boxing</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>🥋</span>MMA</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>🧘</span>Yoga</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>🏊</span>Swimming</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>🚴</span>Cycling</div>
-            <div class="wtype" onclick="this.classList.toggle('on')"><span>⚽</span>Sports</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">Weight Lifting</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">Cardio</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">Functional</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">CrossFit</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">Boxing</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">MMA</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">Yoga</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">Swimming</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">Cycling</div>
+            <div class="wtype" onclick="this.classList.toggle('on')">Sports</div>
           </div>
           <div style="margin-top:16px;">
             <div class="flbl">Intensity</div>
             <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
-              <div class="ichip" onclick="pickIntensity(this)">🟢 Light</div>
-              <div class="ichip" onclick="pickIntensity(this)">🟡 Moderate</div>
-              <div class="ichip" onclick="pickIntensity(this)">🔴 Intense</div>
+              <div class="ichip" onclick="pickIntensity(this)">Light</div>
+              <div class="ichip" onclick="pickIntensity(this)">Moderate</div>
+              <div class="ichip" onclick="pickIntensity(this)">Intense</div>
             </div>
           </div>
           <div style="margin-top:16px;">
             <div class="flbl">Workout Goals</div>
             <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500;">Tap to select one or more</div>
             <div class="wgrid" id="workout-goals-grid">
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>⚖️</span>Weight Loss</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>💪</span>Muscle Gain</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>🏅</span>Endurance</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>🔩</span>Strength</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>🤸</span>Flexibility</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>✨</span>General Fitness</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>🏆</span>Sports Perf.</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>🔥</span>Fat Burn</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>🧠</span>Stress Relief</div>
-              <div class="wtype" onclick="this.classList.toggle('on')"><span>🩺</span>Rehab</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Weight Loss</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Muscle Gain</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Endurance</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Strength</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Flexibility</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">General Fitness</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Sports Perf.</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Fat Burn</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Stress Relief</div>
+              <div class="wtype" onclick="this.classList.toggle('on')">Rehab</div>
             </div>
           </div>
         </div>
@@ -546,12 +544,12 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
         <div class="card">
           <div class="clbl">Mood</div>
           <div class="chips" id="mood">
-            <div class="chip" onclick="pickMood(this)">😄 Great</div>
-            <div class="chip" onclick="pickMood(this)">😊 Good</div>
-            <div class="chip" onclick="pickMood(this)">😐 Okay</div>
-            <div class="chip" onclick="pickMood(this)">😔 Tired</div>
-            <div class="chip" onclick="pickMood(this)">😰 Stressed</div>
-            <div class="chip" onclick="pickMood(this)">😤 Anxious</div>
+            <div class="chip" onclick="pickMood(this)">Great</div>
+            <div class="chip" onclick="pickMood(this)">Good</div>
+            <div class="chip" onclick="pickMood(this)">Okay</div>
+            <div class="chip" onclick="pickMood(this)">Tired</div>
+            <div class="chip" onclick="pickMood(this)">Stressed</div>
+            <div class="chip" onclick="pickMood(this)">Anxious</div>
           </div>
         </div>
         <div class="card" style="margin-bottom:8px;">
@@ -580,9 +578,9 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
     <!-- ANALYSIS -->
     <div class="section" id="sec-analysis">
       <div class="sec-inner">
-        <div id="empty-state" class="empty"><div class="ei">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong> to get started.</p></div>
+        <div id="empty-state" class="empty"><div class="ei" style="font-family:var(--font-serif);font-size:48px;color:var(--gold-d);">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong> to get started.</p></div>
         <div id="loading-state" style="display:none;padding:44px 20px;text-align:center;">
-          <div style="font-size:44px;margin-bottom:18px;animation:pulse 1.5s ease-in-out infinite;">🔬</div>
+          <div style="font-size:44px;margin-bottom:18px;animation:pulse 1.5s ease-in-out infinite;">◎</div>
           <div style="font-family:var(--font-serif);font-size:26px;color:var(--ink);margin-bottom:6px;font-weight:400;">Analysing your client…</div>
           <div style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:24px;" id="lmsg">Reading data…</div>
           <div style="background:var(--line);border-radius:99px;height:5px;overflow:hidden;margin-bottom:8px;">
@@ -590,11 +588,11 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
           </div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:26px;font-weight:600;" id="ppct">0%</div>
           <div style="display:flex;flex-direction:column;gap:10px;text-align:left;">
-            <div class="lstep" id="s1">🌅 Checking daily routine</div>
-            <div class="lstep" id="s2">🥗 Analysing meals & nutrition</div>
-            <div class="lstep" id="s3">🧮 Calculating macros & micros</div>
-            <div class="lstep" id="s4">🍛 Preparing Indian meal suggestions</div>
-            <div class="lstep" id="s5">✨ Generating wellness report</div>
+            <div class="lstep" id="s1">Checking daily routine</div>
+            <div class="lstep" id="s2">Analysing meals & nutrition</div>
+            <div class="lstep" id="s3">Calculating macros & micros</div>
+            <div class="lstep" id="s4">Preparing Indian meal suggestions</div>
+            <div class="lstep" id="s5">Generating wellness report</div>
           </div>
         </div>
         <div id="results" style="display:none;padding-bottom:16px;"></div>
@@ -605,7 +603,7 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
     <div class="section" id="sec-history">
       <div class="sec-inner">
         <div class="sec-head"><div class="sec-title">Client <em>History</em></div><div class="sec-desc">All saved analyses</div></div>
-        <div class="search-bar"><span style="font-size:18px;">🔍</span><input type="text" id="history-search" placeholder="Search by client name…" oninput="filterHistory()"></div>
+        <div class="search-bar"><span style="font-size:13px;color:var(--muted);font-weight:700;">Search</span><input type="text" id="history-search" placeholder="Search by client name…" oninput="filterHistory()"></div>
         <div id="history-list" style="padding-bottom:16px;"></div>
       </div>
     </div>
@@ -615,16 +613,16 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
       <div class="sec-inner">
         <div id="progress-trainers-view">
           <div class="sec-head"><div class="sec-title">PT <em>Progress</em></div><div class="sec-desc">Personal training client analyses</div></div>
-          <div class="search-bar"><span style="font-size:18px;">🔍</span><input type="text" id="trainer-search" placeholder="Search trainer name…" oninput="filterTrainers()"></div>
+          <div class="search-bar"><span style="font-size:13px;color:var(--muted);font-weight:700;">Search</span><input type="text" id="trainer-search" placeholder="Search trainer name…" oninput="filterTrainers()"></div>
           <div id="trainers-list" style="padding-bottom:16px;"></div>
         </div>
         <div id="progress-clients-view" style="display:none;">
-          <button class="back-btn" onclick="showTrainersView()">← Back to Trainers</button>
+          <button class="back-btn" onclick="showTrainersView()">← Trainers</button>
           <div class="sec-head" style="padding-top:10px;">
             <div class="sec-title" id="progress-trainer-title">Trainer</div>
             <div class="sec-desc">Client analyses</div>
           </div>
-          <div class="search-bar"><span style="font-size:18px;">🔍</span><input type="text" id="client-search" placeholder="Search by client name…" oninput="filterClients()"></div>
+          <div class="search-bar"><span style="font-size:13px;color:var(--muted);font-weight:700;">Search</span><input type="text" id="client-search" placeholder="Search by client name…" oninput="filterClients()"></div>
           <div id="clients-list" style="padding-bottom:16px;"></div>
         </div>
       </div>
@@ -634,11 +632,11 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
 </div>
 
 <nav class="nav" id="main-nav" style="display:flex;">
-  <button class="nb on" data-t="routine" onclick="go('routine')"><span>🌅</span>Routine</button>
-  <button class="nb" data-t="meals" onclick="go('meals')"><span>🥗</span>Meals</button>
-  <button class="nb" data-t="analysis" onclick="go('analysis')"><span>✦</span>Analysis</button>
-  <button class="nb" data-t="history" onclick="go('history')"><span>📋</span>History</button>
-  <button class="nb" data-t="progress" onclick="go('progress')"><span>📈</span>PT</button>
+  <button class="nb on" data-t="routine" onclick="go('routine')">Routine</button>
+  <button class="nb" data-t="meals" onclick="go('meals')">Meals</button>
+  <button class="nb" data-t="analysis" onclick="go('analysis')">Analysis</button>
+  <button class="nb" data-t="history" onclick="go('history')">History</button>
+  <button class="nb" data-t="progress" onclick="go('progress')">PT</button>
 </nav>
 <div class="ctawrap" id="main-cta" style="display:block;">
   <button class="cta" id="cta" onclick="ctaClick()">
@@ -925,9 +923,9 @@ function renderResults(a){
   const items=(arr,cls)=>arr.map(x=>`<div class="ri ${cls}">${x}</div>`).join('');
   const vbars=Object.entries(a.vitamins).map(([k,v])=>`<div class="brow"><div class="btop"><span class="bname">${k}</span><span class="bpct">${v}%</span></div><div class="bbg"><div class="bfill" style="width:${v}%;background:${bc(v)};"></div></div></div>`).join('');
   let msugs='';
-  if(a.indian_meal_suggestions){const ms=a.indian_meal_suggestions;[['🌅 Breakfast',ms.breakfast],['☀️ Lunch',ms.lunch],['🌙 Dinner',ms.dinner],['🍎 Snacks',ms.snacks],['💪 Pre-Workout',ms.pre_workout],['🥤 Post-Workout',ms.post_workout]].forEach(([l,it])=>{if(it&&it.length)msugs+=`<div class="ri meal"><strong style="font-size:10px;color:var(--gold-d);font-weight:700;">${l}</strong><br>${it.join(' · ')}</div>`;});}
+  if(a.indian_meal_suggestions){const ms=a.indian_meal_suggestions;[['Breakfast',ms.breakfast],['Lunch',ms.lunch],['Dinner',ms.dinner],['Snacks',ms.snacks],['Pre-Workout',ms.pre_workout],['Post-Workout',ms.post_workout]].forEach(([l,it])=>{if(it&&it.length)msugs+=`<div class="ri meal"><strong style="font-size:10px;color:var(--gold-d);font-weight:700;">${l}</strong><br>${it.join(' · ')}</div>`;});}
   let suppHtml='';
-  if(a.supplements&&a.supplements.length){suppHtml=`<div class="rgroup"><div class="rhead msug">💊 Supplement Suggestions</div>${a.supplements.map(s=>`<div class="supp-card"><div class="supp-name">${s.nutrient} <span style="font-weight:400;color:var(--muted);font-size:12px;">— ${s.level}% of daily need</span></div><div class="supp-bar-wrap"><div class="supp-bar-bg"><div class="supp-bar-fill" style="width:${s.level}%;background:${s.level<30?'var(--red)':'var(--gold)'}"></div></div><span class="supp-pct">${s.level}%</span></div><div class="supp-text">💡 ${s.suggestion}</div><div class="supp-dosage">📌 ${s.dosage} · ⏰ ${s.timing}</div></div>`).join('')}</div>`;}
+  if(a.supplements&&a.supplements.length){suppHtml=`<div class="rgroup"><div class="rhead msug">💊 Supplement Suggestions</div>${a.supplements.map(s=>`<div class="supp-card"><div class="supp-name">${s.nutrient} <span style="font-weight:400;color:var(--muted);font-size:12px;">— ${s.level}% of daily need</span></div><div class="supp-bar-wrap"><div class="supp-bar-bg"><div class="supp-bar-fill" style="width:${s.level}%;background:${s.level<30?'var(--red)':'var(--gold)'}"></div></div><span class="supp-pct">${s.level}%</span></div><div class="supp-text">${s.suggestion}</div><div class="supp-dosage">${s.dosage} · ${s.timing}</div></div>`).join('')}</div>`;}
   const ds=a.date?new Date(a.date).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
   el.innerHTML=`
     ${ds?`<div style="text-align:center;padding:16px 0 0;font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.5px;">${ds}</div>`:''}
@@ -965,10 +963,10 @@ function renderResults(a){
     </div>
     ${suppHtml}
     <div class="save-btns">
-      <button class="save-btn primary" onclick="saveToHistory(event)">💾 Save Analysis</button>
-      <button class="save-btn secondary" onclick="openPTModal()">👤 Save under PT</button>
+      <button class="save-btn primary" onclick="saveToHistory(event)">Save Analysis</button>
+      <button class="save-btn secondary" onclick="openPTModal()">Save under PT</button>
     </div>
-    <button class="pdf-btn" onclick="exportPDF()">📄 Export as PDF Report</button>
+    <button class="pdf-btn" onclick="exportPDF()">Export Report as PDF</button>
   `;
 }
 async function saveToHistory(e){
@@ -976,8 +974,8 @@ async function saveToHistory(e){
   try{
     const fb=window._fb,uid=fb.auth.currentUser.uid;
     await fb.addDoc(fb.collection(fb.db,'gyms',uid,'history'),{...lastAnalysis,clientName:lastAnalysis.clientName||lastAnalysis.data?.name||'Client',savedAt:fb.serverTimestamp(),type:'general'});
-    const btn=e.target;btn.textContent='✓ Saved!';btn.style.background='var(--green)';
-    setTimeout(()=>{btn.textContent='💾 Save Analysis';btn.style.background='';},2500);
+    const btn=e.target;btn.textContent='Saved';btn.style.background='var(--green)';
+    setTimeout(()=>{btn.textContent='Save Analysis';btn.style.background='';},2500);
   }catch(e){alert('Error saving: '+e.message);}
 }
 function openPTModal(){document.getElementById('pt-modal').classList.remove('hidden');document.getElementById('pt-trainer-name').value='';document.getElementById('pt-err').textContent='';}
@@ -990,7 +988,7 @@ async function confirmSavePT(){
     await fb.addDoc(fb.collection(fb.db,'gyms',uid,'pt_analyses'),{...lastAnalysis,clientName:lastAnalysis.clientName||lastAnalysis.data?.name||'Client',trainerName,savedAt:fb.serverTimestamp(),type:'pt'});
     closePTModal();
     const btn=document.querySelector('.save-btn.secondary');
-    if(btn){btn.textContent='✓ Saved under PT!';btn.style.background='var(--green)';btn.style.color='white';setTimeout(()=>{btn.textContent='👤 Save under PT';btn.style.background='';btn.style.color='';},2500);}
+    if(btn){btn.textContent='Saved under PT';btn.style.background='var(--green)';btn.style.color='white';setTimeout(()=>{btn.textContent='Save under PT';btn.style.background='';btn.style.color='';},2500);}
   }catch(e){document.getElementById('pt-err').textContent='Error: '+e.message;}
 }
 async function loadHistory(){
@@ -1035,7 +1033,7 @@ function renderTrainers(){
   allPTData.forEach(a=>{const t=a.trainerName||'Unknown';if(!trainers[t])trainers[t]={name:t,count:0,clients:new Set()};trainers[t].count++;trainers[t].clients.add(a.clientName||'Client');});
   const list=Object.values(trainers).filter(t=>t.name.toLowerCase().includes(q));
   if(!list.length){el.innerHTML='<div class="empty"><div class="ei">📈</div><p>No PT analyses yet.<br>Use "Save under PT" after analysis.</p></div>';return;}
-  el.innerHTML=list.map(t=>`<div class="trainer-card" onclick="showClientsView('${t.name}')"><div class="trainer-avatar">${t.name.charAt(0).toUpperCase()}</div><div><div class="trainer-name">${t.name}</div><div class="trainer-count">${t.count} ${t.count===1?'analysis':'analyses'} · ${t.clients.size} ${t.clients.size===1?'client':'clients'}</div></div><div style="margin-left:auto;color:var(--muted);font-size:22px;">›</div></div>`).join('');
+  el.innerHTML=list.map(t=>`<div class="trainer-card" onclick="showClientsView('${t.name}')"><div class="trainer-avatar">${t.name.charAt(0).toUpperCase()}</div><div><div class="trainer-name">${t.name}</div><div class="trainer-count">${t.count} ${t.count===1?'analysis':'analyses'} · ${t.clients.size} ${t.clients.size===1?'client':'clients'}</div></div><div style="margin-left:auto;color:var(--muted);font-size:18px;font-weight:300;">›</div></div>`).join('');
 }
 function filterTrainers(){renderTrainers();}
 function showTrainersView(){document.getElementById('progress-trainers-view').style.display='block';document.getElementById('progress-clients-view').style.display='none';}
@@ -1078,7 +1076,7 @@ function resetApp(){
   document.querySelectorAll('.wtype,.ichip').forEach(w=>w.classList.remove('on'));
   initMeals();
   document.getElementById('empty-state').style.display='block';
-  document.getElementById('empty-state').innerHTML='<div class="ei">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong> to get started.</p>';
+  document.getElementById('empty-state').innerHTML='<div class="ei" style="font-family:var(--font-serif);font-size:48px;color:var(--gold-d);">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong> to get started.</p>';
   document.getElementById('results').style.display='none';
   document.getElementById('loading-state').style.display='none';
   go('routine');
