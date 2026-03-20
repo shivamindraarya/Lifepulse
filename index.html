@@ -163,10 +163,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .addr:hover{border-color:var(--gold);color:var(--gold-d);background:var(--gold-l);}
 .act-row{border-bottom:2px solid var(--bg);padding-bottom:14px;margin-bottom:14px;}
 .act-row:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0;}
-.act-row-top{display:grid;grid-template-columns:90px 1fr 36px;gap:8px;align-items:center;}
+.act-row-top{display:grid;grid-template-columns:1fr 36px;gap:8px;align-items:center;}
 .act-row-dur{display:flex;align-items:center;gap:10px;margin-top:8px;}
-.dur-label{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
-.dur-input{flex:1;font-size:13px;padding:9px 13px;}
+.dur-label{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+.dur-input{flex:1;font-size:12px;padding:7px 11px;}
 .del{width:36px;height:36px;border-radius:10px;background:transparent;border:2px solid var(--line);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
 .del:hover{border-color:var(--red);color:var(--red);background:var(--red-l);}
 
@@ -475,7 +475,7 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
           <div class="chips" id="sleep-chips">
             <div class="chip" data-val="5" onclick="pickSleep(this,'5')">Less than 6 hrs</div>
             <div class="chip" data-val="6" onclick="pickSleep(this,'6')">6 Hours</div>
-            <div class="chip on" data-val="7" onclick="pickSleep(this,'7')">7 Hours</div>
+            <div class="chip" data-val="7" onclick="pickSleep(this,'7')">7 Hours</div>
             <div class="chip" data-val="8" onclick="pickSleep(this,'8')">8 Hours</div>
             <div class="chip" data-val="9" onclick="pickSleep(this,'9')">More than 8 hrs</div>
           </div>
@@ -485,8 +485,17 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
           <div id="act-list">
             <div class="act-row">
               <div class="act-row-top">
-                <input type="time" value="07:30" style="padding:11px;font-size:14px;">
-                <input type="text" placeholder="e.g. Morning jog" oninput="checkWorkout()">
+                <input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;">
+                <button class="del" onclick="removeActRow(this)">×</button>
+              </div>
+              <div class="act-row-dur">
+                <span class="dur-label">Duration</span>
+                <input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins">
+              </div>
+            </div>
+            <div class="act-row">
+              <div class="act-row-top">
+                <input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;">
                 <button class="del" onclick="removeActRow(this)">×</button>
               </div>
               <div class="act-row-dur">
@@ -569,8 +578,14 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
         </div>
         <div class="card" style="margin-bottom:8px;">
           <div class="clbl">Hydration</div>
-          <div class="sltop"><span class="slname">Water intake today</span><span class="slnum" id="wv" style="color:var(--blue);">2L</span></div>
-          <input type="range" min="1" max="10" step="0.5" value="2" oninput="document.getElementById('wv').textContent=this.value+'L'">
+          <div class="flbl" style="margin-bottom:10px;">Water intake today</div>
+          <div class="chips" id="water-chips">
+            <div class="chip" data-val="1.5" onclick="pickWater(this)">Less than 2L</div>
+            <div class="chip" data-val="2.5" onclick="pickWater(this)">2 — 3 Liters</div>
+            <div class="chip" data-val="3.5" onclick="pickWater(this)">3 — 4 Liters</div>
+            <div class="chip" data-val="4.5" onclick="pickWater(this)">4 — 5 Liters</div>
+            <div class="chip" data-val="5.5" onclick="pickWater(this)">More than 5L</div>
+          </div>
         </div>
       </div>
     </div>
@@ -832,16 +847,17 @@ function go(t){
 function ctaClick(){const t=document.querySelector('.nb.on')?.dataset.t;if(t==='routine')go('meals');else analyse();}
 function pickMood(c){document.querySelectorAll('#mood .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');}
 function pickSleep(el,val){document.querySelectorAll('#sleep-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+function pickWater(el){document.querySelectorAll('#water-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
 function pickIntensity(el){document.querySelectorAll('.ichip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
 function removeActRow(btn){btn.closest('.act-row').remove();checkWorkout();}
 function addAct(){
   const div=document.createElement('div');div.className='act-row';
-  div.innerHTML=`<div class="act-row-top"><input type="time" style="padding:11px;font-size:14px;"><input type="text" placeholder="Activity" oninput="checkWorkout()"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div>`;
+  div.innerHTML=`<div class="act-row-top"><input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div>`;
   document.getElementById('act-list').appendChild(div);
 }
 const WORKOUT_KW=['workout','gym','exercise','training','cardio','run','jog','walk','cycling','swim','yoga','crossfit','boxing','mma','lifting','weights','hiit','zumba','dance','sport','football','cricket','badminton','tennis','basketball','physical'];
 function checkWorkout(){
-  const inputs=document.querySelectorAll('#act-list input[type="text"]');
+  const inputs=document.querySelectorAll('#act-list input[type="text"]:not(.act-dur)');
   let found=false;
   inputs.forEach(i=>{if(WORKOUT_KW.some(kw=>i.value.toLowerCase().includes(kw)))found=true;});
   document.getElementById('workout-card').classList.toggle('show',found);
@@ -871,15 +887,16 @@ function ensureRow(){
 function getData(){
   const acts=[];
   document.querySelectorAll('#act-list .act-row').forEach(r=>{
-    const ins=r.querySelectorAll('input');const dur=r.querySelector('.act-dur')?.value.trim()||'';
-    if(ins[1]?.value.trim())acts.push(`${ins[0].value||'?'}: ${ins[1].value}${dur?' ('+dur+')':''}`);
+    const actInput=r.querySelector('input[type="text"]:not(.act-dur)');
+    const dur=r.querySelector('.act-dur')?.value.trim()||'';
+    if(actInput?.value.trim())acts.push(`${actInput.value.trim()}${dur?' ('+dur+')':''}`);
   });
   const mm={Breakfast:[],Lunch:[],Dinner:[],Snacks:[],'Pre-Workout':[],'Post-Workout':[]};
   document.querySelectorAll('#meal-list .erow').forEach(r=>{const t=r.querySelector('.meal-type')?.value,f=r.querySelector('.meal-food')?.value.trim();if(t&&f)mm[t].push(f);});
   const wtypes=[...document.querySelectorAll('#workout-type-grid .wtype.on')].map(w=>w.textContent.trim().replace(/[^\w\s]/g,'').trim()).filter(Boolean);
   const wgoals=[...document.querySelectorAll('#workout-goals-grid .wtype.on')].map(w=>w.textContent.trim().replace(/[^\w\s]/g,'').trim()).filter(Boolean);
   const wintensity=document.querySelector('.ichip.on')?.textContent?.replace(/[🟢🟡🔴]/g,'').trim()||'';
-  return{name:document.getElementById('user-name-input')?.value.trim()||'Client',age:document.getElementById('age').value,weight:document.getElementById('weight').value,height:document.getElementById('height').value,gender:document.getElementById('gender').value,sleep:document.querySelector('#sleep-chips .chip.on')?.dataset.val||'7',wake:'',water:document.querySelector('[oninput*="wv"]').value,mood:document.querySelector('#mood .chip.on')?.textContent||'Not set',notes:document.getElementById('notes').value,activities:acts,breakfast:mm['Breakfast'],lunch:mm['Lunch'],dinner:mm['Dinner'],snacks:mm['Snacks'],preworkout:mm['Pre-Workout'],postworkout:mm['Post-Workout'],workoutTypes:wtypes,workoutGoals:wgoals,workoutIntensity:wintensity};
+  return{name:document.getElementById('user-name-input')?.value.trim()||'Client',age:document.getElementById('age').value,weight:document.getElementById('weight').value,height:document.getElementById('height').value,gender:document.getElementById('gender').value,sleep:document.querySelector('#sleep-chips .chip.on')?.dataset.val||'7',wake:'',water:document.querySelector('#water-chips .chip.on')?.dataset.val||'2',mood:document.querySelector('#mood .chip.on')?.textContent||'Not set',notes:document.getElementById('notes').value,activities:acts,breakfast:mm['Breakfast'],lunch:mm['Lunch'],dinner:mm['Dinner'],snacks:mm['Snacks'],preworkout:mm['Pre-Workout'],postworkout:mm['Post-Workout'],workoutTypes:wtypes,workoutGoals:wgoals,workoutIntensity:wintensity};
 }
 async function analyse(){
   const d=getData(),btn=document.getElementById('cta');
@@ -1063,15 +1080,17 @@ function filterClients(){renderClients();}
 function viewPTItem(a){lastAnalysis=a;go('analysis');renderResults(a);}
 function resetApp(){
   lastAnalysis=null;
-  document.querySelectorAll('#sleep-chips .chip').forEach(c=>c.classList.remove('on'));document.querySelector('#sleep-chips .chip[data-val="7"]')?.classList.add('on');
-  document.querySelector('[oninput*="wv"]').value=2;document.getElementById('wv').textContent='2L';
+  document.querySelectorAll('#sleep-chips .chip, #water-chips .chip').forEach(c=>c.classList.remove('on'));
+
   document.getElementById('wake').value='07:00';
   document.getElementById('user-name-input').value='';
   ['age','weight','height'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('gender').value='male';
   document.getElementById('notes').value='';
   document.querySelectorAll('#mood .chip').forEach(c=>c.classList.remove('on'));
-  document.getElementById('act-list').innerHTML=`<div class="act-row"><div class="act-row-top"><input type="time" value="07:30" style="padding:11px;font-size:14px;"><input type="text" placeholder="e.g. Morning jog" oninput="checkWorkout()"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div></div>`;
+  document.getElementById('act-list').innerHTML=`
+    <div class="act-row"><div class="act-row-top"><input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div></div>
+    <div class="act-row"><div class="act-row-top"><input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div></div>`;
   document.getElementById('workout-card').classList.remove('show');
   document.querySelectorAll('.wtype,.ichip').forEach(w=>w.classList.remove('on'));
   initMeals();
