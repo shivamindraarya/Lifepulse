@@ -709,7 +709,7 @@ async function handleAuthSubmit(){
   }finally{btn.disabled=false;btn.textContent=isLogin?'Login':'Register Gym';}
 }
 function showPendingScreen(){document.getElementById('auth-screen').classList.add('hidden');document.getElementById('pending-screen').classList.remove('hidden');}
-function showMainApp(){
+async function showMainApp(){
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('pending-screen').classList.add('hidden');
   document.getElementById('app-wrap').style.display='flex';
@@ -725,9 +725,65 @@ function showMainApp(){
     img.onload=()=>{img.style.display='block';def.style.display='none';};
     img.onerror=()=>{img.style.display='none';def.style.display='flex';};
   }
+  // ── SINGLE DEVICE: generate & save session token ──
+  const token = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  localStorage.setItem('dw_session_token', token);
+  const fb = window._fb;
+  const uid = fb.auth.currentUser?.uid;
+  if(uid){
+    await fb.setDoc(fb.doc(fb.db,'gyms',uid), {activeSessionToken: token}, {merge: true});
+    // Start polling to check if this device is still the active session
+    startSessionWatch(uid, token);
+  }
   initMeals();initTheme();
 }
+
+let sessionWatchInterval = null;
+function startSessionWatch(uid, myToken){
+  if(sessionWatchInterval) clearInterval(sessionWatchInterval);
+  sessionWatchInterval = setInterval(async()=>{
+    try{
+      const fb = window._fb;
+      const gymDoc = await fb.getDoc(fb.doc(fb.db,'gyms',uid));
+      if(gymDoc.exists()){
+        const stored = gymDoc.data().activeSessionToken;
+        if(stored && stored !== myToken){
+          // Another device logged in — log out this device
+          clearInterval(sessionWatchInterval);
+          showSessionKickedScreen();
+        }
+      }
+    }catch(e){ console.log('Session check error:', e); }
+  }, 10000); // Check every 10 seconds
+}
+
+function showSessionKickedScreen(){
+  // Force logout
+  window._fb.fbSignOut(window._fb.auth);
+  gymData = null; lastAnalysis = null;
+  document.getElementById('app-wrap').style.display='none';
+  document.getElementById('main-nav').style.display='none';
+  document.getElementById('main-cta').style.display='none';
+  document.getElementById('pending-screen').classList.add('hidden');
+  // Show kicked screen
+  const authScreen = document.getElementById('auth-screen');
+  authScreen.classList.remove('hidden');
+  document.getElementById('auth-err').textContent = '⚠️ This account was logged in on another device. You have been signed out.';
+  document.getElementById('auth-err').style.color = 'var(--red)';
+  document.getElementById('auth-err').style.fontSize = '13px';
+  document.getElementById('auth-err').style.padding = '10px';
+  document.getElementById('auth-err').style.background = 'var(--red-l)';
+  document.getElementById('auth-err').style.borderRadius = '10px';
+}
 async function handleLogout(){
+  // Clear session token from Firestore on manual logout
+  try{
+    const fb = window._fb;
+    const uid = fb.auth.currentUser?.uid;
+    if(uid) await fb.setDoc(fb.doc(fb.db,'gyms',uid), {activeSessionToken: ''}, {merge: true});
+  }catch(e){}
+  if(sessionWatchInterval) clearInterval(sessionWatchInterval);
+  localStorage.removeItem('dw_session_token');
   await window._fb.fbSignOut(window._fb.auth);
   gymData=null;lastAnalysis=null;
   document.getElementById('app-wrap').style.display='none';
@@ -736,7 +792,27 @@ async function handleLogout(){
 }
 window.addEventListener('firebase-ready',()=>{
   window._fb.onAuthStateChanged(window._fb.auth,async(user)=>{
-    if(user){try{const gymDoc=await window._fb.getDoc(window._fb.doc(window._fb.db,'gyms',user.uid));if(gymDoc.exists()){const data=gymDoc.data();if(data.status==='approved'){gymData=data;showMainApp();}else showPendingScreen();}}catch(e){console.log(e);}}
+    if(user){
+      try{
+        const fb=window._fb;
+        const gymDoc=await fb.getDoc(fb.doc(fb.db,'gyms',user.uid));
+        if(gymDoc.exists()){
+          const data=gymDoc.data();
+          if(data.status==='approved'){
+            // Check if this device has an active session token stored
+            const myToken = localStorage.getItem('dw_session_token');
+            const storedToken = data.activeSessionToken;
+            // If there's a stored token and it doesn't match this device → kicked
+            if(storedToken && myToken && storedToken !== myToken){
+              showSessionKickedScreen();
+              return;
+            }
+            gymData=data;
+            showMainApp();
+          } else showPendingScreen();
+        }
+      }catch(e){console.log(e);}
+    }
     initTheme();
   });
 });
