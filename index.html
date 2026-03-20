@@ -109,15 +109,15 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--ink);overflow
 .gym-logo-default{width:100%;height:100%;background:rgba(196,168,130,.15);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--gold);letter-spacing:1px;}
 .gym-logo-img{width:100%;height:100%;object-fit:cover;display:none;border-radius:14px;}
 .status-bar{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(255,255,255,.1);}
-.gym-badge{font-size:12px;color:var(--gold);font-weight:700;background:rgba(196,168,130,.15);border:1px solid rgba(196,168,130,.3);padding:5px 14px;border-radius:24px;letter-spacing:.3px;}
+.gym-badge{font-size:14px;color:var(--gold);font-weight:700;background:rgba(196,168,130,.15);border:1px solid rgba(196,168,130,.4);padding:7px 18px;border-radius:24px;letter-spacing:.5px;font-family:var(--font-serif);}
 .hdr-btns{display:flex;align-items:center;gap:8px;}
 .theme-wrap{display:flex;align-items:center;gap:6px;}
-.theme-icon{font-size:12px;}
-.theme-btn{width:38px;height:21px;border-radius:24px;border:none;background:rgba(255,255,255,.15);cursor:pointer;position:relative;padding:0;transition:background .3s;flex-shrink:0;}
-.theme-btn::after{content:'';position:absolute;width:15px;height:15px;border-radius:50%;background:var(--white);top:3px;left:3px;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.theme-icon{font-size:13px;}
+.theme-btn{width:44px;height:24px;border-radius:24px;border:none;background:rgba(255,255,255,.15);cursor:pointer;position:relative;padding:0;transition:background .3s;flex-shrink:0;}
+.theme-btn::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--white);top:3px;left:3px;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
 body.dark .theme-btn{background:var(--gold);}
-body.dark .theme-btn::after{transform:translateX(17px);}
-.hdr-btn{font-size:11px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:6px 13px;border-radius:20px;cursor:pointer;font-family:var(--font-sans);font-weight:600;color:rgba(255,255,255,.7);transition:all .2s;letter-spacing:.3px;}
+body.dark .theme-btn::after{transform:translateX(20px);}
+.hdr-btn{font-size:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:8px 16px;border-radius:20px;cursor:pointer;font-family:var(--font-sans);font-weight:600;color:rgba(255,255,255,.8);transition:all .2s;letter-spacing:.3px;}
 .hdr-btn:hover{background:rgba(255,255,255,.2);color:#FFF;}
 .hdr-btn.danger{color:#E8876A;background:rgba(212,112,90,.15);border-color:rgba(212,112,90,.3);}
 .hdr-btn.danger:hover{background:rgba(212,112,90,.25);}
@@ -181,7 +181,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 
 /* NAV */
 .nav{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:calc(var(--max) - 24px);background:var(--ink);border-radius:22px;padding:6px;box-shadow:var(--shl);z-index:99;display:none;}
-.nb{flex:1;padding:11px 4px;border:none;background:transparent;color:rgba(255,255,255,.35);font-family:var(--font-sans);font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border-radius:16px;transition:all .25s;}
+.nb{flex:1;padding:12px 4px;border:none;background:transparent;color:rgba(255,255,255,.4);font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;border-radius:16px;transition:all .25s;}
 .nb.on{background:rgba(184,150,90,.2);color:var(--gold);}
 .nb.on[data-t=meals]{background:rgba(61,107,74,.25);color:#7DC895;}
 .nb.on[data-t=analysis]{background:rgba(61,95,122,.25);color:#7AAAC9;}
@@ -329,8 +329,7 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
   .wtype span{font-size:24px;}
   .ichip{padding:11px 20px;font-size:14px;}
   .snum{font-size:64px;}
-  .nb{font-size:10px;padding:10px 4px;}
-  .nb span{font-size:20px;}
+  .nb{font-size:12px;padding:13px 4px;}
   .nav{bottom:90px;padding:7px;}
   .ctawrap{padding:10px 0 20px;}
   .cta{font-size:15px;padding:18px;}
@@ -865,7 +864,7 @@ function checkWorkout(){
 const MOPTS=['Breakfast','Lunch','Dinner','Snacks','Pre-Workout','Post-Workout'];
 function initMeals(){
   const ml=document.getElementById('meal-list');ml.innerHTML='';
-  ml.appendChild(mkMeal('Breakfast'));ml.appendChild(mkMeal('Lunch'));
+  ml.appendChild(mkMeal('Breakfast'));ml.appendChild(mkMeal('Snacks'));
 }
 function mkMeal(tv='Breakfast',fv=''){
   const row=document.createElement('div');row.className='erow meal';
