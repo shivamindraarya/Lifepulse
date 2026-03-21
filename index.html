@@ -962,6 +962,8 @@ function go(t){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById(`sec-${t}`).classList.add('active');
   const sa=document.getElementById('scroll-area');if(sa)sa.scrollTop=0;
+  window.scrollTo(0,0);
+  document.getElementById('sec-'+t)?.scrollTo(0,0);
   if(t==='history')loadHistory();
   if(t==='progress')loadProgress();
   document.getElementById('cta-txt').textContent=t==='routine'?'Next →':'Analyse';
@@ -1144,12 +1146,14 @@ function filterTrainerSug(){
   const names=[...new Set(allPTData.map(a=>a.trainerName).filter(Boolean))];
   const matches=names.filter(n=>n.toLowerCase().includes(val));
   if(!matches.length){sug.classList.remove('show');return;}
-  sug.innerHTML=matches.map(n=>`<div class="trainer-sug-item" onclick="selectTrainer('${n.replace(/'/g,"\'")}'">${n}</div>`).join('');
+  sug.innerHTML=matches.map((n,i)=>`<div class="trainer-sug-item" onmousedown="event.preventDefault();selectTrainer(this.getAttribute('data-name'))" data-name="${n.replace(/"/g,'&quot;')}">${n}</div>`).join('');
   sug.classList.add('show');
 }
 function selectTrainer(name){
   document.getElementById('pt-trainer-name').value=name;
-  document.getElementById('trainer-suggestions').classList.remove('show');
+  const sug=document.getElementById('trainer-suggestions');
+  sug.classList.remove('show');
+  sug.innerHTML='';
 }
 function closePTModal(){
   document.getElementById('pt-modal').classList.add('hidden');
