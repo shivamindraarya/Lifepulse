@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, doc, setDoc, getDoc, getDoc as fbGetDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 const firebaseConfig = {
   apiKey: "AIzaSyDPZIE2z2iSlnlHwfBla9DJf-jhqVGH8ug",
@@ -21,7 +21,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, fbSignOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc };
+window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, fbSignOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, updatePassword, reauthenticateWithCredential, EmailAuthProvider };
 window.dispatchEvent(new Event('firebase-ready'));
 </script>
 <style>
@@ -438,6 +438,26 @@ body.dark .trainer-suggestions{background:var(--white);}
   </div>
 </div>
 
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay hidden" id="pw-modal">
+  <div class="modal">
+    <div class="modal-title">Change Password</div>
+    <div class="modal-sub">Enter your current password to confirm, then set a new one</div>
+    <div class="af"><div class="al">Current Password</div>
+      <div class="pw-wrap"><input class="ai" type="password" id="pw-current" placeholder="Current password"><button class="pw-toggle" type="button" onclick="togglePw('pw-current',this)" tabindex="-1">👁️</button></div>
+    </div>
+    <div class="af"><div class="al">New Password</div>
+      <div class="pw-wrap"><input class="ai" type="password" id="pw-new" placeholder="Min 6 characters"><button class="pw-toggle" type="button" onclick="togglePw('pw-new',this)" tabindex="-1">👁️</button></div>
+    </div>
+    <div class="af"><div class="al">Confirm New Password</div>
+      <div class="pw-wrap"><input class="ai" type="password" id="pw-confirm" placeholder="Repeat new password"><button class="pw-toggle" type="button" onclick="togglePw('pw-confirm',this)" tabindex="-1">👁️</button></div>
+    </div>
+    <div class="aerr" id="pw-err"></div>
+    <button class="mbtn" id="pw-submit-btn" onclick="submitChangePassword()">Update Password</button>
+    <button class="mskip" onclick="closeChangePasswordModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- PT MODAL -->
 <div class="modal-overlay hidden" id="pt-modal">
   <div class="modal">
@@ -478,6 +498,9 @@ body.dark .trainer-suggestions{background:var(--white);}
             </div>
             <div class="logo-dd-item" onclick="triggerLogoUpload()">
               <span class="logo-dd-icon">↻</span> Change Logo
+            </div>
+            <div class="logo-dd-item" onclick="openChangePasswordModal()">
+              <span class="logo-dd-icon">🔑</span> Change Password
             </div>
           </div>
           <input type="file" id="header-logo-file" accept="image/*" style="display:none;" onchange="handleLogoChange(this)">
@@ -1155,6 +1178,60 @@ function selectTrainer(name){
   sug.classList.remove('show');
   sug.innerHTML='';
 }
+function openChangePasswordModal(){
+  document.getElementById('logo-dropdown').classList.remove('show');
+  document.getElementById('pw-modal').classList.remove('hidden');
+  document.getElementById('pw-current').value='';
+  document.getElementById('pw-new').value='';
+  document.getElementById('pw-confirm').value='';
+  document.getElementById('pw-err').textContent='';
+  document.getElementById('pw-submit-btn').textContent='Update Password';
+  document.getElementById('pw-submit-btn').disabled=false;
+}
+
+function closeChangePasswordModal(){
+  document.getElementById('pw-modal').classList.add('hidden');
+}
+
+async function submitChangePassword(){
+  const currentPw = document.getElementById('pw-current').value.trim();
+  const newPw = document.getElementById('pw-new').value.trim();
+  const confirmPw = document.getElementById('pw-confirm').value.trim();
+  const err = document.getElementById('pw-err');
+  const btn = document.getElementById('pw-submit-btn');
+  err.textContent = '';
+
+  if(!currentPw || !newPw || !confirmPw){ err.textContent = 'Please fill in all fields.'; return; }
+  if(newPw.length < 6){ err.textContent = 'New password must be at least 6 characters.'; return; }
+  if(newPw !== confirmPw){ err.textContent = 'New passwords do not match.'; return; }
+  if(currentPw === newPw){ err.textContent = 'New password must be different from current.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+
+  try{
+    const fb = window._fb;
+    const user = fb.auth.currentUser;
+    const credential = fb.EmailAuthProvider.credential(user.email, currentPw);
+    await fb.reauthenticateWithCredential(user, credential);
+    await fb.updatePassword(user, newPw);
+    closeChangePasswordModal();
+    showToast('Password updated successfully');
+  } catch(e){
+    const msg = e.message || '';
+    if(msg.includes('wrong-password') || msg.includes('invalid-credential'))
+      err.textContent = 'Current password is incorrect.';
+    else if(msg.includes('weak-password'))
+      err.textContent = 'New password is too weak. Use at least 6 characters.';
+    else if(msg.includes('network'))
+      err.textContent = 'Network error. Please check WiFi.';
+    else
+      err.textContent = 'Something went wrong. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Update Password';
+  }
+}
+
 function closePTModal(){
   document.getElementById('pt-modal').classList.add('hidden');
   document.getElementById('trainer-suggestions').classList.remove('show');
