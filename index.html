@@ -349,6 +349,18 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
   .rgroup{padding:0;}
 }
 @media(min-width:1024px){:root{--max:720px;}}
+.logo-menu-wrap{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.logo-dots-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:rgba(255,255,255,.7);font-size:13px;font-weight:700;cursor:pointer;padding:3px 9px;letter-spacing:2px;transition:all .2s;line-height:1;}
+.logo-dots-btn:hover{background:rgba(255,255,255,.22);color:#fff;}
+.logo-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border-radius:14px;box-shadow:var(--shl);border:1px solid var(--line);z-index:200;min-width:180px;overflow:hidden;display:none;}
+.logo-dropdown.show{display:block;animation:fadeUp .2s ease;}
+.logo-dd-item{padding:13px 18px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);}
+.logo-dd-item:last-child{border-bottom:none;}
+.logo-dd-item:hover{background:var(--gold-l);color:var(--gold-d);}
+.logo-dd-icon{font-size:15px;}
+body.dark .logo-dropdown{background:#1E1C17;border-color:#2A2820;}
+body.dark .logo-dd-item{color:#D4D0CA;}
+body.dark .logo-dd-item:hover{background:#2A2218;color:var(--gold);}
 ::-webkit-scrollbar{width:0;height:0;}
 .toast{position:fixed;top:28px;left:50%;transform:translateX(-50%) translateY(-90px);background:var(--ink);color:var(--white);font-family:var(--font-sans);font-size:13px;font-weight:600;padding:13px 26px;border-radius:40px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:999;transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .4s ease;opacity:0;white-space:nowrap;letter-spacing:.3px;border-left:3px solid var(--gold);}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
@@ -446,11 +458,23 @@ body.dark .trainer-suggestions{background:var(--white);}
         <div class="header-brand">
           <div class="eyebrow">Daily Wellness</div>
           <h1>Know your<br><em>day better</em></h1>
-          <p class="header-sub">AI-powered wellness · Premium gyms</p>
+          <p class="header-sub">Analyse · Improve · Perform</p>
         </div>
-        <div class="gym-logo-wrap" id="gym-logo-wrap">
-          <div class="gym-logo-default" id="gym-logo-default">DW</div>
-          <img id="gym-logo-img" class="gym-logo-img" src="" alt="Gym Logo">
+        <div class="logo-menu-wrap">
+          <div class="gym-logo-wrap" id="gym-logo-wrap" onclick="toggleLogoMenu()" style="cursor:pointer;">
+            <div class="gym-logo-default" id="gym-logo-default">DW</div>
+            <img id="gym-logo-img" class="gym-logo-img" src="" alt="Gym Logo">
+          </div>
+          <button class="logo-dots-btn" onclick="toggleLogoMenu()">···</button>
+          <div class="logo-dropdown" id="logo-dropdown">
+            <div class="logo-dd-item" onclick="triggerLogoUpload()">
+              <span class="logo-dd-icon">↑</span> Upload Logo
+            </div>
+            <div class="logo-dd-item" onclick="triggerLogoUpload()">
+              <span class="logo-dd-icon">↻</span> Change Logo
+            </div>
+          </div>
+          <input type="file" id="header-logo-file" accept="image/*" style="display:none;" onchange="handleLogoChange(this)">
         </div>
       </div>
       <div class="status-bar">
@@ -592,7 +616,7 @@ body.dark .trainer-suggestions{background:var(--white);}
         </div>
         <div class="card">
           <div class="clbl">Micronutrient Supplements</div>
-          <div class="flbl" style="margin-bottom:10px;">Does the client take any supplements?</div>
+          <div class="flbl" style="margin-bottom:10px;">Do you take any supplements?</div>
           <div class="chips" id="supplement-chips">
             <div class="chip" onclick="toggleSupp(this)">Iron</div>
             <div class="chip" onclick="toggleSupp(this)">Zinc</div>
@@ -766,6 +790,59 @@ async function handleAuthSubmit(){
   }finally{btn.disabled=false;btn.textContent=isLogin?'Login':'Register Gym';}
 }
 function showPendingScreen(){document.getElementById('auth-screen').classList.add('hidden');document.getElementById('pending-screen').classList.remove('hidden');}
+function toggleLogoMenu(){
+  const dd = document.getElementById('logo-dropdown');
+  dd.classList.toggle('show');
+  // Close on outside click
+  if(dd.classList.contains('show')){
+    setTimeout(()=>{
+      document.addEventListener('click', function closeDD(e){
+        if(!e.target.closest('.logo-menu-wrap')){
+          dd.classList.remove('show');
+          document.removeEventListener('click', closeDD);
+        }
+      });
+    }, 10);
+  }
+}
+
+function triggerLogoUpload(){
+  document.getElementById('logo-dropdown').classList.remove('show');
+  document.getElementById('header-logo-file').click();
+}
+
+async function handleLogoChange(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 500*1024){ showToast('Logo must be under 500KB'); return; }
+  try{
+    showToast('Uploading logo…');
+    const logoUrl = await new Promise((res,rej)=>{
+      const r = new FileReader();
+      r.onload = e => res(e.target.result);
+      r.onerror = () => rej(new Error('Failed to read file'));
+      r.readAsDataURL(file);
+    });
+    // Save to Firestore
+    const fb = window._fb;
+    const uid = fb.auth.currentUser?.uid;
+    if(!uid){ showToast('Not logged in.'); return; }
+    await fb.setDoc(fb.doc(fb.db,'gyms',uid), {logoUrl}, {merge:true});
+    // Update local gymData
+    gymData.logoUrl = logoUrl;
+    // Show logo in header
+    const img = document.getElementById('gym-logo-img');
+    const def = document.getElementById('gym-logo-default');
+    img.src = logoUrl;
+    img.style.display = 'block';
+    def.style.display = 'none';
+    showToast('Logo updated successfully');
+    input.value = '';
+  } catch(e){
+    showToast('Error uploading logo. Try again.');
+  }
+}
+
 async function showMainApp(){
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('pending-screen').classList.add('hidden');
