@@ -1422,29 +1422,12 @@ function exportPDF(){
   SEC('Improve With',a.diet_suggestions,[61,95,122]);
   if(a.supplements&&a.supplements.length){y+=4;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;T('Supplement Suggestions',13,true);a.supplements.forEach(s=>{doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(139,105,20);doc.text(s.nutrient,20,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);doc.text(`${s.suggestion} | ${s.dosage} | ${s.timing}`,20,y);y+=6;});}
   if(a.indian_meal_suggestions){y+=4;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;T('Indian Meal Suggestions',13,true);const ms=a.indian_meal_suggestions;[['Breakfast',ms.breakfast],['Lunch',ms.lunch],['Dinner',ms.dinner],['Snacks',ms.snacks],['Pre-Workout',ms.pre_workout],['Post-Workout',ms.post_workout]].forEach(([l,it])=>{if(it&&it.length){doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(184,150,90);doc.text(l,20,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);const lines=doc.splitTextToSize(it.join(', '),170);doc.text(lines,20,y);y+=lines.length*5+3;}});}
-  // ── TRAINER NOTES SECTION ──
-  if(y>230){doc.addPage();y=20;}
-  y+=8;doc.setDrawColor(184,150,90);doc.line(20,y,190,y);y+=10;
-  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(26,24,20);
-  doc.text('TRAINER NOTES',20,y);y+=8;
-  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(155,150,144);
-  doc.text("Space for trainer: observations, recommendations & feedback",20,y);y+=10;
-  // Draw lined space for handwritten notes
-  for(let line=0;line<6;line++){
-    doc.setDrawColor(220,216,210);doc.line(20,y,190,y);y+=10;
-  }
-  y+=4;
-  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(155,150,144);
-  doc.text('Trainer Signature: ________________________     Date: ________________',20,y);
-
   // ── FOOTER ON ALL PAGES ──
   const pc=doc.internal.getNumberOfPages();
   for(let i=1;i<=pc;i++){
     doc.setPage(i);
     doc.setFontSize(8);doc.setTextColor(155,150,144);
     doc.text(`${gymData?.gymName||'Daily Wellness'} · Client Wellness Report · Page ${i} of ${pc}`,20,287);
-    doc.setTextColor(184,150,90);
-    doc.text('Confidential',170,287);
   }
   const cn=(a.clientName||d.name||'Client').replace(/\s+/g,'-');
   doc.save(`${gymData?.gymName?.replace(/\s+/g,'-')||'DailyWellness'}-${cn}-${new Date().toISOString().split('T')[0]}.pdf`);
