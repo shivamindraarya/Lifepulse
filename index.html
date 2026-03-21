@@ -350,6 +350,15 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
 }
 @media(min-width:1024px){:root{--max:720px;}}
 ::-webkit-scrollbar{width:0;height:0;}
+.toast{position:fixed;top:28px;left:50%;transform:translateX(-50%) translateY(-90px);background:var(--ink);color:var(--white);font-family:var(--font-sans);font-size:13px;font-weight:600;padding:13px 26px;border-radius:40px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:999;transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .4s ease;opacity:0;white-space:nowrap;letter-spacing:.3px;border-left:3px solid var(--gold);}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.trainer-suggestions{position:absolute;top:100%;left:0;right:0;background:var(--white);border:2px solid var(--gold);border-top:none;border-radius:0 0 12px 12px;z-index:10;overflow:hidden;display:none;max-height:180px;overflow-y:auto;}
+body.dark .trainer-suggestions{background:var(--white);}
+.trainer-suggestions.show{display:block;}
+.trainer-sug-item{padding:13px 16px;font-size:14px;font-weight:500;color:var(--ink2);cursor:pointer;transition:background .15s;border-bottom:1px solid var(--line);}
+.trainer-sug-item:last-child{border-bottom:none;}
+.trainer-sug-item:hover{background:var(--gold-l);color:var(--gold-d);}
+.trainer-input-wrap{position:relative;}
 </style>
 </head>
 <body>
@@ -416,7 +425,13 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
   <div class="modal">
     <div class="modal-title">Save under Personal Trainer</div>
     <div class="modal-sub">Enter the trainer's name for this client's analysis</div>
-    <div class="af"><div class="al">Trainer Name</div><input class="ai" type="text" id="pt-trainer-name" placeholder="e.g. Shivam Sharma"></div>
+    <div class="af">
+      <div class="al">Trainer Name</div>
+      <div class="trainer-input-wrap">
+        <input class="ai" type="text" id="pt-trainer-name" placeholder="e.g. Shivam Sharma" oninput="filterTrainerSug()" autocomplete="off">
+        <div class="trainer-suggestions" id="trainer-suggestions"></div>
+      </div>
+    </div>
     <div class="aerr" id="pt-err"></div>
     <button class="mbtn" onclick="confirmSavePT()">Save under PT</button>
     <button class="mskip" onclick="closePTModal()">Cancel</button>
@@ -645,6 +660,7 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
 <nav class="nav" id="main-nav" style="display:flex;">
   <button class="nb on" data-t="routine" onclick="go('routine')">Routine</button>
   <button class="nb" data-t="meals" onclick="go('meals')">Meals</button>
@@ -662,6 +678,12 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
 <script>
 let gymData=null,lastAnalysis=null,allHistoryData=[],allPTData=[],currentTrainer='';
 function toggleTheme(){const d=document.body.classList.toggle('dark');document.getElementById('theme-icon').textContent=d?'🌙':'☀️';localStorage.setItem('dw_theme',d?'dark':'light');}
+function showToast(msg,duration=3000){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>t.classList.remove('show'),duration);
+}
 function initTheme(){if(localStorage.getItem('dw_theme')==='dark'){document.body.classList.add('dark');const ti=document.getElementById('theme-icon');if(ti)ti.textContent='🌙';}}
 function switchAuthMode(mode){
   document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('on',(i===0&&mode==='login')||(i===1&&mode==='register')));
@@ -986,16 +1008,38 @@ function renderResults(a){
   `;
 }
 async function saveToHistory(e){
-  if(!lastAnalysis){alert('No analysis to save.');return;}
+  if(!lastAnalysis){showToast('No analysis to save.');return;}
   try{
     const fb=window._fb,uid=fb.auth.currentUser.uid;
     await fb.addDoc(fb.collection(fb.db,'gyms',uid,'history'),{...lastAnalysis,clientName:lastAnalysis.clientName||lastAnalysis.data?.name||'Client',savedAt:fb.serverTimestamp(),type:'general'});
-    const btn=e.target;btn.textContent='Saved';btn.style.background='var(--green)';
-    setTimeout(()=>{btn.textContent='Save Analysis';btn.style.background='';},2500);
-  }catch(e){alert('Error saving: '+e.message);}
+    showToast('Analysis saved under History');
+  }catch(err){showToast('Error saving. Please try again.');}
 }
-function openPTModal(){document.getElementById('pt-modal').classList.remove('hidden');document.getElementById('pt-trainer-name').value='';document.getElementById('pt-err').textContent='';}
-function closePTModal(){document.getElementById('pt-modal').classList.add('hidden');}
+function openPTModal(){
+  document.getElementById('pt-modal').classList.remove('hidden');
+  document.getElementById('pt-trainer-name').value='';
+  document.getElementById('pt-err').textContent='';
+  const sug=document.getElementById('trainer-suggestions');
+  sug.classList.remove('show');sug.innerHTML='';
+}
+function filterTrainerSug(){
+  const val=document.getElementById('pt-trainer-name').value.trim().toLowerCase();
+  const sug=document.getElementById('trainer-suggestions');
+  if(!val||!allPTData.length){sug.classList.remove('show');return;}
+  const names=[...new Set(allPTData.map(a=>a.trainerName).filter(Boolean))];
+  const matches=names.filter(n=>n.toLowerCase().includes(val));
+  if(!matches.length){sug.classList.remove('show');return;}
+  sug.innerHTML=matches.map(n=>`<div class="trainer-sug-item" onclick="selectTrainer('${n.replace(/'/g,"\'")}'">${n}</div>`).join('');
+  sug.classList.add('show');
+}
+function selectTrainer(name){
+  document.getElementById('pt-trainer-name').value=name;
+  document.getElementById('trainer-suggestions').classList.remove('show');
+}
+function closePTModal(){
+  document.getElementById('pt-modal').classList.add('hidden');
+  document.getElementById('trainer-suggestions').classList.remove('show');
+}
 async function confirmSavePT(){
   const trainerName=document.getElementById('pt-trainer-name').value.trim();
   if(!trainerName){document.getElementById('pt-err').textContent='Please enter trainer name.';return;}
@@ -1003,8 +1047,7 @@ async function confirmSavePT(){
     const fb=window._fb,uid=fb.auth.currentUser.uid;
     await fb.addDoc(fb.collection(fb.db,'gyms',uid,'pt_analyses'),{...lastAnalysis,clientName:lastAnalysis.clientName||lastAnalysis.data?.name||'Client',trainerName,savedAt:fb.serverTimestamp(),type:'pt'});
     closePTModal();
-    const btn=document.querySelector('.save-btn.secondary');
-    if(btn){btn.textContent='Saved under PT';btn.style.background='var(--green)';btn.style.color='white';setTimeout(()=>{btn.textContent='Save under PT';btn.style.background='';btn.style.color='';},2500);}
+    showToast('Analysis saved under PT Zone · '+trainerName);
   }catch(e){document.getElementById('pt-err').textContent='Error: '+e.message;}
 }
 async function loadHistory(){
@@ -1096,7 +1139,9 @@ function resetApp(){
   document.getElementById('empty-state').style.display='block';
   document.getElementById('empty-state').innerHTML='<div class="ei" style="font-family:var(--font-serif);font-size:48px;color:var(--gold-d);">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong> to get started.</p>';
   document.getElementById('results').style.display='none';
+  document.getElementById('results').innerHTML='';
   document.getElementById('loading-state').style.display='none';
+  lastAnalysis=null;
   go('routine');
 }
 function exportPDF(){
@@ -1147,7 +1192,7 @@ function exportPDF(){
   const pc=doc.internal.getNumberOfPages();
   for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(155,150,144);doc.text(`${gymData?.gymName||'Daily Wellness'} · Client Report · Page ${i} of ${pc}`,20,287);}
   const cn=(a.clientName||d.name||'Client').replace(/\s+/g,'-');
-  doc.save(`${gymData?.gymName?.replace(/\s+/g,'-')||'DailyWellness'}-${cn}-${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`${gymData?.gymName?.replace(/\s+/g,'-')||'DailyWellness'}-${cn}-${new Date().toISOString().split('T')[0]}.pdf`);showToast('Report exported successfully');
 }
 initTheme();
 </script>
