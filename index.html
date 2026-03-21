@@ -499,7 +499,7 @@ body.dark .trainer-suggestions{background:var(--white);}
           <div id="act-list">
             <div class="act-row">
               <div class="act-row-top">
-                <input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;">
+                <input type="text" placeholder="Work / Study" oninput="checkWorkout()" style="flex:1;">
                 <button class="del" onclick="removeActRow(this)">×</button>
               </div>
               <div class="act-row-dur">
@@ -509,7 +509,7 @@ body.dark .trainer-suggestions{background:var(--white);}
             </div>
             <div class="act-row">
               <div class="act-row-top">
-                <input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;">
+                <input type="text" placeholder="Gym / Swimming" oninput="checkWorkout()" style="flex:1;">
                 <button class="del" onclick="removeActRow(this)">×</button>
               </div>
               <div class="act-row-dur">
@@ -589,6 +589,24 @@ body.dark .trainer-suggestions{background:var(--white);}
         <div class="card">
           <div class="clbl">Food Log</div>
           <div id="meal-list"></div>
+        </div>
+        <div class="card">
+          <div class="clbl">Micronutrient Supplements</div>
+          <div class="flbl" style="margin-bottom:10px;">Does the client take any supplements?</div>
+          <div class="chips" id="supplement-chips">
+            <div class="chip" onclick="toggleSupp(this)">Iron</div>
+            <div class="chip" onclick="toggleSupp(this)">Zinc</div>
+            <div class="chip" onclick="toggleSupp(this)">Calcium</div>
+            <div class="chip" onclick="toggleSupp(this)">Iodine</div>
+            <div class="chip" onclick="toggleSupp(this)">Vitamin A</div>
+            <div class="chip" onclick="toggleSupp(this)">Vitamin D</div>
+            <div class="chip" onclick="toggleSupp(this)">Vitamin B12</div>
+            <div class="chip" onclick="toggleSupp(this)">Omega 3</div>
+            <div class="chip" onclick="toggleSupp(this)">None</div>
+          </div>
+          <div class="field" style="margin-top:12px;">
+            <input type="text" id="supp-other" placeholder="Other (e.g. Magnesium, Biotin…)" style="font-size:13px;">
+          </div>
         </div>
         <div class="card" style="margin-bottom:8px;">
           <div class="clbl">Hydration</div>
@@ -869,11 +887,21 @@ function ctaClick(){const t=document.querySelector('.nb.on')?.dataset.t;if(t==='
 function pickMood(c){document.querySelectorAll('#mood .chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');}
 function pickSleep(el,val){document.querySelectorAll('#sleep-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
 function pickWater(el){document.querySelectorAll('#water-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+function toggleSupp(el){
+  if(el.textContent==='None'){
+    const isOn=el.classList.contains('on');
+    document.querySelectorAll('#supplement-chips .chip').forEach(c=>c.classList.remove('on'));
+    if(!isOn)el.classList.add('on');
+  } else {
+    document.querySelector('#supplement-chips .chip:last-child')?.classList.remove('on');
+    el.classList.toggle('on');
+  }
+}
 function pickIntensity(el){document.querySelectorAll('.ichip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
 function removeActRow(btn){btn.closest('.act-row').remove();checkWorkout();}
 function addAct(){
   const div=document.createElement('div');div.className='act-row';
-  div.innerHTML=`<div class="act-row-top"><input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div>`;
+  div.innerHTML=`<div class="act-row-top"><input type="text" placeholder="Activity / Exercise" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div>`;
   document.getElementById('act-list').appendChild(div);
 }
 const WORKOUT_KW=['workout','gym','exercise','training','cardio','run','jog','walk','cycling','swim','yoga','crossfit','boxing','mma','lifting','weights','hiit','zumba','dance','sport','football','cricket','badminton','tennis','basketball','physical'];
@@ -936,7 +964,10 @@ async function analyse(){
   function adv(){if(si>0){const p=document.getElementById(steps[si-1]);p.classList.remove('active');p.classList.add('done');if(!p.textContent.startsWith('✓'))p.textContent='✓ '+p.textContent;}if(si<steps.length){document.getElementById(steps[si]).classList.add('active');pb.style.width=pcts[si]+'%';pp.textContent=pcts[si]+'%';lm.textContent=msgs[si];si++;}}
   adv();
   const timer=setInterval(()=>{if(si<steps.length)adv();else clearInterval(timer);},900);
-  const prompt=`You are a certified nutritionist and health expert specializing in Indian diet. Provide highly accurate nutritional analysis.\n\nPERSON: name=${d.name}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}\nROUTINE: sleep=${d.sleep}h, water=${d.water}L, mood=${d.mood}\nACTIVITIES: ${d.activities.join('; ')||'none'}\nWORKOUT: ${d.workoutTypes.length?`Types: ${d.workoutTypes.join(' + ')}, Intensity: ${d.workoutIntensity||'not specified'}, Goals: ${d.workoutGoals.join(' + ')||'not specified'}`:'No workout logged'}\nNOTES: ${d.notes||'none'}\nDIET: Breakfast:${d.breakfast.join(', ')||'skipped'} | Lunch:${d.lunch.join(', ')||'skipped'} | Dinner:${d.dinner.join(', ')||'skipped'} | Snacks:${d.snacks.join(', ')||'none'} | Pre-Workout:${d.preworkout.join(', ')||'none'} | Post-Workout:${d.postworkout.join(', ')||'none'}\n\nINSTRUCTIONS:\n1. Use ICMR/NIN Indian food database values for calorie calculations\n2. Realistic portions: 1 roti=80kcal, 1 cup cooked rice=200kcal, 1 cup dal=150kcal, 100g paneer=265kcal\n3. Account for cooking methods - ghee/oil adds ~40kcal per tsp\n4. If workout logged: adjust calorie needs (Weight Lifting 300-500kcal burn, Cardio 400-600, CrossFit 500-700, Boxing 500-650, MMA 600-750)\n5. Multiple workout types: combine calorie burns\n6. Protein targets: Muscle Gain 1.8-2.2g/kg, Strength 2.0-2.4g/kg, Weight Loss 1.4-1.8g/kg, Endurance 1.2-1.6g/kg\n7. Only suggest supplements if micronutrient is below 50% RDI\n\nReturn ONLY this exact JSON (no markdown):\n{"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"supplements":[{"nutrient":"string","level":number,"suggestion":"string","dosage":"string","timing":"string"}],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"],"pre_workout":["item1"],"post_workout":["item1"]}}`;
+  const prompt=`You are a certified nutritionist and health expert specializing in Indian diet. Provide highly accurate nutritional analysis.\n\nPERSON: name=${d.name}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}\nROUTINE: sleep=${d.sleep}h, water=${d.water}L, mood=${d.mood}\nACTIVITIES: ${d.activities.join('; ')||'none'}\nWORKOUT: ${d.workoutTypes.length?`Types: ${d.workoutTypes.join(' + ')}, Intensity: ${d.workoutIntensity||'not specified'}, Goals: ${d.workoutGoals.join(' + ')||'not specified'}`:'No workout logged'}\nNOTES: ${d.notes||'none'}
+SUPPLEMENTS TAKEN: ${(d.clientSupplements&&d.clientSupplements.length)?d.clientSupplements.join(', ')+(d.suppOther?', '+d.suppOther:''):'None reported'}\nDIET: Breakfast:${d.breakfast.join(', ')||'skipped'} | Lunch:${d.lunch.join(', ')||'skipped'} | Dinner:${d.dinner.join(', ')||'skipped'} | Snacks:${d.snacks.join(', ')||'none'} | Pre-Workout:${d.preworkout.join(', ')||'none'} | Post-Workout:${d.postworkout.join(', ')||'none'}\n\nINSTRUCTIONS:\n1. Use ICMR/NIN Indian food database values for calorie calculations\n2. Realistic portions: 1 roti=80kcal, 1 cup cooked rice=200kcal, 1 cup dal=150kcal, 100g paneer=265kcal\n3. Account for cooking methods - ghee/oil adds ~40kcal per tsp\n4. If workout logged: adjust calorie needs (Weight Lifting 300-500kcal burn, Cardio 400-600, CrossFit 500-700, Boxing 500-650, MMA 600-750)\n5. Multiple workout types: combine calorie burns\n6. Protein targets: Muscle Gain 1.8-2.2g/kg, Strength 2.0-2.4g/kg, Weight Loss 1.4-1.8g/kg, Endurance 1.2-1.6g/kg\n7. Only suggest supplements if micronutrient is below 50% RDI
+8. BREAK LOGIC: If client logged 6+ hours of work/study AND logged food in multiple meal slots (Snacks, Lunch etc.), they are already taking natural breaks — do NOT suggest taking breaks during work hours
+9. SUPPLEMENT FACTOR: If client already takes a supplement (listed under SUPPLEMENTS TAKEN), do not flag deficiency for that nutrient — factor it positively into their micronutrient score\n\nReturn ONLY this exact JSON (no markdown):\n{"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"supplements":[{"nutrient":"string","level":number,"suggestion":"string","dosage":"string","timing":"string"}],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"],"pre_workout":["item1"],"post_workout":["item1"]}}`;
   try{
     const res=await fetch('https://lifepulse2.dynamicwebstudio-india.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     const raw=await res.json();
@@ -1000,10 +1031,11 @@ function renderResults(a){
       <div class="rhead msug">🍛 Indian Meal Suggestions</div>${msugs}
     </div>
     ${suppHtml}
+    ${a._isSaved ? '' : `
     <div class="save-btns">
       <button class="save-btn primary" onclick="saveToHistory(event)">Save Analysis</button>
       <button class="save-btn secondary" onclick="openPTModal()">Save under PT</button>
-    </div>
+    </div>`}
     <button class="pdf-btn" onclick="exportPDF()">Export Report as PDF</button>
   `;
 }
@@ -1073,7 +1105,7 @@ function renderHistory(data){
   }).join('');
 }
 function filterHistory(){const q=document.getElementById('history-search').value.toLowerCase();renderHistory(allHistoryData.filter(a=>(a.clientName||'').toLowerCase().includes(q)));}
-function viewHistoryItem(a){lastAnalysis=a;go('analysis');renderResults(a);}
+function viewHistoryItem(a){lastAnalysis=a;lastAnalysis._isSaved=true;go('analysis');renderResults(a);}
 async function loadProgress(){
   showTrainersView();
   const el=document.getElementById('trainers-list');
@@ -1119,7 +1151,7 @@ function renderClients(){
   }).join('');
 }
 function filterClients(){renderClients();}
-function viewPTItem(a){lastAnalysis=a;go('analysis');renderResults(a);}
+function viewPTItem(a){lastAnalysis=a;lastAnalysis._isSaved=true;go('analysis');renderResults(a);}
 function resetApp(){
   lastAnalysis=null;
   document.querySelectorAll('#sleep-chips .chip, #water-chips .chip').forEach(c=>c.classList.remove('on'));
@@ -1131,10 +1163,12 @@ function resetApp(){
   document.getElementById('notes').value='';
   document.querySelectorAll('#mood .chip').forEach(c=>c.classList.remove('on'));
   document.getElementById('act-list').innerHTML=`
-    <div class="act-row"><div class="act-row-top"><input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div></div>
-    <div class="act-row"><div class="act-row-top"><input type="text" placeholder="Activity" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div></div>`;
+    <div class="act-row"><div class="act-row-top"><input type="text" placeholder="Work / Study" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div></div>
+    <div class="act-row"><div class="act-row-top"><input type="text" placeholder="Gym / Swimming" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div></div>`;
   document.getElementById('workout-card').classList.remove('show');
   document.querySelectorAll('.wtype,.ichip').forEach(w=>w.classList.remove('on'));
+  document.querySelectorAll('#supplement-chips .chip').forEach(c=>c.classList.remove('on'));
+  const suppOther=document.getElementById('supp-other');if(suppOther)suppOther.value='';
   initMeals();
   document.getElementById('empty-state').style.display='block';
   document.getElementById('empty-state').innerHTML='<div class="ei" style="font-family:var(--font-serif);font-size:48px;color:var(--gold-d);">◎</div><p>Fill in client routine & meals,<br>then tap <strong>Analyse</strong> to get started.</p>';
