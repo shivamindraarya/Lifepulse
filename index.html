@@ -367,6 +367,8 @@ body.dark .logo-dd-item:hover{background:#2A2218;color:var(--gold);}
 .hcard-del:hover{background:var(--red-l);border-color:var(--red);color:var(--red);}
 body.dark .hcard-del{border-color:#2A2820;color:#706C64;}
 body.dark .hcard-del:hover{background:var(--red-l);border-color:var(--red);color:var(--red);}
+.offline-banner{position:fixed;top:0;left:0;right:0;z-index:1000;background:#B85040;color:#fff;font-family:var(--font-sans);font-size:13px;font-weight:600;text-align:center;padding:10px 16px;letter-spacing:.3px;transform:translateY(-100%);transition:transform .35s ease;}
+.offline-banner.show{transform:translateY(0);}
 ::-webkit-scrollbar{width:0;height:0;}
 .toast{position:fixed;top:28px;left:50%;transform:translateX(-50%) translateY(-90px);background:var(--ink);color:var(--white);font-family:var(--font-sans);font-size:13px;font-weight:600;padding:13px 26px;border-radius:40px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:999;transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .4s ease;opacity:0;white-space:nowrap;letter-spacing:.3px;border-left:3px solid var(--gold);}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
@@ -681,6 +683,10 @@ body.dark .trainer-suggestions{background:var(--white);}
       <div class="sec-inner">
         <div class="sec-head"><div class="sec-title">Client <em>History</em></div><div class="sec-desc">All saved analyses</div></div>
         <div class="search-bar"><span style="font-size:13px;color:var(--muted);font-weight:700;">Search</span><input type="text" id="history-search" placeholder="Search by client name…" oninput="filterHistory()"></div>
+        <div style="max-width:calc(var(--max) - 32px);margin:10px auto 0;display:flex;gap:8px;align-items:center;overflow-x:auto;padding-bottom:4px;">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap;letter-spacing:.5px;text-transform:uppercase;">Filter:</span>
+          <div style="display:flex;gap:6px;" id="month-filters"></div>
+        </div>
         <div id="history-list" style="padding-bottom:16px;"></div>
       </div>
     </div>
@@ -708,6 +714,7 @@ body.dark .trainer-suggestions{background:var(--white);}
   </div>
 </div>
 
+<div class="offline-banner" id="offline-banner">No internet connection · Please connect to WiFi</div>
 <div class="toast" id="toast"></div>
 <nav class="nav" id="main-nav" style="display:flex;">
   <button class="nb on" data-t="routine" onclick="go('routine')">Routine</button>
@@ -726,6 +733,20 @@ body.dark .trainer-suggestions{background:var(--white);}
 <script>
 let gymData=null,lastAnalysis=null,allHistoryData=[],allPTData=[],currentTrainer='';
 function toggleTheme(){const d=document.body.classList.toggle('dark');document.getElementById('theme-icon').textContent=d?'🌙':'☀️';localStorage.setItem('dw_theme',d?'dark':'light');}
+// ── OFFLINE INDICATOR ──
+function initOfflineDetection(){
+  function onOffline(){
+    document.getElementById('offline-banner').classList.add('show');
+  }
+  function onOnline(){
+    document.getElementById('offline-banner').classList.remove('show');
+    showToast('Connected to internet');
+  }
+  window.addEventListener('offline', onOffline);
+  window.addEventListener('online', onOnline);
+  if(!navigator.onLine) onOffline();
+}
+
 function showToast(msg,duration=3000){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
@@ -1120,6 +1141,7 @@ function renderResults(a){
       <button class="save-btn secondary" onclick="openPTModal()">Save under PT</button>
     </div>`}
     <button class="pdf-btn" onclick="exportPDF()">Export Report as PDF</button>
+    <button class="pdf-btn" onclick="shareWhatsApp()" style="margin-top:10px;border-color:var(--green);color:var(--green);background:var(--green-l);">Share on WhatsApp</button>
   `;
 }
 async function saveToHistory(e){
@@ -1172,9 +1194,27 @@ async function loadHistory(){
     const fb=window._fb,uid=fb.auth.currentUser.uid;
     const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'gyms',uid,'history'),fb.orderBy('savedAt','desc')));
     allHistoryData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    buildMonthFilters();
     renderHistory(allHistoryData);
   }catch(e){el.innerHTML='<div class="empty"><p>Error loading history.</p></div>';}
 }
+function buildMonthFilters(){
+  if(!allHistoryData.length){document.getElementById('month-filters').innerHTML='';return;}
+  const months=[...new Set(allHistoryData.map(a=>{
+    const d=a.savedAt?.toDate?a.savedAt.toDate():new Date(a.date);
+    return d.toLocaleDateString('en-IN',{month:'short',year:'numeric'});
+  }))];
+  const activeMonth=window._activeMonth||'';
+  document.getElementById('month-filters').innerHTML=
+    `<div class="chip${!activeMonth?' on':''}" onclick="setMonthFilter('')" style="font-size:11px;padding:6px 12px;">All</div>`+
+    months.map(m=>`<div class="chip${activeMonth===m?' on':''}" onclick="setMonthFilter('${m}')" style="font-size:11px;padding:6px 12px;">${m}</div>`).join('');
+}
+function setMonthFilter(month){
+  window._activeMonth=month;
+  buildMonthFilters();
+  filterHistory();
+}
+
 function renderHistory(data){
   const el=document.getElementById('history-list');
   if(!data.length){el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No saved analyses yet.<br>Analyse a client to get started!</p></div>';return;}
@@ -1218,7 +1258,18 @@ async function deletePTItem(id, e){
   }catch(e){ showToast('Error deleting. Try again.'); }
 }
 
-function filterHistory(){const q=document.getElementById('history-search').value.toLowerCase();renderHistory(allHistoryData.filter(a=>(a.clientName||'').toLowerCase().includes(q)));}
+function filterHistory(){
+  const q=document.getElementById('history-search').value.toLowerCase();
+  const month=window._activeMonth||'';
+  let filtered=allHistoryData.filter(a=>(a.clientName||'').toLowerCase().includes(q));
+  if(month){
+    filtered=filtered.filter(a=>{
+      const d=a.savedAt?.toDate?a.savedAt.toDate():new Date(a.date);
+      return d.toLocaleDateString('en-IN',{month:'short',year:'numeric'})===month;
+    });
+  }
+  renderHistory(filtered);
+}
 function viewHistoryItem(a){lastAnalysis=a;lastAnalysis._isSaved=true;go('analysis');renderResults(a);}
 async function loadProgress(){
   showTrainersView();
@@ -1294,6 +1345,38 @@ function resetApp(){
   lastAnalysis=null;
   go('routine');
 }
+function shareWhatsApp(){
+  if(!lastAnalysis){showToast('No analysis to share.');return;}
+  const a=lastAnalysis;
+  const d=a.data||{};
+  const name=a.clientName||d.name||'Client';
+  const date=new Date(a.date||Date.now()).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  const gym=gymData?.gymName||'Daily Wellness';
+  const msg=`*${gym} — Wellness Report*
+
+*Client:* ${name}
+*Date:* ${date}
+
+*Lifestyle Score:* ${a.lifestyle_score}/10
+*Diet Score:* ${a.diet_score}/10
+
+*Today's Insight:*
+${a.overall_tip}
+
+*Nutrition:*
+Calories: ${a.calories} kcal | Protein: ${a.protein}g | Carbs: ${a.carbs}g | Fat: ${a.fat}g
+
+*Key Suggestions:*
+${(a.routine_suggestions||[]).slice(0,2).map(s=>'• '+s).join('
+')}
+${(a.diet_suggestions||[]).slice(0,2).map(s=>'• '+s).join('
+')}
+
+_Powered by Daily Wellness AI_`;
+  const encoded=encodeURIComponent(msg);
+  window.open('https://wa.me/?text='+encoded,'_blank');
+}
+
 function exportPDF(){
   if(!lastAnalysis)return;
   const {jsPDF}=window.jspdf;
@@ -1339,12 +1422,36 @@ function exportPDF(){
   SEC('Improve With',a.diet_suggestions,[61,95,122]);
   if(a.supplements&&a.supplements.length){y+=4;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;T('Supplement Suggestions',13,true);a.supplements.forEach(s=>{doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(139,105,20);doc.text(s.nutrient,20,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);doc.text(`${s.suggestion} | ${s.dosage} | ${s.timing}`,20,y);y+=6;});}
   if(a.indian_meal_suggestions){y+=4;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;T('Indian Meal Suggestions',13,true);const ms=a.indian_meal_suggestions;[['Breakfast',ms.breakfast],['Lunch',ms.lunch],['Dinner',ms.dinner],['Snacks',ms.snacks],['Pre-Workout',ms.pre_workout],['Post-Workout',ms.post_workout]].forEach(([l,it])=>{if(it&&it.length){doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(184,150,90);doc.text(l,20,y);y+=5;doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);const lines=doc.splitTextToSize(it.join(', '),170);doc.text(lines,20,y);y+=lines.length*5+3;}});}
+  // ── TRAINER NOTES SECTION ──
+  if(y>230){doc.addPage();y=20;}
+  y+=8;doc.setDrawColor(184,150,90);doc.line(20,y,190,y);y+=10;
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(26,24,20);
+  doc.text('TRAINER NOTES',20,y);y+=8;
+  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(155,150,144);
+  doc.text("Space for trainer: observations, recommendations & feedback",20,y);y+=10;
+  // Draw lined space for handwritten notes
+  for(let line=0;line<6;line++){
+    doc.setDrawColor(220,216,210);doc.line(20,y,190,y);y+=10;
+  }
+  y+=4;
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(155,150,144);
+  doc.text('Trainer Signature: ________________________     Date: ________________',20,y);
+
+  // ── FOOTER ON ALL PAGES ──
   const pc=doc.internal.getNumberOfPages();
-  for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(155,150,144);doc.text(`${gymData?.gymName||'Daily Wellness'} · Client Report · Page ${i} of ${pc}`,20,287);}
+  for(let i=1;i<=pc;i++){
+    doc.setPage(i);
+    doc.setFontSize(8);doc.setTextColor(155,150,144);
+    doc.text(`${gymData?.gymName||'Daily Wellness'} · Client Wellness Report · Page ${i} of ${pc}`,20,287);
+    doc.setTextColor(184,150,90);
+    doc.text('Confidential',170,287);
+  }
   const cn=(a.clientName||d.name||'Client').replace(/\s+/g,'-');
-  doc.save(`${gymData?.gymName?.replace(/\s+/g,'-')||'DailyWellness'}-${cn}-${new Date().toISOString().split('T')[0]}.pdf`);showToast('Report exported successfully');
+  doc.save(`${gymData?.gymName?.replace(/\s+/g,'-')||'DailyWellness'}-${cn}-${new Date().toISOString().split('T')[0]}.pdf`);
+  showToast('Report exported successfully');
 }
 initTheme();
+initOfflineDetection();
 </script>
 </body>
 </html>
