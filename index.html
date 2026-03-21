@@ -1044,7 +1044,7 @@ async function analyse(){
   const prompt=`You are a certified nutritionist and health expert specializing in Indian diet. Provide highly accurate nutritional analysis.\n\nPERSON: name=${d.name}, age=${d.age||'?'}, weight=${d.weight||'?'}kg, height=${d.height||'?'}cm, gender=${d.gender}\nROUTINE: sleep=${d.sleep}h, water=${d.water}L, mood=${d.mood}\nACTIVITIES: ${d.activities.join('; ')||'none'}\nWORKOUT: ${d.workoutTypes.length?`Types: ${d.workoutTypes.join(' + ')}, Intensity: ${d.workoutIntensity||'not specified'}, Goals: ${d.workoutGoals.join(' + ')||'not specified'}`:'No workout logged'}\nNOTES: ${d.notes||'none'}
 SUPPLEMENTS TAKEN: ${(d.clientSupplements&&d.clientSupplements.length)?d.clientSupplements.join(', ')+(d.suppOther?', '+d.suppOther:''):'None reported'}\nDIET: Breakfast:${d.breakfast.join(', ')||'skipped'} | Lunch:${d.lunch.join(', ')||'skipped'} | Dinner:${d.dinner.join(', ')||'skipped'} | Snacks:${d.snacks.join(', ')||'none'} | Pre-Workout:${d.preworkout.join(', ')||'none'} | Post-Workout:${d.postworkout.join(', ')||'none'}\n\nINSTRUCTIONS:\n1. Use ICMR/NIN Indian food database values for calorie calculations\n2. Realistic portions: 1 roti=80kcal, 1 cup cooked rice=200kcal, 1 cup dal=150kcal, 100g paneer=265kcal\n3. Account for cooking methods - ghee/oil adds ~40kcal per tsp\n4. If workout logged: adjust calorie needs (Weight Lifting 300-500kcal burn, Cardio 400-600, CrossFit 500-700, Boxing 500-650, MMA 600-750)\n5. Multiple workout types: combine calorie burns\n6. Protein targets: Muscle Gain 1.8-2.2g/kg, Strength 2.0-2.4g/kg, Weight Loss 1.4-1.8g/kg, Endurance 1.2-1.6g/kg\n7. Only suggest supplements if micronutrient is below 50% RDI
 8. BREAK LOGIC: If client logged 6+ hours of work/study AND logged food in multiple meal slots (Snacks, Lunch etc.), they are already taking natural breaks — do NOT suggest taking breaks during work hours
-9. SUPPLEMENT FACTOR: If client already takes a supplement (listed under SUPPLEMENTS TAKEN), do not flag deficiency for that nutrient — factor it positively into their micronutrient score\n\nReturn ONLY this exact JSON (no markdown):\n{"lifestyle_score":number,"diet_score":number,"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"supplements":[{"nutrient":"string","level":number,"suggestion":"string","dosage":"string","timing":"string"}],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"],"pre_workout":["item1"],"post_workout":["item1"]}}`;
+9. SUPPLEMENT FACTOR: If client already takes a supplement (listed under SUPPLEMENTS TAKEN), do not flag deficiency for that nutrient — factor it positively into their micronutrient score\n\nReturn ONLY this exact JSON (no markdown):\n{"lifestyle_score":number(out of 10, one decimal e.g. 7.5),"diet_score":number(out of 10, one decimal e.g. 6.8),"overall_tip":"string","routine_positives":["string"],"routine_negatives":["string"],"routine_suggestions":["string"],"calories":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"vitamins":{"Vitamin C":number,"Vitamin D":number,"Vitamin B12":number,"Iron":number,"Calcium":number},"diet_positives":["string"],"diet_negatives":["string"],"diet_suggestions":["string"],"supplements":[{"nutrient":"string","level":number,"suggestion":"string","dosage":"string","timing":"string"}],"indian_meal_suggestions":{"breakfast":["item1","item2"],"lunch":["item1","item2"],"dinner":["item1","item2"],"snacks":["item1","item2"],"pre_workout":["item1"],"post_workout":["item1"]}}`;
   try{
     const res=await fetch('https://lifepulse2.dynamicwebstudio-india.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     const raw=await res.json();
@@ -1077,8 +1077,8 @@ function renderResults(a){
     ${ds?`<div style="text-align:center;padding:16px 0 0;font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.5px;">${ds}</div>`:''}
     ${a.clientName?`<div style="text-align:center;font-family:var(--font-serif);font-size:22px;color:var(--gold-d);padding-top:4px;font-style:italic;">${a.clientName}</div>`:''}
     <div class="scores">
-      <div class="stile"><div class="snum" style="color:var(--gold-d)">${a.lifestyle_score}</div><div class="slbl">Lifestyle Score</div></div>
-      <div class="stile"><div class="snum" style="color:var(--green)">${a.diet_score}</div><div class="slbl">Diet Score</div></div>
+      <div class="stile"><div class="snum" style="color:var(--gold-d)">${a.lifestyle_score}<span style="font-size:18px;font-weight:300;color:var(--muted);">/10</span></div><div class="slbl">Lifestyle Score</div></div>
+      <div class="stile"><div class="snum" style="color:var(--green)">${a.diet_score}<span style="font-size:18px;font-weight:300;color:var(--muted);">/10</span></div><div class="slbl">Diet Score</div></div>
     </div>
     <div class="tip"><strong>Today's Insight</strong>${a.overall_tip}</div>
     <div class="rgroup">
@@ -1176,7 +1176,7 @@ function renderHistory(data){
     const date=a.savedAt?.toDate?a.savedAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
     return`<div class="hcard" onclick="viewHistoryItem(${JSON.stringify(a).replace(/"/g,'&quot;')})">
       <div class="hcard-top"><div class="hcard-name">${a.clientName||'Client'}</div><div class="hcard-date">${date}</div></div>
-      <div class="hcard-scores"><div><div class="hscore" style="color:var(--gold-d)">${a.lifestyle_score}</div><div class="hlbl">Lifestyle</div></div><div><div class="hscore" style="color:var(--green)">${a.diet_score}</div><div class="hlbl">Diet</div></div></div>
+      <div class="hcard-scores"><div><div class="hscore" style="color:var(--gold-d)">${a.lifestyle_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Lifestyle</div></div><div><div class="hscore" style="color:var(--green)">${a.diet_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Diet</div></div></div>
       <div class="hcard-tip">${(a.overall_tip||'').substring(0,100)}…</div>
     </div>`;
   }).join('');
@@ -1222,7 +1222,7 @@ function renderClients(){
     const date=a.savedAt?.toDate?a.savedAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
     return`<div class="hcard" onclick="viewPTItem(${JSON.stringify(a).replace(/"/g,'&quot;')})">
       <div class="hcard-top"><div class="hcard-name">${a.clientName||'Client'}</div><div class="hcard-date">${date}</div></div>
-      <div class="hcard-scores"><div><div class="hscore" style="color:var(--gold-d)">${a.lifestyle_score}</div><div class="hlbl">Lifestyle</div></div><div><div class="hscore" style="color:var(--green)">${a.diet_score}</div><div class="hlbl">Diet</div></div></div>
+      <div class="hcard-scores"><div><div class="hscore" style="color:var(--gold-d)">${a.lifestyle_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Lifestyle</div></div><div><div class="hscore" style="color:var(--green)">${a.diet_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Diet</div></div></div>
       <div class="hcard-tip">${(a.overall_tip||'').substring(0,100)}…</div>
     </div>`;
   }).join('');
@@ -1281,8 +1281,8 @@ function exportPDF(){
   const half=Math.ceil(info.length/2);
   for(let i=0;i<Math.max(half,info.length-half);i++){if(info[i])doc.text(info[i],20,y);if(info[i+half])doc.text(info[i+half],110,y);y+=6;}
   y+=2;doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=8;
-  doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(184,150,90);doc.text(`Lifestyle: ${a.lifestyle_score}/100`,20,y);
-  doc.setTextColor(61,107,74);doc.text(`Diet: ${a.diet_score}/100`,110,y);y+=10;
+  doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(184,150,90);doc.text(`Lifestyle: ${a.lifestyle_score}/10`,20,y);
+  doc.setTextColor(61,107,74);doc.text(`Diet: ${a.diet_score}/10`,110,y);y+=10;
   T('Overall Insight',12,true);doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(61,58,53);
   const tipLines=doc.splitTextToSize(a.overall_tip,170);doc.text(tipLines,20,y);y+=tipLines.length*5+6;
   doc.setDrawColor(232,228,223);doc.line(20,y,190,y);y+=6;
