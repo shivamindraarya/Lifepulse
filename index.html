@@ -989,7 +989,7 @@ function addAct(){
   div.innerHTML=`<div class="act-row-top"><input type="text" placeholder="Activity / Exercise" oninput="checkWorkout()" style="flex:1;"><button class="del" onclick="removeActRow(this)">×</button></div><div class="act-row-dur"><span class="dur-label">Duration</span><input type="text" class="act-dur dur-input" placeholder="e.g. 30 mins"></div>`;
   document.getElementById('act-list').appendChild(div);
 }
-const WORKOUT_KW=['workout','gym','exercise','training','cardio','run','jog','walk','cycling','swim','yoga','crossfit','boxing','mma','lifting','weights','hiit','zumba','dance','sport','football','cricket','badminton','tennis','basketball','physical'];
+const WORKOUT_KW=['workout','gym','exercise'];
 function checkWorkout(){
   const inputs=document.querySelectorAll('#act-list input[type="text"]:not(.act-dur)');
   let found=false;
