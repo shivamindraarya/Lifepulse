@@ -1273,8 +1273,6 @@ function viewPTItem(a){lastAnalysis=a;lastAnalysis._isSaved=true;go('analysis');
 function resetApp(){
   lastAnalysis=null;
   document.querySelectorAll('#sleep-chips .chip, #water-chips .chip').forEach(c=>c.classList.remove('on'));
-
-  document.getElementById('wake').value='07:00';
   document.getElementById('user-name-input').value='';
   ['age','weight','height'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('gender').value='male';
