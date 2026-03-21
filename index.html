@@ -9,7 +9,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, doc, setDoc, getDoc, getDoc as fbGetDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 const firebaseConfig = {
   apiKey: "AIzaSyDPZIE2z2iSlnlHwfBla9DJf-jhqVGH8ug",
   authDomain: "daily-wellness-7d62c.firebaseapp.com",
@@ -21,7 +21,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, fbSignOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp };
+window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, fbSignOut, onAuthStateChanged, doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc };
 window.dispatchEvent(new Event('firebase-ready'));
 </script>
 <style>
@@ -252,7 +252,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .search-bar{display:flex;align-items:center;gap:10px;max-width:calc(var(--max) - 32px);margin:16px auto 0;background:var(--white);border:2px solid var(--line);border-radius:14px;padding:12px 18px;box-shadow:var(--sh);}
 .search-bar input{flex:1;border:none;background:transparent;font-family:var(--font-sans);font-size:14px;font-weight:500;color:var(--ink);outline:none;}
 .search-bar input::placeholder{color:var(--muted);}
-.hcard{background:var(--white);border-radius:16px;padding:16px 18px;max-width:calc(var(--max) - 32px);margin:12px auto 0;border:1px solid var(--line);box-shadow:var(--sh);cursor:pointer;transition:all .2s;}
+.hcard{background:var(--white);border-radius:16px;padding:16px 18px;border:1px solid var(--line);box-shadow:var(--sh);cursor:pointer;transition:all .2s;width:100%;}
+.hcard-wrap{max-width:calc(var(--max) - 32px);margin:12px auto 0;position:relative;}
 .hcard:hover{box-shadow:var(--shl);transform:translateY(-1px);}
 .hcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
 .hcard-name{font-size:16px;font-weight:700;color:var(--ink);}
@@ -361,6 +362,11 @@ body.dark .hdr-btn{border-color:rgba(255,255,255,.15);}
 body.dark .logo-dropdown{background:#1E1C17;border-color:#2A2820;}
 body.dark .logo-dd-item{color:#D4D0CA;}
 body.dark .logo-dd-item:hover{background:#2A2218;color:var(--gold);}
+.hcard-wrap{position:relative;}
+.hcard-del{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;background:transparent;border:1.5px solid var(--line);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2;font-family:var(--font-sans);}
+.hcard-del:hover{background:var(--red-l);border-color:var(--red);color:var(--red);}
+body.dark .hcard-del{border-color:#2A2820;color:#706C64;}
+body.dark .hcard-del:hover{background:var(--red-l);border-color:var(--red);color:var(--red);}
 ::-webkit-scrollbar{width:0;height:0;}
 .toast{position:fixed;top:28px;left:50%;transform:translateX(-50%) translateY(-90px);background:var(--ink);color:var(--white);font-family:var(--font-sans);font-size:13px;font-weight:600;padding:13px 26px;border-radius:40px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:999;transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .4s ease;opacity:0;white-space:nowrap;letter-spacing:.3px;border-left:3px solid var(--gold);}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
@@ -1174,13 +1180,44 @@ function renderHistory(data){
   if(!data.length){el.innerHTML='<div class="empty"><div class="ei">📋</div><p>No saved analyses yet.<br>Analyse a client to get started!</p></div>';return;}
   el.innerHTML=data.map(a=>{
     const date=a.savedAt?.toDate?a.savedAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-    return`<div class="hcard" onclick="viewHistoryItem(${JSON.stringify(a).replace(/"/g,'&quot;')})">
-      <div class="hcard-top"><div class="hcard-name">${a.clientName||'Client'}</div><div class="hcard-date">${date}</div></div>
-      <div class="hcard-scores"><div><div class="hscore" style="color:var(--gold-d)">${a.lifestyle_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Lifestyle</div></div><div><div class="hscore" style="color:var(--green)">${a.diet_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Diet</div></div></div>
-      <div class="hcard-tip">${(a.overall_tip||'').substring(0,100)}…</div>
+    const safeData=JSON.stringify(a).replace(/"/g,'&quot;');
+    return`<div class="hcard-wrap">
+      <div class="hcard" onclick="viewHistoryItem(${safeData})" style="padding-right:48px;">
+        <div class="hcard-top"><div class="hcard-name">${a.clientName||'Client'}</div><div class="hcard-date">${date}</div></div>
+        <div class="hcard-scores"><div><div class="hscore" style="color:var(--gold-d)">${a.lifestyle_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Lifestyle</div></div><div><div class="hscore" style="color:var(--green)">${a.diet_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Diet</div></div></div>
+        <div class="hcard-tip">${(a.overall_tip||'').substring(0,100)}…</div>
+      </div>
+      <button class="hcard-del" onclick="deleteHistoryItem('${a.id}',event)" title="Delete">⌫</button>
     </div>`;
   }).join('');
 }
+async function deleteHistoryItem(id, e){
+  e.stopPropagation();
+  if(!confirm('Delete this analysis? This cannot be undone.')) return;
+  try{
+    const fb=window._fb, uid=fb.auth.currentUser.uid;
+    await fb.deleteDoc(fb.doc(fb.db,'gyms',uid,'history',id));
+    allHistoryData=allHistoryData.filter(a=>a.id!==id);
+    renderHistory(allHistoryData);
+    showToast('Analysis deleted');
+  }catch(e){ showToast('Error deleting. Try again.'); }
+}
+
+async function deletePTItem(id, e){
+  e.stopPropagation();
+  if(!confirm('Delete this PT analysis? This cannot be undone.')) return;
+  try{
+    const fb=window._fb, uid=fb.auth.currentUser.uid;
+    await fb.deleteDoc(fb.doc(fb.db,'gyms',uid,'pt_analyses',id));
+    allPTData=allPTData.filter(a=>a.id!==id);
+    renderClients();
+    // If no more clients for this trainer, go back to trainers view
+    const remaining=allPTData.filter(a=>a.trainerName===currentTrainer);
+    if(!remaining.length) showTrainersView();
+    showToast('PT analysis deleted');
+  }catch(e){ showToast('Error deleting. Try again.'); }
+}
+
 function filterHistory(){const q=document.getElementById('history-search').value.toLowerCase();renderHistory(allHistoryData.filter(a=>(a.clientName||'').toLowerCase().includes(q)));}
 function viewHistoryItem(a){lastAnalysis=a;lastAnalysis._isSaved=true;go('analysis');renderResults(a);}
 async function loadProgress(){
@@ -1220,10 +1257,14 @@ function renderClients(){
   if(!data.length){el.innerHTML='<div class="empty"><div class="ei">👤</div><p>No analyses found.</p></div>';return;}
   el.innerHTML=data.map(a=>{
     const date=a.savedAt?.toDate?a.savedAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-    return`<div class="hcard" onclick="viewPTItem(${JSON.stringify(a).replace(/"/g,'&quot;')})">
-      <div class="hcard-top"><div class="hcard-name">${a.clientName||'Client'}</div><div class="hcard-date">${date}</div></div>
-      <div class="hcard-scores"><div><div class="hscore" style="color:var(--gold-d)">${a.lifestyle_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Lifestyle</div></div><div><div class="hscore" style="color:var(--green)">${a.diet_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Diet</div></div></div>
-      <div class="hcard-tip">${(a.overall_tip||'').substring(0,100)}…</div>
+    const safeData=JSON.stringify(a).replace(/"/g,'&quot;');
+    return`<div class="hcard-wrap">
+      <div class="hcard" onclick="viewPTItem(${safeData})" style="padding-right:48px;">
+        <div class="hcard-top"><div class="hcard-name">${a.clientName||'Client'}</div><div class="hcard-date">${date}</div></div>
+        <div class="hcard-scores"><div><div class="hscore" style="color:var(--gold-d)">${a.lifestyle_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Lifestyle</div></div><div><div class="hscore" style="color:var(--green)">${a.diet_score}<span style="font-size:11px;color:var(--muted);font-weight:400;">/10</span></div><div class="hlbl">Diet</div></div></div>
+        <div class="hcard-tip">${(a.overall_tip||'').substring(0,100)}…</div>
+      </div>
+      <button class="hcard-del" onclick="deletePTItem('${a.id}',event)" title="Delete">⌫</button>
     </div>`;
   }).join('');
 }
