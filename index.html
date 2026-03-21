@@ -1120,6 +1120,7 @@ function renderResults(a){
       <button class="save-btn secondary" onclick="openPTModal()">Save under PT</button>
     </div>`}
     <button class="pdf-btn" onclick="exportPDF()">Export Report as PDF</button>
+    <button class="pdf-btn" onclick="shareWhatsApp()" style="margin-top:10px;border-color:#25D366;color:#25D366;background:#f0fdf4;">Share on WhatsApp</button>
   `;
 }
 async function saveToHistory(e){
@@ -1294,6 +1295,32 @@ function resetApp(){
   lastAnalysis=null;
   go('routine');
 }
+function shareWhatsApp(){
+  if(!lastAnalysis){showToast("No analysis to share.");return;}
+  var a=lastAnalysis;
+  var d=a.data||{};
+  var name=a.clientName||d.name||"Client";
+  var gym=gymData&&gymData.gymName?gymData.gymName:"Daily Wellness";
+  var date=new Date(a.date||Date.now()).toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
+  var sugg1=(a.routine_suggestions&&a.routine_suggestions[0])||"";
+  var sugg2=(a.diet_suggestions&&a.diet_suggestions[0])||"";
+  var msg=gym+" Wellness Report"+"
+"+"Client: "+name+"
+"+"Date: "+date+"
+"+"Lifestyle: "+a.lifestyle_score+"/10 | Diet: "+a.diet_score+"/10"+"
+
+"+"Insight: "+a.overall_tip+"
+
+"+"Nutrition: "+a.calories+" kcal | Protein: "+a.protein+"g | Carbs: "+a.carbs+"g | Fat: "+a.fat+"g"+"
+
+"+"Suggestions:"+"
+"+(sugg1?"- "+sugg1+"
+":""  )+(sugg2?"- "+sugg2+"
+":"")+"
+Powered by Daily Wellness AI";
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+
 function exportPDF(){
   if(!lastAnalysis)return;
   const {jsPDF}=window.jspdf;
